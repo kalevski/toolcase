@@ -356,6 +356,17 @@ tc-bottom-sheet > .tc-extended-select__menu {
 // the element moves the menu into a tc-bottom-sheet, where it is no longer a
 // descendant of the host — a host-scoped selector would quietly stop matching and
 // the multi-select ticks would never appear. The class is written by render().
+//
+// NOTE FOR THEME AUTHORS. `--selected` does NOT imply the accent fill. It is
+// dropped in TWO places — here, and in a bottom sheet (see the sheet section at
+// the bottom of this file) — and both are expressed as a selector one compound
+// heavier than the plain `.tc-extended-select__option--selected` rule, so they win
+// by specificity. A theme rule written against `--selected` sits under the theme
+// root's own selector, which makes it heavier than BOTH of these and carries the
+// on-accent ink onto a plain surface. If a theme pins ink for the fill, it must
+// restore it for these two selectors; better still, let the ink cascade from the
+// row's own `color` and write no child rule at all. `blueprint` and `dungeon` each
+// shipped this bug at 1.1:1 — see their partials for the restore.
 .tc-extended-select__menu--multiple {
     .tc-extended-select__option--selected {
         // Keep the plain surface — the tick carries the state.

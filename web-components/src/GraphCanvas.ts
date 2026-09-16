@@ -13,7 +13,8 @@ import { num } from './internal/tc-element'
 // eleven cards are drawn on a circle whose circumference cannot hold them and
 // they overlap. The radius is therefore derived from how many nodes have to fit
 // on the ring, which keeps the gap between siblings roughly constant however wide
-// the tree is.
+// the tree is — and it is derived in PIXELS, see `_weight`, because a radius
+// driven by a count of leaves grows with the whole tree instead of with the ring.
 //
 // PAST EIGHT SIBLINGS THE RING BECOMES A GRID. A twelfth child on an ever-growing
 // ring pushes the whole drawing off screen to keep an arc that nobody is reading
@@ -97,7 +98,7 @@ export class GraphCanvas extends HTMLElement {
     private _layer: HTMLElement | null = null
 
     static get observedAttributes(): string[] {
-        return ['ring-gap', 'node-width', 'node-height', 'start-angle', 'class']
+        return ['ring-gap', 'node-width', 'node-height', 'start-angle', 'aspect', 'class']
     }
 
     connectedCallback(): void {
@@ -158,6 +159,16 @@ export class GraphCanvas extends HTMLElement {
         this.setAttribute('node-height', String(v))
     }
 
+    /** Width ÷ height of the pane this will be read in. Stacked blocks are shaped
+     *  to it — squaring a block wastes whichever direction the viewport has less
+     *  of, and on a wide pane that is most of the screen. `1` keeps them square. */
+    get aspect(): number {
+        return Math.min(4, Math.max(0.25, num(this.getAttribute('aspect'), 1)))
+    }
+    set aspect(v: number) {
+        this.setAttribute('aspect', String(v))
+    }
+
     /** Where the first child of a ring is placed, in degrees. `-90` is twelve
      *  o'clock, which is where a reader looks first. */
     get startAngle(): number {
@@ -189,21 +200,37 @@ export class GraphCanvas extends HTMLElement {
 
     // ── Weighing subtrees ────────────────────────────────────────────────────
 
-    /** How many equivalent-width ring slots one child's subtree needs. A leaf is
-     *  one; an ordinary node sums its own children's weight; a stacked block
-     *  counts as however many standard-width columns its own grid needs. Used
-     *  to size each child's angular slice in `_layout` — a branch that has grown
-     *  wide gets proportionally more of the ring instead of the same slice as a
-     *  one-node sibling, so two subtrees can never crowd into each other. */
+    /** The width of one card's lane on a ring, at that ring's shrink. */
+    private _lane(level: number): number {
+        return this.nodeWidth * LEVEL_SHRINK ** level + SIBLING_GAP
+    }
+
+    /** How much ARC one child's subtree needs, in pixels. A leaf needs its own
+     *  lane; a stacked block needs its grid's width; an ordinary node needs
+     *  whichever is wider, its own lane or everything below it. Used to size each
+     *  child's angular slice in `_layout` — a branch that has grown wide gets
+     *  proportionally more of the ring instead of the same slice as a one-node
+     *  sibling, so two subtrees can never crowd into each other.
+     *
+     *  Pixels rather than a count of leaves is what keeps the ring small. Weight
+     *  decides the slice and the slice decides the radius, so a weight that does
+     *  not carry the node's real width leaves the NARROWEST slice on the ring
+     *  setting the radius for everyone: one childless sibling beside a heavy one
+     *  used to push the radius to `lane × total weight ÷ 2π`, growing the drawing
+     *  with the size of the whole tree rather than with the ring's own occupants.
+     *  Measured in pixels every slice is exactly as wide as what stands in it. */
     private _weight(id: string, level: number): number {
+        const lane = this._lane(level)
         const children = this._childrenOf(id)
-        if (children.length === 0) return 1
+        if (children.length === 0) return lane
         if (children.length > RING_CAP) {
-            const scale = LEVEL_SHRINK ** level
             const grid = this._gridFor(children, level + 1)
-            return Math.max(1, grid.lateral / (this.nodeWidth * scale + SIBLING_GAP))
+            return Math.max(lane, grid.lateral)
         }
-        return children.reduce((sum, child) => sum + this._weight(child.id, level + 1), 0)
+        return Math.max(
+            lane,
+            children.reduce((sum, child) => sum + this._weight(child.id, level + 1), 0),
+        )
     }
 
     /** A node's own footprint once its stacked descendants (if any) are folded
@@ -242,7 +269,8 @@ export class GraphCanvas extends HTMLElement {
         const count = items.length
         const lateralAvg = items.reduce((sum, box) => sum + box.lateral, 0) / count
         const outwardAvg = items.reduce((sum, box) => sum + box.outward, 0) / count
-        const columns = Math.max(1, Math.min(count, Math.ceil(Math.sqrt((count * outwardAvg) / lateralAvg))))
+        const want = Math.max(0.05, this.aspect)
+        const columns = Math.max(1, Math.min(count, Math.ceil(Math.sqrt((want * count * outwardAvg) / lateralAvg))))
         const rows = Math.ceil(count / columns)
         const columnWidths: number[] = new Array(columns).fill(0)
         const rowHeights: number[] = new Array(rows).fill(0)
@@ -320,9 +348,24 @@ export class GraphCanvas extends HTMLElement {
                 // room for its (possibly narrower) slice.
                 const weights = children.map((child) => this._weight(child.id, level))
                 const total = weights.reduce((sum, w) => sum + w, 0)
-                const needed = weights.reduce((widest, w) => {
-                    const span = Math.max((TAU * w) / total, 0.0001)
-                    return Math.max(widest, (this.nodeWidth * scale + SIBLING_GAP) / span)
+                const needed = children.length < 2 ? 0 : weights.reduce((widest, w, index) => {
+                    // Siblings are separated by the CHORD between them, not by the arc
+                    // their slices occupy, and the chord is shorter — by a third at half
+                    // a circle. Sizing a ring from the arc lets two of three siblings touch.
+                    const span = Math.min(Math.max((TAU * w) / total, 0.0001), Math.PI)
+                    // A fanned child only has to fit its own card on this ring; its
+                    // own children get the next one out. A STACKED child carries its
+                    // whole grid here, so that width is what the ring must hold.
+                    //
+                    // Two axis-aligned cards clear each other when they are apart on
+                    // EITHER axis, so the distance to cover is the DIAGONAL of the two
+                    // half-extents; measuring the width alone under-reserves at every
+                    // angle in between, which shows up as a card a few px into its neighbour.
+                    const across =
+                        this._childrenOf(children[index].id).length > RING_CAP
+                            ? w
+                            : Math.hypot(this.nodeWidth * scale, this.nodeHeight * scale) + SIBLING_GAP
+                    return Math.max(widest, across / (2 * Math.sin(span / 2)))
                 }, 0)
                 const radius = Math.max(gap * (level === 1 ? 1 : 0.8), needed)
 

@@ -4,6 +4,71 @@ Entries start at `5.0.19`. Earlier versions are not covered here.
 
 ## Unreleased
 
+### Fixed — a selected `tc-extended-select` option was white-on-white off the accent fill
+
+`--selected` does not imply the accent fill. The base drops it in two places — a
+multi-select menu, where the checkbox carries the state, and a bottom sheet, where
+the tick does — and both restore the row's ordinary ink on the row itself. Both
+themes then pinned the on-accent ink on a CHILD of the row instead of letting it
+cascade: `blueprint` on the option's label and description, `dungeon` on its
+description. A child rule written under the theme root's own selector (0-3-1) is
+heavier than either no-fill rule (0-3-0 and 0-2-1), so it won in both places and
+painted on-accent ink onto a plain surface — measured at 1.1:1 in a bottom sheet,
+i.e. invisible.
+
+`blueprint`'s label rule is gone: the ink cascades from the row's `color`, which is
+right in every context by construction. Both themes now restore the description
+tint for the two no-fill selectors. `style/components/_extended-select.scss` carries
+a note for theme authors saying so, because the trap is not visible from
+`--selected` alone.
+
+Released as `6.0.4` rather than `6.0.3`: `6.0.3` is already on the registry without
+this fix, so a consumer cannot reach it under that number.
+
+### Added — `tc-graph-canvas` takes an `aspect`
+
+Blocks were always packed square. Squaring a block wastes whichever direction the
+viewport has less of, which on a wide pane is most of the screen. Pass the pane's
+width ÷ height as `aspect` and the grids are shaped to it; `1` keeps the old
+behaviour. Measured on a 211-node graph in a 2470×1164 pane, fitting it went from
+14% to 37% — the same tree, the same node count, cards nearly three times the area.
+
+### Fixed — `tc-graph-canvas` let siblings and children touch
+
+Two faults in the ring sizing, both worth a few px of overlap each:
+
+- A ring was sized from the ARC each slice occupies, but siblings are separated by
+  the CHORD between them, which is shorter — by a third at half a circle. With two
+  or three nodes on a ring that is enough for them to touch.
+- The separation a card needs was measured along its WIDTH. Two axis-aligned cards
+  clear each other when they are apart on EITHER axis, so the distance to cover is
+  the DIAGONAL of the two half-extents; measuring one axis under-reserves at every
+  angle in between, which showed up as a card a few px inside its parent whenever
+  the branch ran at roughly 30° off horizontal.
+
+Across 640 randomly generated trees (to 600 nodes, depth 1-5, fan-out 1-25) the
+consuming app's port of this layout went from 15 trees with overlapping cards to 0.
+
+### Fixed — `tc-graph-canvas` sized its rings from a leaf count
+
+A child's slice of a ring was weighted by how many LEAVES its subtree held, and
+the radius was then whatever the narrowest slice needed to fit one card. The two
+together meant the narrowest slice set the radius for the whole ring, so a
+childless node beside a heavy sibling pushed the radius to
+`lane × total weight ÷ 2π` — a drawing that grew with the size of the entire
+tree rather than with the number of nodes on the ring. On a 211-node graph in
+mindmap that was a ring of radius 3850px for six cards that needed 250px, and
+because every level computed a similarly enormous radius the rings landed on top
+of each other and the cards overlapped.
+
+`_weight` now measures a subtree's requirement in ARC PIXELS — a leaf needs its
+own lane, a stacked block its grid's width, an ordinary node whichever is wider —
+so each slice is exactly as wide as what stands in it and the radius follows the
+ring's own occupants. The ring sizing also now asks a STACKED child for its whole
+grid width (which it carries on this ring) and a fanned child for just its own
+card (its children get the next ring out).
+
+
 Fixes found while consuming `5.0.19` from the app, plus the desktop pass below.
 The `desktop` attribute is additive but new API surface, so this is now a
 **minor** (5.1.0) rather than the patch the fixes alone would have been.

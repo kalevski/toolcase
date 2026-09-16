@@ -39,4 +39,26 @@ tc-theme[name='dungeon'],
     .tc-extended-select__option--selected .tc-extended-select__option-desc {
         color: rgba(26, 20, 13, 0.7); // --fg-ink at 70% opacity
     }
+
+    // ── No-fill rows — multi mode and the bottom sheet ───────────────────────
+    //
+    // Both drop the gold fill (the checkbox, or the sheet's tick, carries the
+    // state), leaving the description on the dark wood surface — where engraved
+    // ink is unreadable. Hand the muted parchment tint back.
+    //
+    // REQUIRED, not defensive: the base's own no-fill rules
+    // (`.tc-extended-select__menu--multiple …-desc` at 0-3-0 and
+    // `tc-bottom-sheet …-desc` at 0-2-1) are lighter than the rule above (0-3-1),
+    // which the theme root's own selector inflates — measured at 1.1:1 without it.
+    //
+    // Scoped to the MENU class / the sheet ancestor rather than
+    // `tc-extended-select[multiple]`: under a coarse pointer the menu moves into a
+    // tc-bottom-sheet and stops being a descendant of the host.
+    // See style/components/_extended-select.scss.
+    .tc-extended-select__menu--multiple .tc-extended-select__option--selected,
+    tc-bottom-sheet .tc-extended-select__option--selected {
+        .tc-extended-select__option-desc {
+            color: var(--bs-extended-select-option-desc-color);
+        }
+    }
 }

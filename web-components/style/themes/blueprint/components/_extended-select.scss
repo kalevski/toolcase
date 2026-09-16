@@ -126,29 +126,40 @@ tc-theme[name='blueprint'],
             color: var(--bp-text-muted);
         }
 
-        // On the selected row, dim the description relative to the pink surface
+        // On the selected row, dim the description relative to the pink surface.
+        //
+        // THE LABEL GETS NO COLOUR RULE OF ITS OWN, deliberately. The row's own
+        // `color` is already --bs-extended-select-option-selected-color
+        // (= --bp-pink-ink) and cascades into the label for free. Pinning the ink
+        // on the label instead carries it into every context where the base DROPS
+        // the pink fill — and, being a compound heavier than the base's no-fill
+        // rules, it WINS there: measured as white-on-paper at 1.1:1 in a bottom
+        // sheet. See the restore below.
         &--selected {
             .tc-extended-select__option-desc {
                 color: color-mix(in srgb, var(--bp-pink-ink) 65%, transparent);
             }
-
-            // Mono label stays white on the pink fill — sufficient contrast
-            .tc-extended-select__option-label {
-                color: var(--bp-pink-ink);
-            }
         }
     }
 
-    // Multi mode keeps the plain paper row (the checkbox carries the state, no
-    // pink fill) — restore ink on selected labels/descriptions.
-    // Scoped to the MENU class rather than `tc-extended-select[multiple]`: under a
-    // coarse pointer the menu moves into a tc-bottom-sheet and stops being a
-    // descendant of the host. See style/components/_extended-select.scss.
-    .tc-extended-select__menu--multiple .tc-extended-select__option--selected {
-        .tc-extended-select__option-label {
-            color: inherit;
-        }
-
+    // ── No-fill rows — multi mode and the bottom sheet ───────────────────────
+    //
+    // Both keep the plain paper row (the checkbox, or the sheet's tick, carries
+    // the state rather than a pink fill), so the ink-on-pink description tint
+    // above has to be handed back.
+    //
+    // This restore is REQUIRED, not defensive. The base's own no-fill rules —
+    // `.tc-extended-select__menu--multiple …--selected …-desc` (0-3-0) and
+    // `tc-bottom-sheet …--selected …-desc` (0-2-1) — are lighter than this theme's
+    // `--selected` rule (0-3-1), which the theme root's own selector inflates. So
+    // without this the 65%-white tint paints on a white row: 1.07:1, invisible.
+    //
+    // Scoped to the MENU class / the sheet ancestor rather than
+    // `tc-extended-select[multiple]`: under a coarse pointer the menu moves into a
+    // tc-bottom-sheet and stops being a descendant of the host.
+    // See style/components/_extended-select.scss.
+    .tc-extended-select__menu--multiple .tc-extended-select__option--selected,
+    tc-bottom-sheet .tc-extended-select__option--selected {
         .tc-extended-select__option-desc {
             color: var(--bp-text-muted);
         }
