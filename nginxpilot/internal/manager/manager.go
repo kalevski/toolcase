@@ -94,7 +94,11 @@ type Manager struct {
 }
 
 type siteLoop struct {
-	site     config.Site
+	site config.Site
+	// app is set when this loop drives a php app rather than a static site.
+	// The two share the loop machinery (jitter, backoff, kick, status) and
+	// differ only in which sync entry point runs.
+	app      *config.App
 	interval time.Duration
 	cancel   context.CancelFunc
 	kick     chan struct{}
@@ -193,6 +197,11 @@ func (m *Manager) Run(ctx context.Context) {
 	for i := range m.cfg.Sites {
 		m.startLoop(m.cfg.Sites[i])
 	}
+	for i := range m.cfg.Apps {
+		if m.cfg.Apps[i].IsEnabled() {
+			m.startAppLoop(m.cfg.Apps[i])
+		}
+	}
 	m.mu.Unlock()
 
 	m.warnOrphans()
@@ -200,6 +209,13 @@ func (m *Manager) Run(ctx context.Context) {
 	// Log shipping starts BEFORE the managed apply so the syslog intake is
 	// bound before nginx reloads with access_log directives pointing at it (G6).
 	m.startLogship(ctx)
+
+	// php-fpm pools are written BEFORE the nginx apply: an app's vhost is
+	// quarantined when its pool is not answering, so the pool has to exist and
+	// be reloaded first or every app would be disabled on the first apply.
+	if err := m.ApplyPools(ctx); err != nil {
+		m.log.Error("php pool apply failed at startup", "error", err)
+	}
 
 	// Managed mode: write the live nginx config and start watching for cert
 	// renewals. nginx only ever receives config that passed `nginx -t`.
@@ -259,6 +275,24 @@ func (m *Manager) startLoop(site config.Site) {
 	go m.loop(loopCtx, sl)
 }
 
+// startAppLoop starts a sync loop for a php app. Held under m.mu like
+// startLoop.
+func (m *Manager) startAppLoop(app config.App) {
+	loopCtx, cancel := context.WithCancel(m.ctx)
+	appCopy := app
+	sl := &siteLoop{
+		site:     app.AsSite(),
+		app:      &appCopy,
+		interval: app.Interval(m.cfg.Defaults),
+		cancel:   cancel,
+		kick:     make(chan struct{}, 1),
+		done:     make(chan struct{}),
+	}
+	m.loops[app.Domain] = sl
+	m.wg.Add(1)
+	go m.loop(loopCtx, sl)
+}
+
 func (m *Manager) loop(ctx context.Context, sl *siteLoop) {
 	defer m.wg.Done()
 	defer close(sl.done)
@@ -310,7 +344,13 @@ func (m *Manager) syncOnce(ctx context.Context, sl *siteLoop) (streak int) {
 	syncCtx, cancel := context.WithTimeout(ctx, syncTimeout)
 	defer cancel()
 
-	st, err := m.syncFn(syncCtx, sl.site, defaults, dataDir, m.store, dep, m.log)
+	var st *state.SiteState
+	var err error
+	if sl.app != nil {
+		st, err = SyncApp(syncCtx, *sl.app, defaults, dataDir, m.store, dep, m.log)
+	} else {
+		st, err = m.syncFn(syncCtx, sl.site, defaults, dataDir, m.store, dep, m.log)
+	}
 	if err != nil {
 		m.log.Error("sync failed", "domain", sl.site.Domain, "error", err,
 			"failure_streak", st.FailureStreak)
@@ -452,12 +492,28 @@ func (m *Manager) Reload(newCfg *config.Config) {
 		newSites[s.Domain] = s
 	}
 
+	// Apps run the same loop as sites and live in the same m.loops map, so a
+	// reload that only reconciles sites would stop every app loop as "removed"
+	// and never start one for an app added at runtime — the app would sit with
+	// its fragment written, visible in /status, and never sync.
+	oldApps := map[string]config.App{}
+	for _, a := range m.cfg.Apps {
+		oldApps[a.Domain] = a
+	}
+	newApps := map[string]config.App{}
+	for _, a := range newCfg.Apps {
+		if a.IsEnabled() {
+			newApps[a.Domain] = a
+		}
+	}
+
 	m.cfg = newCfg
 	m.deployer = deploy.New(newCfg.DataDir, m.log)
 
-	// Removed sites: stop the loop; content stays on disk (orphan).
+	// Removed sites and apps: stop the loop; content stays on disk (orphan).
 	for domain, sl := range m.loops {
-		if _, keep := newSites[domain]; !keep {
+		_, keepApp := newApps[domain]
+		if _, keep := newSites[domain]; !keep && !keepApp {
 			m.log.Warn("site removed from config; loop stopped, content kept on disk (orphan)",
 				"domain", domain)
 			sl.cancel()
@@ -495,6 +551,31 @@ func (m *Manager) Reload(newCfg *config.Config) {
 		}
 	}
 
+	for domain, app := range newApps {
+		old, existed := oldApps[domain]
+		sl, running := m.loops[domain]
+		switch {
+		case !existed || !running:
+			m.log.Info("app added", "domain", domain)
+			m.startAppLoop(app)
+			m.loops[domain].kick <- struct{}{}
+		case !sameApp(old, app) || sl.interval != app.Interval(newCfg.Defaults):
+			m.log.Info("app changed, restarting loop", "domain", domain)
+			sl.cancel()
+			delete(m.loops, domain)
+			go func(old *siteLoop, na config.App) {
+				<-old.done
+				m.mu.Lock()
+				defer m.mu.Unlock()
+				if _, exists := m.loops[na.Domain]; exists {
+					return
+				}
+				m.startAppLoop(na)
+				m.loops[na.Domain].kick <- struct{}{}
+			}(sl, app)
+		}
+	}
+
 	go m.warnOrphans()
 
 	// Log shipping reconfigures BEFORE the apply is triggered: destinations
@@ -512,6 +593,11 @@ func (m *Manager) Reload(newCfg *config.Config) {
 
 // sameSite compares sites ignoring provenance.
 func sameSite(a, b config.Site) bool {
+	a.File, b.File = "", ""
+	return reflect.DeepEqual(a, b)
+}
+
+func sameApp(a, b config.App) bool {
 	a.File, b.File = "", ""
 	return reflect.DeepEqual(a, b)
 }

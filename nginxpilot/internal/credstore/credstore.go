@@ -39,8 +39,26 @@ const fileSuffix = ".cred"
 // also guards the on-disk filename against path tricks.
 var providerRe = regexp.MustCompile(`^[a-z0-9-]+$`)
 
+// DefaultAccount is the account label used when a caller names none. It is the
+// legacy single-credential slot: on disk it stays "<provider>.cred", so a store
+// written before accounts existed keeps working untouched.
+const DefaultAccount = "default"
+
 // ValidProvider reports whether name is an acceptable provider identifier.
 func ValidProvider(name string) bool { return providerRe.MatchString(name) }
+
+// ValidAccount reports whether an account label is acceptable. It shares the
+// provider charset, which is what makes "<provider>.<account>.cred" parse back
+// unambiguously — neither half may contain a dot.
+func ValidAccount(name string) bool { return providerRe.MatchString(name) }
+
+// NormalizeAccount maps the empty label onto DefaultAccount.
+func NormalizeAccount(account string) string {
+	if strings.TrimSpace(account) == "" {
+		return DefaultAccount
+	}
+	return strings.TrimSpace(account)
+}
 
 // Request is the parsed credential input. Raw is the provider-agnostic escape
 // hatch (the full INI/JSON body); the typed fields are conveniences for the
@@ -53,10 +71,11 @@ type Request struct {
 	ServiceAccountJSON string `json:"service_account_json"`
 }
 
-// Info is one stored provider's metadata for GET /acme/credentials. Secret
-// material is never included.
+// Info is one stored credential's metadata for GET /acme/credentials. Secret
+// material is never included. A provider may hold several, one per account.
 type Info struct {
 	Provider  string    `json:"provider"`
+	Account   string    `json:"account"`
 	Mechanism string    `json:"mechanism"`
 	ModTime   time.Time `json:"mod_time"`
 }
@@ -129,7 +148,7 @@ func ensureTrailingNewline(s string) string {
 	return s + "\n"
 }
 
-// Store persists per-provider credential artifacts under dir.
+// Store persists credential artifacts under dir, one per (provider, account).
 type Store struct {
 	dir string
 }
@@ -137,45 +156,77 @@ type Store struct {
 // New builds a store rooted at dir (created lazily on first Set).
 func New(dir string) *Store { return &Store{dir: dir} }
 
-func (s *Store) path(provider string) string {
-	return filepath.Join(s.dir, provider+fileSuffix)
+// path locates one credential. The default account keeps the flat legacy name
+// so an existing store needs no migration; a named account gets
+// "<provider>.<account>.cred", which parses back because neither half may
+// contain a dot.
+func (s *Store) path(provider, account string) string {
+	account = NormalizeAccount(account)
+	if account == DefaultAccount {
+		return filepath.Join(s.dir, provider+fileSuffix)
+	}
+	return filepath.Join(s.dir, provider+"."+account+fileSuffix)
+}
+
+// parseName splits a stored filename back into provider and account.
+func parseName(name string) (provider, account string, ok bool) {
+	stem, found := strings.CutSuffix(name, fileSuffix)
+	if !found || stem == "" {
+		return "", "", false
+	}
+	provider, account, hasAccount := strings.Cut(stem, ".")
+	if !hasAccount {
+		account = DefaultAccount
+	}
+	if !ValidProvider(provider) || !ValidAccount(account) {
+		return "", "", false
+	}
+	return provider, account, true
 }
 
 // Set writes (or replaces) a provider's credential atomically as a 0600,
 // daemon-owned file.
-func (s *Store) Set(provider string, content []byte) error {
+func (s *Store) Set(provider, account string, content []byte) error {
 	if !ValidProvider(provider) {
 		return fmt.Errorf("invalid provider %q", provider)
+	}
+	account = NormalizeAccount(account)
+	if !ValidAccount(account) {
+		return fmt.Errorf("invalid account %q (must match [a-z0-9-]+)", account)
 	}
 	if err := os.MkdirAll(s.dir, 0o700); err != nil {
 		return fmt.Errorf("create credentials dir: %w", err)
 	}
-	return writeFileAtomic0600(s.path(provider), content)
+	return writeFileAtomic0600(s.path(provider, account), content)
 }
 
 // Has reports whether a credential is stored for the provider.
-func (s *Store) Has(provider string) bool {
-	if !ValidProvider(provider) {
+func (s *Store) Has(provider, account string) bool {
+	if !ValidProvider(provider) || !ValidAccount(NormalizeAccount(account)) {
 		return false
 	}
-	fi, err := os.Stat(s.path(provider))
+	fi, err := os.Stat(s.path(provider, account))
 	return err == nil && fi.Mode().IsRegular()
 }
 
 // Get locates a stored credential for the acme client. ok=false when none.
-func (s *Store) Get(provider string) (Resolved, bool) {
-	if !s.Has(provider) {
+func (s *Store) Get(provider, account string) (Resolved, bool) {
+	if !s.Has(provider, account) {
 		return Resolved{}, false
 	}
-	return Resolved{Path: s.path(provider), Mechanism: Mechanism(provider)}, true
+	return Resolved{Path: s.path(provider, account), Mechanism: Mechanism(provider)}, true
 }
 
 // Delete removes a stored credential. Returns os.ErrNotExist when absent.
-func (s *Store) Delete(provider string) error {
+func (s *Store) Delete(provider, account string) error {
 	if !ValidProvider(provider) {
 		return fmt.Errorf("invalid provider %q", provider)
 	}
-	return os.Remove(s.path(provider))
+	account = NormalizeAccount(account)
+	if !ValidAccount(account) {
+		return fmt.Errorf("invalid account %q", account)
+	}
+	return os.Remove(s.path(provider, account))
 }
 
 // List enumerates stored providers (sorted) with metadata only — never the
@@ -187,17 +238,25 @@ func (s *Store) List() []Info {
 		return out
 	}
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), fileSuffix) {
+		if e.IsDir() {
 			continue
 		}
-		provider := strings.TrimSuffix(e.Name(), fileSuffix)
+		provider, account, ok := parseName(e.Name())
+		if !ok {
+			continue
+		}
 		mt := time.Time{}
 		if fi, err := e.Info(); err == nil {
 			mt = fi.ModTime()
 		}
-		out = append(out, Info{Provider: provider, Mechanism: Mechanism(provider), ModTime: mt})
+		out = append(out, Info{Provider: provider, Account: account, Mechanism: Mechanism(provider), ModTime: mt})
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Provider < out[j].Provider })
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Provider != out[j].Provider {
+			return out[i].Provider < out[j].Provider
+		}
+		return out[i].Account < out[j].Account
+	})
 	return out
 }
 

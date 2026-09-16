@@ -6,12 +6,14 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
+	"github.com/kalevski/toolcase/nginxpilot/internal/phpfpm"
 	"github.com/kalevski/toolcase/nginxpilot/internal/realip"
 )
 
 // Resource kinds, surfaced in ApplyResult / GET /status.
 const (
 	KindSite            = "site"
+	KindApp             = "app"
 	KindProxy           = "proxy"
 	KindRedirect        = "redirect"
 	KindDeadHost        = "dead-host"
@@ -118,6 +120,31 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 		}
 		resources = append(resources, rendered{
 			kind: KindSite, key: s.Domain, filename: filename,
+			content: content, context: ctxHTTP,
+		})
+	}
+	// Apps render like sites, with one extra gate: an app whose php-fpm pool is
+	// not answering is DISABLED rather than rendered. Rendering it anyway would
+	// leave nginx serving index.php through the static handler as text/plain,
+	// publishing the application's own database credentials — the single
+	// highest-severity failure mode in the feature.
+	for i := range cfg.Apps {
+		a := &cfg.Apps[i]
+		if !a.IsEnabled() {
+			continue
+		}
+		filename := "app-" + config.FileStem(a.Domain) + ".conf"
+		if !phpfpm.PoolUp(cfg, a.Domain) {
+			disabled = append(disabled, disableResult(KindApp, a.Domain, filename, nginxconf.ErrPoolMissing))
+			continue
+		}
+		content, err := nginxconf.AppVhost(cfg, a, opts)
+		if err != nil {
+			disabled = append(disabled, disableResult(KindApp, a.Domain, filename, err))
+			continue
+		}
+		resources = append(resources, rendered{
+			kind: KindApp, key: a.Domain, filename: filename,
 			content: content, context: ctxHTTP,
 		})
 	}

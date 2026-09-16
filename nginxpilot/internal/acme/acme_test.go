@@ -52,7 +52,7 @@ func contains(args []string, v string) bool {
 
 func TestIssueDNSDigitalOceanArgv(t *testing.T) {
 	store := credstore.New(t.TempDir())
-	if err := store.Set("digitalocean", []byte("dns_digitalocean_token = SECRET123\n")); err != nil {
+	if err := store.Set("digitalocean", "", []byte("dns_digitalocean_token = SECRET123\n")); err != nil {
 		t.Fatal(err)
 	}
 	cfg := config.Acme{
@@ -120,7 +120,7 @@ func TestIssueHTTPWebrootArgv(t *testing.T) {
 
 func TestIssueRoute53UsesEnvNotFlag(t *testing.T) {
 	store := credstore.New(t.TempDir())
-	if err := store.Set("route53", []byte("[default]\naws_access_key_id = K\naws_secret_access_key = S\n")); err != nil {
+	if err := store.Set("route53", "", []byte("[default]\naws_access_key_id = K\naws_secret_access_key = S\n")); err != nil {
 		t.Fatal(err)
 	}
 	cfg := config.Acme{
@@ -153,7 +153,7 @@ func TestIssueRoute53UsesEnvNotFlag(t *testing.T) {
 // plugin (with that provider's stored credential), not the configured ones.
 func TestIssueOptionOverrides(t *testing.T) {
 	store := credstore.New(t.TempDir())
-	if err := store.Set("cloudflare", []byte("dns_cloudflare_api_token = CFTOKEN\n")); err != nil {
+	if err := store.Set("cloudflare", "", []byte("dns_cloudflare_api_token = CFTOKEN\n")); err != nil {
 		t.Fatal(err)
 	}
 	cfg := config.Acme{

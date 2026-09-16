@@ -77,10 +77,13 @@ type IssueOptions struct {
 	// Email overrides acme.email for this cert's ACME account registration (-m).
 	Email string
 	// Provider overrides acme.dns.provider — the certbot DNS plugin (--dns-<provider>)
-	// and which stored credential (credstore.Get(provider)) is used. DNS-01 only;
-	// ignored for the http/nginx/standalone challenges.
+	// and which stored credential is used. DNS-01 only; ignored for the
+	// http/nginx/standalone challenges.
 	Provider string
-	Staging  bool
+	// Account picks which of that provider's stored credentials to use. Empty
+	// means credstore.DefaultAccount, which is the legacy single-credential slot.
+	Account string
+	Staging bool
 }
 
 // Issue runs `certbot certonly` for one cert (>=1 domains; wildcards only with
@@ -110,7 +113,7 @@ func (c *Client) Issue(ctx context.Context, name string, domains []string, opts 
 	args = append(args, "certonly", "--agree-tos", "-m", email, "--cert-name", name)
 	args = append(args, c.serverArgs(opts.Staging)...)
 
-	chArgs, env, cleanup, err := c.challengeArgs(opts.Provider)
+	chArgs, env, cleanup, err := c.challengeArgs(opts.Provider, opts.Account)
 	if err != nil {
 		return "", err
 	}
@@ -191,7 +194,7 @@ func (c *Client) serverArgs(staging bool) []string {
 // challengeArgs builds the authenticator flags + any process env for the
 // configured challenge, plus a cleanup func that removes a materialized
 // config-env creds file.
-func (c *Client) challengeArgs(provider string) (args []string, env []string, cleanup func(), err error) {
+func (c *Client) challengeArgs(provider, account string) (args []string, env []string, cleanup func(), err error) {
 	switch c.cfg.ChallengeOrDefault() {
 	case config.ChallengeHTTP:
 		return []string{"--webroot", "-w", c.cfg.HTTP.Webroot}, nil, nil, nil
@@ -200,7 +203,7 @@ func (c *Client) challengeArgs(provider string) (args []string, env []string, cl
 	case config.ChallengeStandalone:
 		return []string{"--standalone"}, nil, nil, nil
 	case config.ChallengeDNS:
-		return c.dnsArgs(provider)
+		return c.dnsArgs(provider, account)
 	default:
 		return nil, nil, nil, fmt.Errorf("unknown challenge %q", c.cfg.ChallengeOrDefault())
 	}
@@ -210,14 +213,14 @@ func (c *Client) challengeArgs(provider string) (args []string, env []string, cl
 // the credential source (config ref → store → ambient). providerOverride wins
 // over acme.dns.provider when non-empty (so a caller can pick which stored
 // credential certbot uses for this issuance).
-func (c *Client) dnsArgs(providerOverride string) (args []string, env []string, cleanup func(), err error) {
+func (c *Client) dnsArgs(providerOverride, account string) (args []string, env []string, cleanup func(), err error) {
 	provider := providerOverride
 	if provider == "" {
 		provider = c.cfg.DNS.Provider
 	}
 	args = []string{"--dns-" + provider}
 
-	credPath, cleanup, err := c.resolveCredPath(provider)
+	credPath, cleanup, err := c.resolveCredPath(provider, account)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -246,7 +249,7 @@ func (c *Client) dnsArgs(providerOverride string) (args []string, env []string, 
 // resolveCredPath returns the on-disk credentials path for the provider, or ""
 // to fall back to ambient SDK env. Order: config ref (materialized to a 0600
 // tmp file) → credstore → none.
-func (c *Client) resolveCredPath(provider string) (path string, cleanup func(), err error) {
+func (c *Client) resolveCredPath(provider, account string) (path string, cleanup func(), err error) {
 	if c.cfg.DNS.CredentialsEnv != "" || c.cfg.DNS.CredentialsFile != "" {
 		body, err := config.ResolveSecret(c.cfg.DNS.CredentialsEnv, c.cfg.DNS.CredentialsFile)
 		if err != nil {
@@ -278,7 +281,7 @@ func (c *Client) resolveCredPath(provider string) (path string, cleanup func(), 
 		return name, func() { os.Remove(name) }, nil
 	}
 	if c.store != nil {
-		if r, ok := c.store.Get(provider); ok {
+		if r, ok := c.store.Get(provider, account); ok {
 			return r.Path, nil, nil
 		}
 	}

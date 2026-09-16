@@ -72,6 +72,13 @@ type Config struct {
 	Upstreams []Upstream `yaml:"upstreams"`
 	Proxies   []Proxy    `yaml:"proxies"`
 
+	// Apps are vhosts whose content is executed rather than served — today a
+	// php runtime backed by a per-app php-fpm pool. They share the site/proxy
+	// domain namespace and carry the same WebOptions. PHP is the daemon-level
+	// php-fpm surface (pool dir, socket dir, test/reload commands).
+	Apps []App `yaml:"apps"`
+	PHP  PHP   `yaml:"php"`
+
 	// Redirects and DeadHosts are lightweight http vhosts: a redirect answers
 	// every request with a 30x to another host; a dead host parks a domain on a
 	// fixed error code (optionally over TLS, keeping the cert warm). Both share

@@ -760,3 +760,104 @@ func TestValidateProxyLocationPathDefaulted(t *testing.T) {
 		t.Fatalf("want default path /, got %q", got)
 	}
 }
+
+// An app's source used to skip every rule a site's source gets: it was checked
+// for its interval and for inline secrets and nothing else, so a source the
+// fetcher cannot use was accepted at config time and failed at the first sync.
+func appConfig(src Source) Config {
+	cfg := minValidConfig()
+	cfg.PHP = PHP{Enabled: true, PoolDir: "/etc/php/pools", SocketDir: "/run/php"}
+	cfg.Apps = []App{{
+		Domain:  "shop.example.com",
+		Runtime: RuntimePHP,
+		Source:  src,
+	}}
+	return cfg
+}
+
+func TestValidateAppSourceRejectsUnknownType(t *testing.T) {
+	cfg := appConfig(Source{Type: "github", URL: "https://github.com/acme/shop.git", Branch: "main"})
+
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected an error for source.type github, got nil")
+	}
+	if !strings.Contains(err.Error(), "must be git or http-zip") {
+		t.Fatalf("expected the source.type rule, got: %v", err)
+	}
+}
+
+func TestValidateAppSourceRejectsAuthTheTypeCannotUse(t *testing.T) {
+	cfg := appConfig(Source{
+		Type:   SourceGit,
+		URL:    "https://git.example.com/acme/shop.git",
+		Branch: "main",
+		Auth:   Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "PW"},
+	})
+
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected an error for basic auth on a git source, got nil")
+	}
+	if !strings.Contains(err.Error(), "git sources support") {
+		t.Fatalf("expected the git auth rule, got: %v", err)
+	}
+}
+
+func TestValidateAppSourceAcceptsEveryGitAuthMethod(t *testing.T) {
+	for _, src := range []Source{
+		{Type: SourceGit, URL: "https://git.example.com/acme/shop.git", Branch: "main"},
+		{Type: SourceGit, URL: "https://git.example.com/acme/shop.git", Branch: "main",
+			Auth: Auth{Method: AuthHTTPSToken, Username: "acme", TokenEnv: "TOKEN"}},
+		{Type: SourceGit, URL: "https://github.com/acme/shop.git", Branch: "main",
+			Auth: Auth{Method: AuthGitHubToken, TokenEnv: "TOKEN"}},
+		{Type: SourceGit, URL: "git@git.example.com:acme/shop.git", Branch: "main",
+			Auth: Auth{Method: AuthSSHKey, KeyEnv: "KEY"}},
+	} {
+		cfg := appConfig(src)
+		if err := Validate(&cfg); err != nil {
+			t.Fatalf("auth %q on %q: unexpected error: %v", src.Auth.MethodOrNone(), src.URL, err)
+		}
+	}
+}
+
+func TestValidateAppSourceAcceptsEveryHTTPZipAuthMethod(t *testing.T) {
+	for _, src := range []Source{
+		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip"},
+		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
+			Auth: Auth{Method: AuthBearer, TokenEnv: "TOKEN"}},
+		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
+			Auth: Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "PW"}},
+		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
+			Auth: Auth{Method: AuthHeader, Name: "X-Key", ValueEnv: "VALUE"}},
+	} {
+		cfg := appConfig(src)
+		if err := Validate(&cfg); err != nil {
+			t.Fatalf("auth %q: unexpected error: %v", src.Auth.MethodOrNone(), err)
+		}
+	}
+}
+
+func TestValidateAppRejectsBadEnvKey(t *testing.T) {
+	cfg := appConfig(Source{Type: SourceGit, URL: "https://example.com/a.git", Branch: "main"})
+	cfg.Apps[0].PHP.Env = map[string]string{"bad key": "x"}
+	if err := Validate(&cfg); err == nil {
+		t.Fatal("expected a bad env key to be refused")
+	}
+}
+
+func TestValidateAppRejectsNewlineEnvValue(t *testing.T) {
+	cfg := appConfig(Source{Type: SourceGit, URL: "https://example.com/a.git", Branch: "main"})
+	cfg.Apps[0].PHP.Env = map[string]string{"OK": "a\nb"}
+	if err := Validate(&cfg); err == nil {
+		t.Fatal("expected a newline in an env value to be refused — it would break out of the directive")
+	}
+}
+
+func TestValidateAppAcceptsEnv(t *testing.T) {
+	cfg := appConfig(Source{Type: SourceGit, URL: "https://example.com/a.git", Branch: "main"})
+	cfg.Apps[0].PHP.Env = map[string]string{"APP_ENV": "production", "_X1": "v"}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("expected a valid env map to pass: %v", err)
+	}
+}

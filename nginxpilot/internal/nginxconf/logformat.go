@@ -22,6 +22,7 @@ const LogFormatName = "nginxpilot_json"
 // nginxpilot's own entity model).
 const (
 	LogResourceSite     = "site"
+	LogResourceApp      = "app"
 	LogResourceProxy    = "proxy"
 	LogResourceRedirect = "redirect"
 	LogResourceDeadHost = "dead_host"

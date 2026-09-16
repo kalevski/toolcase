@@ -39,6 +39,11 @@ var operationDocs = map[string]operationDoc{
 	"POST /sites":            {summary: "Write one site fragment (validate, persist, reload).", yaml: true, responseRef: "WriteResult"},
 	"DELETE /sites/{domain}": {summary: "Remove a site's fragment and reload."},
 
+	"GET /apps":                  {summary: "List configured php apps.", responseRef: "AppList"},
+	"POST /apps":                 {summary: "Write one app fragment (validate, persist, reload).", yaml: true, responseRef: "WriteResult"},
+	"DELETE /apps/{domain}":      {summary: "Remove an app's fragment and reload. Its persistent data is kept."},
+	"DELETE /apps/{domain}/data": {summary: "Permanently delete an app's persistent data directory."},
+
 	"GET /upstreams":           {summary: "List configured http upstream pools.", responseRef: "UpstreamList"},
 	"POST /upstreams":          {summary: "Write one upstream fragment (validate, persist, reload).", yaml: true, responseRef: "WriteResult"},
 	"DELETE /upstreams/{name}": {summary: "Remove an upstream (409 while a proxy still references it)."},
@@ -84,9 +89,11 @@ var operationDocs = map[string]operationDoc{
 	"POST /certs/{domain}/renew": {summary: "Force-renew one certificate by name."},
 	"DELETE /certs/{domain}":     {summary: "Delete a certificate (certbot-managed or manual)."},
 
-	"GET /acme/credentials":               {summary: "List stored ACME DNS-provider credentials (metadata only).", responseRef: "AcmeCredentialList"},
-	"PUT /acme/credentials/{provider}":    {summary: "Store (or replace) a provider's DNS credential.", requestRef: "AcmeCredentialRequest", responseRef: "AcmeCredentialResult"},
-	"DELETE /acme/credentials/{provider}": {summary: "Remove a provider's stored credential."},
+	"GET /acme/credentials":                         {summary: "List stored ACME DNS-provider credentials (metadata only).", responseRef: "AcmeCredentialList"},
+	"PUT /acme/credentials/{provider}":              {summary: "Store (or replace) a provider's DNS credential.", requestRef: "AcmeCredentialRequest", responseRef: "AcmeCredentialResult"},
+	"DELETE /acme/credentials/{provider}":           {summary: "Remove a provider's stored credential (default account)."},
+	"PUT /acme/credentials/{provider}/{account}":    {summary: "Store (or replace) one named account's DNS credential for a provider.", requestRef: "AcmeCredentialRequest", responseRef: "AcmeCredentialResult"},
+	"DELETE /acme/credentials/{provider}/{account}": {summary: "Remove one named account's stored credential for a provider."},
 
 	"GET /git-credentials":           {summary: "List stored git source credentials (metadata only, never tokens).", responseRef: "GitCredentialList"},
 	"PUT /git-credentials/{name}":    {summary: "Store (or replace) a private git source's access token as a daemon-owned 0600 file; reference the returned path via auth.token_file.", requestRef: "GitCredentialRequest", responseRef: "GitCredentialResult"},

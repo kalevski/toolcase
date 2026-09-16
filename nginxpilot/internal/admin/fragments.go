@@ -16,6 +16,7 @@ import (
 func fragmentCounts(f *config.Fragment) map[string]int {
 	return map[string]int{
 		"site":            len(f.Sites),
+		"app":             len(f.Apps),
 		"upstream":        len(f.Upstreams),
 		"proxy":           len(f.Proxies),
 		"redirect":        len(f.Redirects),

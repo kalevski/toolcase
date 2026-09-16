@@ -61,6 +61,11 @@ func Vhost(cfg *config.Config, domain string) (string, error) {
 // a cert dir is configured, so the snippet shows real cert paths). It renders
 // disabled resources too — this is the preview surface, not the live config.
 func VhostOpts(cfg *config.Config, domain string, opts Options) (string, error) {
+	for i := range cfg.Apps {
+		if cfg.Apps[i].Domain == domain {
+			return AppVhost(cfg, &cfg.Apps[i], opts)
+		}
+	}
 	for i := range cfg.Sites {
 		if cfg.Sites[i].Domain == domain {
 			return StaticVhost(cfg, &cfg.Sites[i], opts)

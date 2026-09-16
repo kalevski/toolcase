@@ -2,6 +2,7 @@ package credstore
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -45,21 +46,21 @@ func TestStoreSetGetListDelete(t *testing.T) {
 	dir := t.TempDir()
 	s := New(dir)
 
-	if s.Has("digitalocean") {
+	if s.Has("digitalocean", "") {
 		t.Fatal("empty store should not have digitalocean")
 	}
-	if _, ok := s.Get("digitalocean"); ok {
+	if _, ok := s.Get("digitalocean", ""); ok {
 		t.Fatal("Get on empty store should be ok=false")
 	}
 
-	if err := s.Set("digitalocean", []byte("dns_digitalocean_token = SECRET\n")); err != nil {
+	if err := s.Set("digitalocean", "", []byte("dns_digitalocean_token = SECRET\n")); err != nil {
 		t.Fatal(err)
 	}
-	if !s.Has("digitalocean") {
+	if !s.Has("digitalocean", "") {
 		t.Fatal("Has should be true after Set")
 	}
 
-	r, ok := s.Get("digitalocean")
+	r, ok := s.Get("digitalocean", "")
 	if !ok {
 		t.Fatal("Get should succeed")
 	}
@@ -75,7 +76,7 @@ func TestStoreSetGetListDelete(t *testing.T) {
 	}
 
 	list := s.List()
-	if len(list) != 1 || list[0].Provider != "digitalocean" {
+	if len(list) != 1 || list[0].Provider != "digitalocean" || list[0].Account != DefaultAccount {
 		t.Fatalf("List = %+v", list)
 	}
 	// metadata only — no secret material on the Info type (compile-time guarantee)
@@ -83,13 +84,13 @@ func TestStoreSetGetListDelete(t *testing.T) {
 		t.Errorf("list mechanism = %q", list[0].Mechanism)
 	}
 
-	if err := s.Delete("digitalocean"); err != nil {
+	if err := s.Delete("digitalocean", ""); err != nil {
 		t.Fatal(err)
 	}
-	if s.Has("digitalocean") {
+	if s.Has("digitalocean", "") {
 		t.Fatal("Has should be false after Delete")
 	}
-	if err := s.Delete("digitalocean"); !os.IsNotExist(err) {
+	if err := s.Delete("digitalocean", ""); !os.IsNotExist(err) {
 		t.Errorf("Delete on absent = %v, want os.ErrNotExist", err)
 	}
 }
@@ -104,6 +105,93 @@ func TestMechanism(t *testing.T) {
 	for p, want := range cases {
 		if got := Mechanism(p); got != want {
 			t.Errorf("Mechanism(%s) = %q, want %q", p, got, want)
+		}
+	}
+}
+
+// Several accounts may exist for one provider: each is its own 0600 artifact,
+// the default account keeps the legacy flat filename, and deleting one leaves
+// the others alone.
+func TestStoreNamedAccounts(t *testing.T) {
+	dir := t.TempDir()
+	s := New(dir)
+
+	if err := s.Set("cloudflare", "", []byte("dns_cloudflare_api_token = DEFAULT\n")); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Set("cloudflare", "team-a", []byte("dns_cloudflare_api_token = A\n")); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Set("cloudflare", "team-b", []byte("dns_cloudflare_api_token = B\n")); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, account := range []string{"", DefaultAccount, "team-a", "team-b"} {
+		if !s.Has("cloudflare", account) {
+			t.Errorf("Has(cloudflare, %q) = false", account)
+		}
+	}
+	if s.Has("cloudflare", "team-c") {
+		t.Error("Has should be false for an unknown account")
+	}
+
+	// the three credentials are distinct files with distinct contents
+	seen := map[string]string{}
+	for _, account := range []string{DefaultAccount, "team-a", "team-b"} {
+		r, ok := s.Get("cloudflare", account)
+		if !ok {
+			t.Fatalf("Get(cloudflare, %s) missing", account)
+		}
+		body, err := os.ReadFile(r.Path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if prev, dup := seen[r.Path]; dup {
+			t.Fatalf("account %s reused the path of %s", account, prev)
+		}
+		seen[r.Path] = account
+		if string(body) == "" {
+			t.Fatalf("account %s stored nothing", account)
+		}
+	}
+
+	// the default account keeps the pre-accounts filename, so an existing store
+	// keeps resolving without migration
+	if r, _ := s.Get("cloudflare", DefaultAccount); filepath.Base(r.Path) != "cloudflare.cred" {
+		t.Errorf("default account path = %q, want cloudflare.cred", filepath.Base(r.Path))
+	}
+
+	list := s.List()
+	if len(list) != 3 {
+		t.Fatalf("List = %+v, want 3", list)
+	}
+	want := []string{DefaultAccount, "team-a", "team-b"}
+	for i, info := range list {
+		if info.Provider != "cloudflare" || info.Account != want[i] {
+			t.Errorf("list[%d] = %+v, want cloudflare/%s", i, info, want[i])
+		}
+	}
+
+	if err := s.Delete("cloudflare", "team-a"); err != nil {
+		t.Fatal(err)
+	}
+	if s.Has("cloudflare", "team-a") {
+		t.Error("team-a should be gone")
+	}
+	if !s.Has("cloudflare", "team-b") || !s.Has("cloudflare", DefaultAccount) {
+		t.Error("deleting one account removed another")
+	}
+}
+
+func TestValidAccount(t *testing.T) {
+	for _, ok := range []string{"default", "team-a", "u12ab34"} {
+		if !ValidAccount(ok) {
+			t.Errorf("ValidAccount(%q) = false", ok)
+		}
+	}
+	for _, bad := range []string{"", "Team", "a.b", "a/b", "a b"} {
+		if ValidAccount(bad) {
+			t.Errorf("ValidAccount(%q) = true", bad)
 		}
 	}
 }

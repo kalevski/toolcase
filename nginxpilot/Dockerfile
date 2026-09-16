@@ -26,6 +26,16 @@ FROM nginx:1.27-alpine
 #   --build-arg CERTBOT_DNS_PLUGINS="certbot-dns-cloudflare certbot-dns-route53"
 ARG CERTBOT_DNS_PLUGINS="certbot-dns-digitalocean certbot-dns-cloudflare certbot-dns-route53 certbot-dns-google"
 
+# PHP apps. PHP_VERSION selects the php-fpm minor baked in; build with
+# PHP_VERSION="" for a php-free image so realms that serve only static sites
+# stay out of the blast radius of a PHP CVE and keep the smaller layer. The
+# extension list is deliberately generous: a missing extension is the single
+# most common "why doesn't my app boot", and it costs only disk.
+#   docker build --build-arg PHP_VERSION=83 -t nginxpilot:php8.3 .
+#   docker build --build-arg PHP_VERSION=""  -t nginxpilot:plain  .
+ARG PHP_VERSION="83"
+ARG PHP_EXTENSIONS="fpm opcache session mysqli pdo pdo_mysql pdo_pgsql pdo_sqlite gd mbstring xml curl zip intl fileinfo openssl phar tokenizer dom simplexml iconv ctype json bcmath exif sodium"
+
 # git/openssh for git sources; certbot + nginx/DNS plugins for ACME issuance
 # (certbot core also provides the webroot + standalone challenges). The DNS
 # plugins install from pip — there are no apk packages for them.
@@ -40,6 +50,27 @@ ARG CERTBOT_DNS_PLUGINS="certbot-dns-digitalocean certbot-dns-cloudflare certbot
 RUN apk add --no-cache --upgrade libexpat git openssh-client ca-certificates \
     tzdata su-exec libcap certbot py3-pip curl && \
     pip install --break-system-packages certbot-nginx ${CERTBOT_DNS_PLUGINS}
+
+# php-fpm + extensions, only when PHP_VERSION is set. The pool files nginxpilot
+# writes live in /etc/php/pool.d (created by the entrypoint on the writable
+# layer, not baked in — same overlayfs/rename constraint as the nginx dirs), and
+# php-fpm.conf is a thin shell that includes them. The stock www pool is removed:
+# a catch-all pool running as a shared uid is exactly the isolation hole the
+# per-app pools exist to close.
+RUN if [ -n "$PHP_VERSION" ]; then \
+        set -eu; \
+        pkgs=""; \
+        for ext in $PHP_EXTENSIONS; do pkgs="$pkgs php${PHP_VERSION}-${ext}"; done; \
+        apk add --no-cache php${PHP_VERSION} $pkgs && \
+        mkdir -p /etc/php && \
+        rm -f /etc/php${PHP_VERSION}/php-fpm.d/www.conf && \
+        printf '[global]\npid = /run/php/php-fpm.pid\nerror_log = /proc/self/fd/2\ndaemonize = no\n\ninclude=/etc/php/pool.d/*.conf\n' \
+            > /etc/php/php-fpm.conf && \
+        mkdir -p /etc/php/pool.d && \
+        printf '; Placeholder pool. php-fpm refuses to start with zero pools, and\n; nginxpilot writes the real app-*.conf pools only AFTER it boots — so\n; without this the pool manager could never come up on a fresh container.\n; It serves nothing: no app vhost ever points at this socket, and the apply\n; engine only ever adds or removes app-*.conf, so it is left alone.\n[nginxpilot-placeholder]\nuser = nginxpilot\ngroup = nginx\nlisten = /run/php/.placeholder.sock\nlisten.owner = nginxpilot\nlisten.mode = 0600\npm = ondemand\npm.max_children = 1\npm.process_idle_timeout = 10s\nphp_admin_value[open_basedir] = /dev/null\nphp_admin_value[disable_functions] = exec,passthru,shell_exec,system,proc_open,popen,dl,pcntl_exec\n' \
+            > /etc/php/pool.d/00-placeholder.conf && \
+        ln -sf /usr/sbin/php-fpm${PHP_VERSION} /usr/local/bin/php-fpm; \
+    fi
 
 RUN addgroup -S nginxpilot 2>/dev/null; \
     adduser -S -D -H -G nginx nginxpilot && \

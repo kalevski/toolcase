@@ -67,7 +67,7 @@ func SyncSite(ctx context.Context, site config.Site, defaults config.Defaults, d
 	st.SourceFingerprint = fp
 
 	keep := site.KeepReleases(defaults)
-	err = doSync(ctx, site, dataDir, keep, st, dep, log)
+	err = doSync(ctx, site, deploy.KindSites, nil, dataDir, keep, st, dep, log)
 	if err != nil {
 		st.FailureStreak++
 		st.LastError = err.Error()
@@ -87,8 +87,50 @@ func SyncSite(ctx context.Context, site config.Site, defaults config.Defaults, d
 	return st, nil
 }
 
-// doSync mutates st on success (deployed ref, validators, timestamps).
-func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st *state.SiteState, dep *deploy.Deployer, log *slog.Logger) error {
+// SyncApp runs the same pipeline for a php app. The only differences from a
+// site are the content tree it deploys into (apps/ rather than sites/) and the
+// persistent-path relinking that happens just before the release is sealed.
+func SyncApp(ctx context.Context, app config.App, defaults config.Defaults, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error) {
+	site := app.AsSite()
+
+	st, err := store.Load(site.Domain)
+	if err != nil {
+		return &state.SiteState{Domain: site.Domain}, err
+	}
+
+	fp := site.Source.Fingerprint()
+	if st.SourceFingerprint != "" && st.SourceFingerprint != fp {
+		log.Info("source identity changed, forcing full resync", "domain", site.Domain)
+		st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+		st.DeployedBytes = 0
+	}
+	st.SourceFingerprint = fp
+
+	keep := app.KeepReleases(defaults)
+	err = doSync(ctx, site, deploy.KindApps, app.PHP.Persistent, dataDir, keep, st, dep, log)
+	if err != nil {
+		st.FailureStreak++
+		st.LastError = err.Error()
+		st.LastErrorTime = time.Now().UTC()
+		if saveErr := store.Save(st); saveErr != nil {
+			log.Error("state save failed", "domain", site.Domain, "error", saveErr)
+		}
+		return st, err
+	}
+
+	st.FailureStreak = 0
+	st.LastError = ""
+	st.LastErrorTime = time.Time{}
+	if saveErr := store.Save(st); saveErr != nil {
+		log.Error("state save failed", "domain", site.Domain, "error", saveErr)
+	}
+	return st, nil
+}
+
+// doSync mutates st on success (deployed ref, validators, timestamps). kind
+// selects the content tree ("sites" or "apps"); persistent is the app's declared
+// writable paths, empty for a site.
+func doSync(ctx context.Context, site config.Site, kind string, persistent []string, dataDir string, keep int, st *state.SiteState, dep *deploy.Deployer, log *slog.Logger) error {
 	src, err := buildSource(site, dataDir, log)
 	if err != nil {
 		return err
@@ -110,7 +152,7 @@ func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st 
 		return err
 	}
 
-	if !res.Changed && !dep.CurrentExists(site.Domain) {
+	if !res.Changed && !dep.CurrentExistsIn(kind, site.Domain) {
 		log.Warn("deployed ref recorded but current release missing; forcing resync", "domain", site.Domain)
 		st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
 		st.DeployedBytes = 0
@@ -160,7 +202,26 @@ func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st 
 		}
 	}
 
-	releasePath, err := dep.Promote(site.Domain, res.Ref, staging, keep)
+	// Persistent paths are relinked on EVERY deploy, immediately before the
+	// release is sealed: whatever the repo shipped at a declared path is
+	// replaced by a symlink to apps/<domain>/persistent/<path>, so an
+	// application that writes to its own document root keeps that data.
+	if len(persistent) > 0 {
+		linked, err := dep.LinkPersistent(site.Domain, staging, persistent)
+		if err != nil {
+			return fmt.Errorf("link persistent paths: %w", err)
+		}
+		if len(linked.Seeded) > 0 {
+			log.Info("seeded persistent paths from the repository",
+				"domain", site.Domain, "paths", linked.Seeded)
+		}
+		for path, skipped := range linked.SkippedFiles {
+			log.Info("ignored repository content at a persistent path",
+				"domain", site.Domain, "path", path, "files", skipped)
+		}
+	}
+
+	releasePath, err := dep.PromoteIn(kind, site.Domain, res.Ref, staging, keep)
 	if err != nil {
 		return fmt.Errorf("deploy: %w", err)
 	}

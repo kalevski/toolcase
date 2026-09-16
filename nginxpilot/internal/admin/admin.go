@@ -117,6 +117,10 @@ func endpoints() []endpoint {
 		{"GET", "/sites", true, func(s *Server) http.HandlerFunc { return s.handleListSites }},
 		{"POST", "/sites", true, func(s *Server) http.HandlerFunc { return s.handleCreateSite }},
 		{"DELETE", "/sites/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteSite }},
+		{"GET", "/apps", true, func(s *Server) http.HandlerFunc { return s.handleListApps }},
+		{"POST", "/apps", true, func(s *Server) http.HandlerFunc { return s.handleCreateApp }},
+		{"DELETE", "/apps/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteApp }},
+		{"DELETE", "/apps/{domain}/data", true, func(s *Server) http.HandlerFunc { return s.handleDeleteAppData }},
 		{"GET", "/upstreams", true, func(s *Server) http.HandlerFunc { return s.handleListUpstreams }},
 		{"POST", "/upstreams", true, func(s *Server) http.HandlerFunc { return s.handleCreateUpstream }},
 		{"DELETE", "/upstreams/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteUpstream }},
@@ -156,7 +160,9 @@ func endpoints() []endpoint {
 		{"DELETE", "/certs/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCert }},
 		{"GET", "/acme/credentials", true, func(s *Server) http.HandlerFunc { return s.handleListCreds }},
 		{"PUT", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleSetCreds }},
+		{"PUT", "/acme/credentials/{provider}/{account}", true, func(s *Server) http.HandlerFunc { return s.handleSetCreds }},
 		{"DELETE", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCreds }},
+		{"DELETE", "/acme/credentials/{provider}/{account}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCreds }},
 		{"GET", "/git-credentials", true, func(s *Server) http.HandlerFunc { return s.handleListGitCreds }},
 		{"PUT", "/git-credentials/{name}", true, func(s *Server) http.HandlerFunc { return s.handleSetGitCred }},
 		{"DELETE", "/git-credentials/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteGitCred }},
@@ -239,6 +245,11 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	// Log shipping stats (per-destination shipped/dropped/last_error plus
 	// intake health) — same spirit as per-site sync state.
 	payload["logs"] = s.mgr.LogsStatus()
+
+	// PHP runtime + per-app pool health. Present whether or not php is enabled,
+	// so a control plane can tell "this realm cannot serve php" from "this realm
+	// is an older nginxpilot that does not report it".
+	payload["php"] = s.mgr.PHPStatus()
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

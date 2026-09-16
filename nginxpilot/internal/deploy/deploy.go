@@ -152,7 +152,16 @@ func DirSize(dir string) (int64, error) {
 // ref should be a short content identifier (git SHA / hash prefix).
 // keep is the maximum number of releases to retain after the swap.
 func (d *Deployer) Promote(domain, ref, stagingDir string, keep int) (string, error) {
-	releasesDir := filepath.Join(d.SiteDir(domain), "releases")
+	return d.PromoteIn(KindSites, domain, ref, stagingDir, keep)
+}
+
+// PromoteIn is Promote against a named content tree — "sites" for served files,
+// "apps" for executed code. The mechanics are identical; only the root differs,
+// so an app gets the same stage → fsync → rename → swap → prune guarantees a
+// site has always had.
+func (d *Deployer) PromoteIn(kind, domain, ref, stagingDir string, keep int) (string, error) {
+	root := d.Root(kind, domain)
+	releasesDir := filepath.Join(root, "releases")
 	if err := os.MkdirAll(releasesDir, 0o750); err != nil {
 		return "", err
 	}
@@ -177,21 +186,22 @@ func (d *Deployer) Promote(domain, ref, stagingDir string, keep int) (string, er
 
 	// 3. Atomic swap: temp symlink + rename(2). Open handles nginx holds on
 	//    old content stay valid; new requests resolve the new target.
-	tmpLink := filepath.Join(d.SiteDir(domain), "current.tmp")
+	tmpLink := filepath.Join(root, "current.tmp")
 	_ = os.Remove(tmpLink)
 	if err := os.Symlink(filepath.Join("releases", releaseName), tmpLink); err != nil {
 		return "", fmt.Errorf("create temp symlink: %w", err)
 	}
-	if err := os.Rename(tmpLink, d.CurrentPath(domain)); err != nil {
+	if err := os.Rename(tmpLink, filepath.Join(root, "current")); err != nil {
 		_ = os.Remove(tmpLink)
 		return "", fmt.Errorf("swap current symlink: %w", err)
 	}
-	if err := syncDir(d.SiteDir(domain)); err != nil {
+	if err := syncDir(root); err != nil {
 		return "", err
 	}
 
-	// 4. Prune old releases.
-	if err := d.Prune(domain, keep); err != nil {
+	// 4. Prune old releases. persistent/ is not under releases/, so it is never
+	//    a prune candidate — the data outlives every release by construction.
+	if err := d.PruneIn(kind, domain, keep); err != nil {
 		d.log.Warn("prune failed", "domain", domain, "error", err)
 	}
 	return releasePath, nil
@@ -200,13 +210,19 @@ func (d *Deployer) Promote(domain, ref, stagingDir string, keep int) (string, er
 // Prune deletes releases beyond keep, oldest first, never deleting the target
 // of `current`. keep is the maximum number of releases to retain.
 func (d *Deployer) Prune(domain string, keep int) error {
-	releasesDir := filepath.Join(d.SiteDir(domain), "releases")
+	return d.PruneIn(KindSites, domain, keep)
+}
+
+// PruneIn is Prune against a named content tree.
+func (d *Deployer) PruneIn(kind, domain string, keep int) error {
+	root := d.Root(kind, domain)
+	releasesDir := filepath.Join(root, "releases")
 	entries, err := os.ReadDir(releasesDir)
 	if err != nil {
 		return err
 	}
 	currentTarget := ""
-	if t, err := os.Readlink(d.CurrentPath(domain)); err == nil {
+	if t, err := os.Readlink(filepath.Join(root, "current")); err == nil {
 		currentTarget = filepath.Base(t)
 	}
 	var names []string

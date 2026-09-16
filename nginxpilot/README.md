@@ -245,6 +245,96 @@ Self-redirects (`to:` equal to `domain`) and `force_ssl` on a redirect are valid
 
 Proxies, redirects and dead hosts accept one leading `*.` label (`*.example.com`); sites do not. Managed files and API fragments use certbot's `_wildcard.` stem on disk (`proxy-_wildcard.example.com.conf`). A wildcard vhost matches a cert whose SANs carry the identical `*.example.com` pattern — issuing one requires `acme.challenge: dns`. A wildcard and an exact vhost (`*.example.com` + `app.example.com`) may coexist; nginx prefers the exact `server_name`.
 
+## PHP apps
+
+A **site** is files nginx serves. An **app** is code that executes: nginxpilot syncs the same way, and
+routes requests to a per-app php-fpm pool. Apps share the site/proxy domain namespace and carry the same
+per-host TLS toggles.
+
+```yaml
+php:
+  enabled: true
+  pool_dir: /etc/php/pool.d
+  socket_dir: /run/php
+
+apps:
+  - domain: shop.example.com
+    runtime: php
+    source:
+      type: git
+      url: https://github.com/acme/shop.git
+      branch: main
+    php:
+      routing: front-controller   # front-controller (default) | static-first
+      index: index.php
+      persistent:                 # survives every deploy — see below
+        - wp-content/uploads
+      max_body_size: 32MiB
+      memory_limit: 256M
+      max_children: 8
+    tls: auto
+    force_ssl: true
+```
+
+| `php.routing` | `try_files` in `location /` | Fits |
+|---|---|---|
+| `front-controller` (default) | `$uri $uri/ /index.php?$query_string` | Laravel, Symfony, WordPress permalinks |
+| `static-first` | `$uri $uri/ =404` | a directory of `.php` pages, no router |
+
+The image carries php-fpm when built with `PHP_VERSION` (default `83`); build with `--build-arg
+PHP_VERSION=""` for a php-free image. One PHP minor per tag — the realm serves the version its image
+carries.
+
+### Persistent paths — code is immutable, data is not
+
+A release directory is written once and swapped with `rename(2)`. WordPress breaks that immediately:
+uploads and plugin installs write *inside* the document root, so the next sync would swap to a release
+where none of it exists.
+
+Declared `persistent:` paths live outside the release and are **symlinked into every new one**:
+
+```
+apps/shop.example.com/
+├── releases/20260914T121500-d4e5f6/
+│   ├── index.php                      (from the repo, immutable)
+│   └── wp-content/uploads ──────┐     (symlink, recreated every deploy)
+├── persistent/                  │
+│   └── wp-content/uploads/  ◄───┘     (real directory, never pruned)
+└── current -> releases/20260914T121500-d4e5f6
+```
+
+The first deploy **seeds** persistent from whatever the repo shipped there (a theme's default images
+work); every deploy after that leaves it alone and logs how many repo files it ignored. Paths are
+validated at parse time — relative, no `..`, no escaping the release. `persistent/` is never a prune
+target, and `DELETE /apps/{domain}` keeps it: reclaiming the data is the separate
+`DELETE /apps/{domain}/data`.
+
+### Isolation
+
+One pool per app, each with its own uid, `open_basedir` naming exactly that app's release and persistent
+tree, and `disable_functions` covering the process-spawning family. `pm = ondemand`, so an idle app holds
+no worker and a pool-per-app stays affordable. Pool files are rendered by nginxpilot, validated as a set
+with `php-fpm -t`, and quarantined one at a time on failure — the same discipline the nginx config gets.
+
+### What never happens
+
+- **An uploaded `.php` never executes.** Only the front controller (plus anything in `php.expose`) is
+  routed to fastcgi; it is marked `internal;`, and every other `.php` returns 404. This matters more here
+  than in a normal PHP install, because `persistent:` deliberately puts a writable directory inside the
+  document root.
+- **A pool that is down disables the app**, it does not fall through to the static handler. Serving
+  `index.php` as `text/plain` would publish the application's own database credentials.
+- **`SCRIPT_FILENAME` uses `$realpath_root`**, not `$document_root`: the root is the `current` symlink, and
+  opcache keys by the path it is handed — with `$document_root` php would keep executing the previous
+  release after a swap.
+
+### Endpoints
+
+`GET /apps`, `POST /apps` (one app per fragment), `DELETE /apps/{domain}`,
+`DELETE /apps/{domain}/data`. `GET /status` gains a `php` object reporting the runtime version, the
+**extension list** (so a control plane can refuse an app needing `imagick` before it is deployed rather
+than after a 500) and per-pool health.
+
 ## Managed mode
 
 By default nginxpilot is a config **generator** (print-vhost + manual paste). Opt into **managed mode** and it becomes the thing that **writes the live nginx config and reloads nginx** — unlocking TLS termination, per-host toggles and `stream` blocks. The default (`nginx.manage: false`) is unchanged: existing deployments behave exactly as before.

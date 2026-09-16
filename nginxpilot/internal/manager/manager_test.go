@@ -400,3 +400,83 @@ func TestStatusNextSyncIsUTC(t *testing.T) {
 	cancel()
 	m.wg.Wait()
 }
+
+// TestReloadStartsAppLoops pins the bug where Reload reconciled only Sites: an
+// app added at runtime never got a loop (so it never synced and /sync/<domain>
+// answered 404), and the removal pass stopped the app loops that did exist,
+// because every loop whose domain was absent from newSites was treated as
+// removed.
+func TestReloadStartsAppLoops(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	store, err := state.NewStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	app := func(domain string) config.App {
+		return config.App{
+			Domain:  domain,
+			Runtime: config.RuntimePHP,
+			Source: config.Source{
+				Type:     "git",
+				URL:      "https://example.invalid/app.git",
+				Branch:   "main",
+				Interval: config.Duration(time.Hour),
+			},
+		}
+	}
+
+	m := &Manager{
+		log:      logger,
+		store:    store,
+		cfg:      &config.Config{DataDir: dir, Apps: []config.App{app("one.example.com")}},
+		deployer: deploy.New(dir, logger),
+		loops:    map[string]*siteLoop{},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	m.ctx = ctx
+	// Drain the loops before the temp dir is removed: a loop still syncing
+	// writes into it and the cleanup then fails.
+	defer func() {
+		cancel()
+		m.wg.Wait()
+	}()
+
+	m.mu.Lock()
+	m.startAppLoop(m.cfg.Apps[0])
+	m.mu.Unlock()
+
+	m.Reload(&config.Config{
+		DataDir: dir,
+		Apps:    []config.App{app("one.example.com"), app("two.example.com")},
+	})
+
+	m.mu.Lock()
+	_, keptFirst := m.loops["one.example.com"]
+	_, startedSecond := m.loops["two.example.com"]
+	m.mu.Unlock()
+
+	if !keptFirst {
+		t.Error("a reload that still declares the app stopped its loop")
+	}
+	if !startedSecond {
+		t.Error("the app added by the reload never got a loop")
+	}
+	if !m.Kick("two.example.com") {
+		t.Error("Kick found no loop for the added app, so /sync would answer 404")
+	}
+
+	// An app dropped from the config must still have its loop stopped.
+	m.Reload(&config.Config{DataDir: dir, Apps: []config.App{app("two.example.com")}})
+
+	m.mu.Lock()
+	_, stillThere := m.loops["one.example.com"]
+	m.mu.Unlock()
+	if stillThere {
+		t.Error("an app removed from the config kept its loop")
+	}
+}

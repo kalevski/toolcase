@@ -37,13 +37,20 @@ func cmdSync(args []string) int {
 	log := newLogger(*logFormat, cfg.LogLevel)
 
 	var site *config.Site
+	var app *config.App
 	for i := range cfg.Sites {
 		if cfg.Sites[i].Domain == domain {
 			site = &cfg.Sites[i]
 			break
 		}
 	}
-	if site == nil {
+	for i := range cfg.Apps {
+		if cfg.Apps[i].Domain == domain {
+			app = &cfg.Apps[i]
+			break
+		}
+	}
+	if site == nil && app == nil {
 		fmt.Fprintf(os.Stderr, "domain %q is not configured\n", domain)
 		return 1
 	}
@@ -61,8 +68,14 @@ func cmdSync(args []string) int {
 	ctx, cancel := context.WithTimeout(ctx, *timeout)
 	defer cancel()
 
-	if _, err := manager.SyncSite(ctx, *site, cfg.Defaults, cfg.DataDir, store, dep, log); err != nil {
-		fmt.Fprintf(os.Stderr, "sync failed: %v\n", err)
+	var syncErr error
+	if app != nil {
+		_, syncErr = manager.SyncApp(ctx, *app, cfg.Defaults, cfg.DataDir, store, dep, log)
+	} else {
+		_, syncErr = manager.SyncSite(ctx, *site, cfg.Defaults, cfg.DataDir, store, dep, log)
+	}
+	if syncErr != nil {
+		fmt.Fprintf(os.Stderr, "sync failed: %v\n", syncErr)
 		return 1
 	}
 	return 0

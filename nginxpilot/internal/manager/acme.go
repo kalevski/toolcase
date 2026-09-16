@@ -31,16 +31,16 @@ func (m *Manager) AcmeEnabled() bool {
 }
 
 // IssueCert issues one certificate (>=1 domains; wildcard only with dns), then
-// re-applies managed nginx so the new cert is served immediately. email and
-// provider are per-call overrides (empty → the daemon's acme.email /
-// acme.dns.provider config defaults).
-func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, email, provider string, staging bool) error {
+// re-applies managed nginx so the new cert is served immediately. email,
+// provider and account are per-call overrides (empty → the daemon's acme.email /
+// acme.dns.provider config defaults, and the provider's default account).
+func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, email, provider, account string, staging bool) error {
 	m.acmeMu.Lock()
 	defer m.acmeMu.Unlock()
 	if m.acme == nil {
 		return ErrAcmeDisabled
 	}
-	opts := acme.IssueOptions{Email: email, Provider: provider, Staging: staging}
+	opts := acme.IssueOptions{Email: email, Provider: provider, Account: account, Staging: staging}
 	if _, err := m.acme.Issue(ctx, name, domains, opts); err != nil {
 		return err
 	}
@@ -147,9 +147,9 @@ func (m *Manager) AddManualCert(ctx context.Context, domain string, certPEM, key
 	return existed, nil
 }
 
-// SetAcmeCredentials stores a provider's credential (built from the request).
-// No certbot run — it takes effect on the next issue/renew.
-func (m *Manager) SetAcmeCredentials(provider string, req credstore.Request) error {
+// SetAcmeCredentials stores one credential for a provider account (built from
+// the request). No certbot run — it takes effect on the next issue/renew.
+func (m *Manager) SetAcmeCredentials(provider, account string, req credstore.Request) error {
 	if m.creds == nil {
 		return ErrNoCertDir
 	}
@@ -157,10 +157,11 @@ func (m *Manager) SetAcmeCredentials(provider string, req credstore.Request) err
 	if err != nil {
 		return err
 	}
-	if err := m.creds.Set(provider, body); err != nil {
+	if err := m.creds.Set(provider, account, body); err != nil {
 		return err
 	}
-	m.log.Info("acme provider credentials stored", "provider", provider)
+	m.log.Info("acme provider credentials stored",
+		"provider", provider, "account", credstore.NormalizeAccount(account))
 	return nil
 }
 
@@ -172,12 +173,22 @@ func (m *Manager) ListAcmeCredentials() []credstore.Info {
 	return m.creds.List()
 }
 
-// DeleteAcmeCredentials removes a provider's stored credential.
-func (m *Manager) DeleteAcmeCredentials(provider string) error {
+// HasAcmeCredentials reports whether one provider account has a stored
+// credential, so the admin layer can refuse an issuance that would otherwise
+// fail minutes later inside certbot.
+func (m *Manager) HasAcmeCredentials(provider, account string) bool {
+	if m.creds == nil {
+		return false
+	}
+	return m.creds.Has(provider, account)
+}
+
+// DeleteAcmeCredentials removes one stored credential for a provider account.
+func (m *Manager) DeleteAcmeCredentials(provider, account string) error {
 	if m.creds == nil {
 		return os.ErrNotExist
 	}
-	return m.creds.Delete(provider)
+	return m.creds.Delete(provider, account)
 }
 
 // CertName is re-exported so the admin layer derives the cert-name consistently.

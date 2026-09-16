@@ -57,6 +57,26 @@ func componentSchemas() map[string]any {
 		}), "domain"),
 		"SiteList": obj(map[string]any{"sites": arr(ref("Site"))}),
 
+		"AppPHP": obj(map[string]any{
+			"routing":       strEnum("", "front-controller", "static-first"),
+			"index":         str(),
+			"persistent":    arr(str()),
+			"expose":        arr(str()),
+			"max_body_size": str(),
+			"timeout":       str(),
+			"memory_limit":  str(),
+			"max_children":  integer(),
+		}),
+		"App": obj(withWebOptions(map[string]any{
+			"domain":  str(),
+			"enabled": boolean(),
+			"runtime": strEnum("php"),
+			"source":  map[string]any{"type": "object"},
+			"exclude": arr(str()),
+			"php":     ref("AppPHP"),
+		}), "domain", "runtime"),
+		"AppList": obj(map[string]any{"apps": arr(ref("App"))}),
+
 		"UpstreamServer": obj(map[string]any{
 			"address":      str(),
 			"weight":       integer(),

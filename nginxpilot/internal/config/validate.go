@@ -65,6 +65,23 @@ func Validate(cfg *Config) error {
 		seen[site.Domain] = site.File
 	}
 
+	if err := validatePHP(cfg); err != nil {
+		return err
+	}
+	for i := range cfg.Apps {
+		app := &cfg.Apps[i]
+		if err := validateApp(app, cfg.PHP); err != nil {
+			return fmt.Errorf("app %q (%s): %w", app.Domain, app.File, err)
+		}
+		if err := validateWebOptions(&app.WebOptions); err != nil {
+			return fmt.Errorf("app %q (%s): %w", app.Domain, app.File, err)
+		}
+		if prev, dup := seen[app.Domain]; dup {
+			return fmt.Errorf("duplicate domain %q declared in %s and %s", app.Domain, prev, app.File)
+		}
+		seen[app.Domain] = app.File
+	}
+
 	upstreams, err := validateUpstreams(cfg)
 	if err != nil {
 		return err
@@ -556,22 +573,30 @@ func validateSite(site *Site) error {
 		}
 	}
 
-	if site.Source.Subdir != "" {
-		sub := path.Clean(site.Source.Subdir)
+	return validateSource(&site.Source)
+}
+
+// validateSource is shared by sites and apps. Both are fetched by the same
+// pipeline, so the source rules are one set — an app that skipped them would be
+// accepted at config time and fail at the first fetch, which is the worst place
+// to learn that an auth method is not supported for the URL scheme.
+func validateSource(src *Source) error {
+	if src.Subdir != "" {
+		sub := path.Clean(src.Subdir)
 		if path.IsAbs(sub) || sub == ".." || strings.HasPrefix(sub, "../") {
-			return fmt.Errorf("subdir %q must be relative and must not contain ..", site.Source.Subdir)
+			return fmt.Errorf("subdir %q must be relative and must not contain ..", src.Subdir)
 		}
 	}
 
-	switch site.Source.Type {
+	switch src.Type {
 	case SourceGit:
-		return validateGitSource(&site.Source)
+		return validateGitSource(src)
 	case SourceHTTPZip:
-		return validateHTTPZipSource(&site.Source)
+		return validateHTTPZipSource(src)
 	case "":
 		return fmt.Errorf("source.type is required (git | http-zip)")
 	default:
-		return fmt.Errorf("source.type %q: must be git or http-zip", site.Source.Type)
+		return fmt.Errorf("source.type %q: must be git or http-zip", src.Type)
 	}
 }
 

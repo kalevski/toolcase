@@ -23,6 +23,7 @@ type issueRequest struct {
 	CertName string   `json:"cert_name"`
 	Email    string   `json:"email"`
 	Provider string   `json:"provider"`
+	Account  string   `json:"account"`
 	Staging  bool     `json:"staging"`
 }
 
@@ -57,6 +58,15 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid provider (must match [a-z0-9-]+)", http.StatusBadRequest)
 		return
 	}
+	req.Account = credstore.NormalizeAccount(req.Account)
+	if !credstore.ValidAccount(req.Account) {
+		http.Error(w, "invalid account (must match [a-z0-9-]+)", http.StatusBadRequest)
+		return
+	}
+	if req.Provider != "" && !s.mgr.HasAcmeCredentials(req.Provider, req.Account) {
+		http.Error(w, fmt.Sprintf("no stored credentials for provider %q account %q", req.Provider, req.Account), http.StatusBadRequest)
+		return
+	}
 
 	challenge := s.mgr.Config().Acme.ChallengeOrDefault()
 	domains := make([]string, 0, len(req.Domains))
@@ -82,7 +92,7 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 	// request on it. Register a job, run the issuance in a detached goroutine, and
 	// return 202 + the job id immediately; the caller polls GET /certs/jobs/{id}.
 	job := s.jobs.create(name, domains, req.Staging)
-	email, provider, staging := req.Email, req.Provider, req.Staging
+	email, provider, account, staging := req.Email, req.Provider, req.Account, req.Staging
 	go func() {
 		s.jobs.update(job.ID, func(j *certJob) { j.State = jobRunning })
 		// Detached from the request context (the HTTP response has already
@@ -90,7 +100,7 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 		// timeout the synchronous path used.
 		ctx, cancel := context.WithTimeout(context.Background(), s.issueTimeout())
 		defer cancel()
-		if err := s.mgr.IssueCert(ctx, name, domains, email, provider, staging); err != nil {
+		if err := s.mgr.IssueCert(ctx, name, domains, email, provider, account, staging); err != nil {
 			s.log.Warn("cert issue failed", "cert_name", name, "job", job.ID, "error", err)
 			s.jobs.update(job.ID, func(j *certJob) {
 				j.State = jobFailed
@@ -231,11 +241,20 @@ func (s *Server) handleDeleteCert(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("deleted\n"))
 }
 
-// handleSetCreds stores provider credentials (PUT /acme/credentials/{provider}).
+// handleSetCreds stores one provider account's credentials
+// (PUT /acme/credentials/{provider} for the default account, or
+// PUT /acme/credentials/{provider}/{account} for a named one — several accounts
+// may exist for the same provider, so a control plane can give each of its own
+// users a separate credential).
 func (s *Server) handleSetCreds(w http.ResponseWriter, r *http.Request) {
 	provider := r.PathValue("provider")
 	if !credstore.ValidProvider(provider) {
 		http.Error(w, "invalid provider (must match [a-z0-9-]+)", http.StatusBadRequest)
+		return
+	}
+	account := credstore.NormalizeAccount(r.PathValue("account"))
+	if !credstore.ValidAccount(account) {
+		http.Error(w, "invalid account (must match [a-z0-9-]+)", http.StatusBadRequest)
 		return
 	}
 	body, ok := readFragmentBody(w, r)
@@ -248,8 +267,8 @@ func (s *Server) handleSetCreds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existed := s.credsExist(provider)
-	if err := s.mgr.SetAcmeCredentials(provider, req); err != nil {
+	existed := s.credsExist(provider, account)
+	if err := s.mgr.SetAcmeCredentials(provider, account, req); err != nil {
 		http.Error(w, fmt.Sprintf("store credentials failed: %v", err), http.StatusBadRequest)
 		return
 	}
@@ -259,6 +278,7 @@ func (s *Server) handleSetCreds(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]any{
 		"status":    map[bool]string{true: "replaced", false: "created"}[existed],
 		"provider":  provider,
+		"account":   account,
 		"mechanism": credstore.Mechanism(provider),
 	}, s)
 }
@@ -276,9 +296,14 @@ func (s *Server) handleDeleteCreds(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid provider", http.StatusBadRequest)
 		return
 	}
-	if err := s.mgr.DeleteAcmeCredentials(provider); err != nil {
+	account := credstore.NormalizeAccount(r.PathValue("account"))
+	if !credstore.ValidAccount(account) {
+		http.Error(w, "invalid account", http.StatusBadRequest)
+		return
+	}
+	if err := s.mgr.DeleteAcmeCredentials(provider, account); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			http.Error(w, "no credentials for provider", http.StatusNotFound)
+			http.Error(w, "no credentials for that provider account", http.StatusNotFound)
 			return
 		}
 		http.Error(w, fmt.Sprintf("delete failed: %v", err), http.StatusInternalServerError)
@@ -288,9 +313,9 @@ func (s *Server) handleDeleteCreds(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("deleted\n"))
 }
 
-func (s *Server) credsExist(provider string) bool {
+func (s *Server) credsExist(provider, account string) bool {
 	for _, c := range s.mgr.ListAcmeCredentials() {
-		if c.Provider == provider {
+		if c.Provider == provider && c.Account == account {
 			return true
 		}
 	}

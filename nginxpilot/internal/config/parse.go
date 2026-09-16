@@ -26,6 +26,7 @@ const DefaultPath = "/etc/nginxpilot/config.yml"
 // test (TestFragmentKindsCoverEveryList) enforces the FragmentKinds half.
 type Fragment struct {
 	Sites           []Site           `yaml:"sites"`
+	Apps            []App            `yaml:"apps"`
 	Upstreams       []Upstream       `yaml:"upstreams"`
 	Proxies         []Proxy          `yaml:"proxies"`
 	Redirects       []Redirect       `yaml:"redirects"`
@@ -39,7 +40,7 @@ type Fragment struct {
 // FragmentKinds are the yaml list keys a fragment may declare, in Fragment
 // field order. Used for the ParseFragment error text and asserted complete by
 // a reflection test so the message can never go stale again.
-var FragmentKinds = []string{"sites", "upstreams", "proxies", "redirects", "dead_hosts", "access_lists", "stream_upstreams", "streams", "log_destinations"}
+var FragmentKinds = []string{"sites", "apps", "upstreams", "proxies", "redirects", "dead_hosts", "access_lists", "stream_upstreams", "streams", "log_destinations"}
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
 // include glob matching zero files).
@@ -175,6 +176,7 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 				return err
 			}
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
+			cfg.Apps = append(cfg.Apps, frag.Apps...)
 			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
 			cfg.Proxies = append(cfg.Proxies, frag.Proxies...)
 			cfg.Redirects = append(cfg.Redirects, frag.Redirects...)
@@ -200,6 +202,9 @@ func ParseFragment(raw []byte, file string) (*Fragment, error) {
 	}
 	for i := range frag.Sites {
 		frag.Sites[i].File = file
+	}
+	for i := range frag.Apps {
+		frag.Apps[i].File = file
 	}
 	for i := range frag.Upstreams {
 		frag.Upstreams[i].File = file
