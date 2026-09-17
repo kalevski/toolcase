@@ -148,6 +148,19 @@ tc-module-access {
     padding: 0.625rem 0.75rem;
 }
 
+// A hint glyph is a control, and on a coarse pointer its 44px target reaches
+// roughly 13px past the chip it belongs to. The grid answers with more room
+// rather than the glyph with less target: explained chips are spaced chips.
+.module-access__group-chips--hinted {
+    gap: 0.5rem 0.75rem;
+}
+
+.module-access__perm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
 .module-access__perm-chip {
     font-family: var(--tc-font-mono);
     font-size: 11.5px;

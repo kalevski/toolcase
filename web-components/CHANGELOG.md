@@ -4,6 +4,51 @@ Entries start at `5.0.19`. Earlier versions are not covered here.
 
 ## Unreleased
 
+### Fixed — `tc-hint-tip` opened two tips per click, and nothing closed them
+
+Two defects that only showed up together, on a screen carrying a hundred glyphs.
+
+**Two plugins per glyph.** `connectedCallback` patched and then attached, and
+patching sets the host class — an observed attribute, so it re-entered
+`attributeChangedCallback`, which attached as well. Every tip therefore had two
+Bootstrap tooltip plugins bound to one button: a click fired `show` twice, stacked
+two tip nodes in `<body>`, and a second click closed only one of them. Beside a
+single heading this reads as a slightly bold shadow, which is why it survived.
+`_attach()` is now idempotent — it detaches first.
+
+**No way to put one away.** The trigger is `click`, and a click-triggered tip that
+closes only on its own trigger means finding a 13px glyph again to dismiss a
+sentence. A tip now closes when another opens, when a pointer goes down anywhere
+outside it, and on Escape, which returns focus to its own button. The open tip is
+found by asking the document rather than kept in a module variable, so there is no
+registry to keep in step with elements appearing and disappearing.
+
+### Added — `tc-module-access` takes `permissionHints`
+
+A chip's label says which permission it is and never what granting it does, and the
+difference between `app.write` and `app.container.write` is the whole decision the
+person on that screen is making. Until now the only place that sentence could live
+was a manual they had to leave the page to read.
+
+`permissionHints` is a `Record<string, string>` keyed by the full permission key,
+the same shape as `permissionLabels`. A key that has one grows a `tc-hint-tip` beside
+its chip; a key that has none renders exactly as before, so the property is additive
+for every existing consumer.
+
+**`tc-hint-tip` rather than wrapping the chip in `tc-tooltip`,** for two reasons that
+are the same reason. Its trigger is `click`, so the sentence is reachable on a phone,
+where a hover tip is a sentence a touch reader can never read. And it is a separate
+control sitting beside the chip rather than on it, so tapping to read what a grant
+does cannot toggle the grant you were only asking about — which is exactly the
+accident a tooltip *on* a toggle invites.
+
+The one visible cost: a hint glyph is a control, so on a coarse pointer it carries the
+44px target the styleguide floors every control at, and that target reaches about 13px
+past the chip it belongs to. `.module-access__group-chips--hinted` answers with a wider
+grid gap rather than shrinking the target — explained chips are spaced chips. The
+modifier lands only when at least one hint is supplied, so an unhinted grid keeps its
+old density to the pixel.
+
 ### Fixed — a selected `tc-extended-select` option was white-on-white off the accent fill
 
 `--selected` does not imply the accent fill. The base drops it in two places — a

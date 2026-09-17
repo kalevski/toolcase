@@ -48,6 +48,7 @@ export class ModuleAccess extends HTMLElement {
     private _limitableResources: ModuleAccessLimitableResource[] = []
     private _permissionGroupLabels: Record<string, string> = {}
     private _permissionLabels: Record<string, string> = {}
+    private _permissionHints: Record<string, string> = {}
 
     onChange: ((draft: ModuleAccessRoleDraft) => void) | null = null
 
@@ -131,6 +132,30 @@ export class ModuleAccess extends HTMLElement {
     }
     set permissionLabels(v: Record<string, string>) {
         this._permissionLabels = v && typeof v === 'object' ? v : {}
+        if (this._initialised) this.render()
+    }
+
+    /**
+     * Optional per-permission explanation, keyed by the FULL permission key.
+     * A key that has one grows a `tc-hint-tip` beside its chip; a key that has
+     * none renders exactly as before.
+     *
+     * A chip's label says which permission it is, never what granting it does,
+     * and the difference between `app.write` and `app.container.write` is the
+     * whole decision the person on this screen is making. The sentence belongs
+     * one tap from the chip rather than in a manual they would have to leave
+     * the page to read.
+     *
+     * `tc-hint-tip` rather than `tc-tooltip` on the chip itself, for two
+     * reasons: its trigger is `click`, so the sentence is reachable on a phone
+     * where there is no hover, and it is a separate control, so tapping to read
+     * cannot toggle the grant you were only asking about.
+     */
+    get permissionHints(): Record<string, string> {
+        return this._permissionHints
+    }
+    set permissionHints(v: Record<string, string>) {
+        this._permissionHints = v && typeof v === 'object' ? v : {}
         if (this._initialised) this.render()
     }
 
@@ -252,6 +277,9 @@ export class ModuleAccess extends HTMLElement {
 
     private _renderGroups(selected: Set<string>): string {
         const groups = this._permissionGroups()
+        const hinted = Object.keys(this._permissionHints).length > 0
+            ? ' module-access__group-chips--hinted'
+            : ''
 
         const html = groups
             .map(({ group, keys }) => {
@@ -260,7 +288,17 @@ export class ModuleAccess extends HTMLElement {
                     .map((k) => {
                         const label = this._permissionLabels[k] ?? (k.slice(group.length + 1) || k)
                         const isSelected = selected.has(k) ? ' selected' : ''
-                        return `<tc-chip class="module-access__perm-chip" data-perm-key="${esc(k)}"${isSelected}>${esc(label)}</tc-chip>`
+                        const chip = `<tc-chip class="module-access__perm-chip" data-perm-key="${esc(k)}"${isSelected}>${esc(label)}</tc-chip>`
+
+                        const hint = this._permissionHints[k]
+                        if (!hint) return chip
+
+                        return (
+                            `<span class="module-access__perm">` +
+                            chip +
+                            `<tc-hint-tip class="module-access__perm-hint" text="${esc(hint)}" placement="auto" label="${esc(label)} — what this grants"></tc-hint-tip>` +
+                            `</span>`
+                        )
                     })
                     .join('')
 
@@ -271,7 +309,7 @@ export class ModuleAccess extends HTMLElement {
                     `<span class="module-access__group-count">${on}/${keys.length}</span>` +
                     `<button type="button" class="module-access__group-bulk">${on === keys.length ? 'None' : 'All'}</button>` +
                     `</div>` +
-                    `<div class="module-access__group-chips">${chips}</div>` +
+                    `<div class="module-access__group-chips${hinted}">${chips}</div>` +
                     `</div>`
                 )
             })

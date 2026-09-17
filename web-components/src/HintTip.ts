@@ -29,6 +29,22 @@ import { msg } from './messages'
 
 const TAG_NAME = 'tc-hint-tip'
 
+// ONE TIP AT A TIME, AND A TIP YOU CAN PUT AWAY.
+//
+// A click-triggered tip that closes only on its own trigger is fine beside one
+// heading and a litter on a screen carrying a hundred of them — an access
+// editor's permission grid is the case that made it obvious: every glyph opened
+// a tip, none of them went away, and reading a second one meant finding the 13px
+// glyph that opened the first. So a tip closes when another opens, when a pointer
+// goes down anywhere else, and on Escape. That is what a click-triggered overlay
+// is expected to do; nothing about it is specific to the screen that prompted it.
+//
+// The open one is found by asking the document rather than kept in a module
+// variable: `hide()` on a tip that is not showing is already a no-op, so there is
+// no registry to keep in step with elements appearing and disappearing.
+
+const TIP_CLASS = 'tooltip'
+
 export type HintTipPlacement = 'auto' | 'top' | 'right' | 'bottom' | 'left'
 const PLACEMENTS: HintTipPlacement[] = ['auto', 'top', 'right', 'bottom', 'left']
 
@@ -118,6 +134,13 @@ export class HintTip extends HTMLElement {
     }
 
     private _attach(): void {
+        // Idempotent on purpose. `connectedCallback` patches before it attaches,
+        // and patching sets the host class — an observed attribute, so it re-enters
+        // `attributeChangedCallback`, which attaches too. Without this the first
+        // connect left TWO tooltip plugins bound to one button and every click
+        // opened two stacked tips, the second of which nothing then closed.
+        this._detach()
+
         const text = this.text
         if (!text) return
         const button = this.querySelector<HTMLButtonElement>(':scope > .tc-hint-tip__button')
@@ -127,11 +150,51 @@ export class HintTip extends HTMLElement {
             placement: this.placement,
             trigger: 'click',
         })
+        button.addEventListener('shown.bs.tooltip', this._onShown)
+        button.addEventListener('hidden.bs.tooltip', this._onHidden)
     }
 
     private _detach(): void {
+        const button = this.querySelector<HTMLButtonElement>(':scope > .tc-hint-tip__button')
+        button?.removeEventListener('shown.bs.tooltip', this._onShown)
+        button?.removeEventListener('hidden.bs.tooltip', this._onHidden)
+        // Also covers the element being removed while its tip is open: the tip is
+        // portaled to <body>, so nothing else would take it down with the trigger.
+        this._release()
         this._tip?.dispose()
         this._tip = null
+    }
+
+    private _onShown = (): void => {
+        document.querySelectorAll<HintTip>(TAG_NAME).forEach((other) => {
+            if (other !== this) other.hide()
+        })
+        document.addEventListener('pointerdown', this._onOutsidePointerDown, true)
+        document.addEventListener('keydown', this._onKeyDown, true)
+    }
+
+    private _onHidden = (): void => {
+        this._release()
+    }
+
+    private _release(): void {
+        document.removeEventListener('pointerdown', this._onOutsidePointerDown, true)
+        document.removeEventListener('keydown', this._onKeyDown, true)
+    }
+
+    private _onOutsidePointerDown = (e: Event): void => {
+        const target = e.target as Node | null
+        if (!target) return
+        // The button toggles itself, and the tip's own text stays selectable.
+        if (this.contains(target)) return
+        if (target instanceof Element && target.closest(`.${TIP_CLASS}`)) return
+        this.hide()
+    }
+
+    private _onKeyDown = (e: KeyboardEvent): void => {
+        if (e.key !== 'Escape') return
+        this.hide()
+        this.querySelector<HTMLButtonElement>(':scope > .tc-hint-tip__button')?.focus()
     }
 }
 

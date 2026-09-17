@@ -27,6 +27,27 @@ const PERMISSIONS: string[] = [
     'moderation.ban',
 ]
 
+const PERMISSION_HINTS: Record<string, string> = {
+    'admin.settings.read': 'See the workspace settings screen. Read-only — every switch on it is disabled.',
+    'admin.settings.write': 'Change workspace-wide settings, including the ones that switch whole features off.',
+    'admin.access.read': 'See the roles, what each one grants, and which accounts hold it.',
+    'admin.access.write': 'Create roles and change what they grant. A role can never be given more than you hold.',
+    'admin.billing.read': 'See plans, subscriptions and invoices. Does not allow changing any of them.',
+    'project.create': 'Start a new project, up to the quota above. Does not grant editing anyone else\u2019s.',
+    'project.read': 'Open projects shared with this account and read their tasks.',
+    'project.update': 'Rename a project and change its settings. Its tasks are a separate grant.',
+    'project.delete': 'Delete a project and everything filed under it. There is no undo.',
+    'project.archive': 'Close a project without deleting it — it stays readable and stops accepting work.',
+    'task.create': 'Add a task to any project this account can read.',
+    'task.read': 'Read tasks. Without it a project opens with an empty board.',
+    'task.update': 'Edit a task\u2019s title, description and state.',
+    'task.delete': 'Delete a task. The project\u2019s history keeps the record.',
+    'task.assign': 'Assign a task to somebody else, or take one off them.',
+    'moderation.review': 'Open the report queue and resolve what is in it.',
+    'moderation.suspend': 'Suspend an account for a fixed period. They are told why.',
+    'moderation.ban': 'Remove an account permanently. Only a ban cannot be lifted from this screen.',
+}
+
 const LIMITABLE_RESOURCES: ModuleAccessLimitableResource[] = [
     { key: 'projects', label: 'Projects' },
     { key: 'tasks', label: 'Tasks per project' },
@@ -72,7 +93,12 @@ const ModuleAccessDemo: React.FC = () => {
     }
 
     const accessRef = useTc<HTMLElement>(
-        { roleData: role, permissions: PERMISSIONS, limitableResources: LIMITABLE_RESOURCES },
+        {
+            roleData: role,
+            permissions: PERMISSIONS,
+            limitableResources: LIMITABLE_RESOURCES,
+            permissionHints: PERMISSION_HINTS,
+        },
         {
             'tc-change': (e: Event) => {
                 const draft = (e as CustomEvent).detail.role as ModuleAccessRoleDraft
@@ -93,7 +119,7 @@ const ModuleAccessDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Module Access"
-                            description="A single role's live permission editor — name, quota limits, and the permission catalog grouped by domain prefix into toggle-chip cards. No role picker, no footer: every edit fires tc-change immediately with the full draft, and the host owns persistence and any surrounding navigation entirely."
+                            description="A single role's live permission editor — name, quota limits, and the permission catalog grouped by domain prefix into toggle-chip cards. Each chip carries the sentence that says what granting it does, one tap away. No role picker, no footer: every edit fires tc-change immediately with the full draft, and the host owns persistence and any surrounding navigation entirely."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

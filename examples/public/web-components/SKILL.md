@@ -9910,6 +9910,7 @@ A single role's live permission editor: name, quota limits, and the permission c
 | `limitableResources`    | `ModuleAccessLimitableResource[]` | `{ key, label }[]` — one numeric quota input per entry.                                                                                                                                                                      |
 | `permissionGroupLabels` | `Record<string, string>`          | Optional override for a domain's display label (defaults to the capitalised prefix, e.g. `admin` → `Admin`).                                                                                                                 |
 | `permissionLabels`      | `Record<string, string>`          | Optional per-chip label, keyed by the FULL permission key. Without it a chip is labelled with the raw remainder (`private_repo`, `admin.read`) — an identifier, on a screen a person administers. Anything absent keeps the remainder.                                                                                                                 |
+| `permissionHints`       | `Record<string, string>`          | Optional per-permission explanation, keyed by the FULL permission key. A key that has one grows a `tc-hint-tip` beside its chip — a 13px glyph whose trigger is `click`, so the sentence is reachable on a phone and reading it cannot toggle the grant. Keys without one render exactly as before.                                                                                                                 |
 
 **Events**
 
@@ -9930,6 +9931,10 @@ A single role's live permission editor: name, quota limits, and the permission c
         'project.read',
     ]
     el.limitableResources = [{ key: 'projects', label: 'Projects' }]
+    el.permissionHints = {
+        'project.create': 'Start a new project. Does not grant editing anyone else\u2019s.',
+        'admin.settings.write': 'Change workspace-wide settings, including the ones that switch features off.',
+    }
     el.roleData = {
         id: 'member',
         name: 'Member',
@@ -13498,6 +13503,11 @@ A sentence a heading can carry without spending a line on it. `text`,
 This one _is_ the trigger and its trigger is `click` — there is no hover on a
 phone, so a hover tip beside a heading is a sentence a touch reader can never
 read.
+
+**One at a time, and dismissable.** Opening a tip closes any other open one, and
+a tip closes on a pointer down anywhere else or on Escape. A click-triggered tip
+that closed only on its own trigger was fine beside a single heading and became a
+litter on a screen carrying a hundred of them.
 
 #### tc-filter-trigger
 

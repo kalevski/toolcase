@@ -3831,6 +3831,8 @@ export interface ToolcaseIntrinsicElements {
             'owner-role-id'?: string | number
             limitableResources?: __ModuleAccess$ModuleAccessLimitableResource[]
             permissionGroupLabels?: Record<string, string>
+            permissionHints?: Record<string, string>
+            permissionLabels?: Record<string, string>
             permissions?: string[]
             roleData?: __ModuleAccess$ModuleAccessRole | null
             'ontc-change'?: (e: CustomEvent<{ role: any }>) => void
