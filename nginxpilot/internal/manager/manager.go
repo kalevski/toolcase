@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/acme"
@@ -52,11 +53,15 @@ type Manager struct {
 	lastApply nginxctl.ApplyResult
 	certIndex *certs.Index
 
-	// ACME / certbot issuance (acme is nil unless acme.enabled). creds is the
-	// runtime credentials store, always present so credentials can be saved
-	// before issuance is turned on. acmeMu serializes certbot runs + manual
-	// cert writes (they share the cert dir and certbot locks /etc/letsencrypt).
-	acme   *acme.Client
+	// ACME / certbot issuance (the pointer is nil unless acme.enabled). creds is
+	// the runtime credentials store, always present so credentials can be saved
+	// before issuance is turned on. acmeMu serializes certbot RUNS + manual cert
+	// writes (they share the cert dir and certbot locks /etc/letsencrypt) and is
+	// therefore held for minutes on DNS-01. The client pointer is atomic rather
+	// than guarded by that mutex: Reload swaps it on every config write, and
+	// waiting for the run lock there froze the daemon's whole write surface for
+	// the length of an issuance.
+	acme   atomic.Pointer[acme.Client]
 	creds  *credstore.Store
 	acmeMu sync.Mutex
 
@@ -158,7 +163,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 	m.creds = credstore.New(filepath.Join(cfg.DataDir, "acme", "credentials"))
 	m.gitCreds = gitcreds.New(filepath.Join(cfg.DataDir, "git-credentials"))
 	if cfg.Acme.Enabled {
-		m.acme = acme.New(cfg.Acme, m.creds, cfg.DataDir, log)
+		m.acme.Store(acme.New(cfg.Acme, m.creds, cfg.DataDir, log))
 		warnAcmeMismatches(cfg, log)
 	}
 	return m
@@ -463,22 +468,23 @@ func (m *Manager) Config() *config.Config {
 // The caller guarantees newCfg passed validation — a config that fails
 // validation must never reach here (reload rejected wholesale).
 func (m *Manager) Reload(newCfg *config.Config) {
-	// Rebuild the ACME client from the new config FIRST, under acmeMu and before
-	// taking m.mu. New() builds m.acme once at startup, so without this a reload
-	// that flips acme.enabled (or changes the provider / config_dir / challenge)
+	// Rebuild the ACME client from the new config FIRST, before taking m.mu.
+	// New() builds the client once at startup, so without this a reload that
+	// flips acme.enabled (or changes the provider / config_dir / challenge)
 	// never takes effect — the issue/renew endpoints would keep returning 501
-	// (or run with stale settings) until a full restart. Done outside m.mu to
-	// preserve the acmeMu→m.mu lock order the issue/renew paths use (they hold
-	// acmeMu while calling m.Config()/applyManaged, which take m.mu). m.creds is
-	// path-stable (DataDir/acme/credentials) and always present, so it is reused.
-	m.acmeMu.Lock()
+	// (or run with stale settings) until a full restart. The swap is an atomic
+	// store and takes no lock: every fragment write reloads, and taking acmeMu
+	// here made each one wait out any certbot run in flight (up to RenewTimeout,
+	// three minutes on DNS-01), which the control plane sees as the daemon being
+	// unreachable. A run that is already under way keeps the client it loaded;
+	// the next one loads this one. m.creds is path-stable
+	// (DataDir/acme/credentials) and always present, so it is reused.
 	if newCfg.Acme.Enabled {
-		m.acme = acme.New(newCfg.Acme, m.creds, newCfg.DataDir, m.log)
+		m.acme.Store(acme.New(newCfg.Acme, m.creds, newCfg.DataDir, m.log))
 		warnAcmeMismatches(newCfg, m.log)
 	} else {
-		m.acme = nil
+		m.acme.Store(nil)
 	}
-	m.acmeMu.Unlock()
 
 	m.mu.Lock()
 	defer m.mu.Unlock()

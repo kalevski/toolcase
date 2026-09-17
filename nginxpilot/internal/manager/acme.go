@@ -22,12 +22,12 @@ var (
 	ErrNoCertDir    = errors.New("no cert directory configured (tls.cert_dir)")
 )
 
-// AcmeEnabled reports whether certbot issuance is configured. Guarded by acmeMu
-// because Reload may swap m.acme (enable/disable) concurrently.
+// AcmeEnabled reports whether certbot issuance is configured. It reads the
+// atomic client pointer rather than taking acmeMu, so the admin handlers that
+// call it as a precondition answer immediately instead of queueing behind a
+// certbot run that may have minutes left.
 func (m *Manager) AcmeEnabled() bool {
-	m.acmeMu.Lock()
-	defer m.acmeMu.Unlock()
-	return m.acme != nil
+	return m.acme.Load() != nil
 }
 
 // IssueCert issues one certificate (>=1 domains; wildcard only with dns), then
@@ -37,11 +37,12 @@ func (m *Manager) AcmeEnabled() bool {
 func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, email, provider, account string, staging bool) error {
 	m.acmeMu.Lock()
 	defer m.acmeMu.Unlock()
-	if m.acme == nil {
+	client := m.acme.Load()
+	if client == nil {
 		return ErrAcmeDisabled
 	}
 	opts := acme.IssueOptions{Email: email, Provider: provider, Account: account, Staging: staging}
-	if _, err := m.acme.Issue(ctx, name, domains, opts); err != nil {
+	if _, err := client.Issue(ctx, name, domains, opts); err != nil {
 		return err
 	}
 	m.applyManaged(ctx)
@@ -52,10 +53,11 @@ func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, 
 func (m *Manager) RenewCert(ctx context.Context, name string) error {
 	m.acmeMu.Lock()
 	defer m.acmeMu.Unlock()
-	if m.acme == nil {
+	client := m.acme.Load()
+	if client == nil {
 		return ErrAcmeDisabled
 	}
-	if _, err := m.acme.Renew(ctx, name); err != nil {
+	if _, err := client.Renew(ctx, name); err != nil {
 		return err
 	}
 	m.applyManaged(ctx)
@@ -66,10 +68,11 @@ func (m *Manager) RenewCert(ctx context.Context, name string) error {
 func (m *Manager) RenewDue(ctx context.Context) (string, error) {
 	m.acmeMu.Lock()
 	defer m.acmeMu.Unlock()
-	if m.acme == nil {
+	client := m.acme.Load()
+	if client == nil {
 		return "", ErrAcmeDisabled
 	}
-	out, err := m.acme.RenewDue(ctx)
+	out, err := client.RenewDue(ctx)
 	if err != nil {
 		return out, err
 	}
@@ -86,10 +89,10 @@ func (m *Manager) DeleteCert(ctx context.Context, domain string) error {
 	defer m.acmeMu.Unlock()
 
 	cfg := m.Config()
-	if m.acme != nil {
+	if client := m.acme.Load(); client != nil {
 		liveDir := filepath.Join(cfg.Acme.ConfigDirOrDefault(), "live", domain)
 		if isDir(liveDir) {
-			if _, err := m.acme.Delete(ctx, domain); err != nil {
+			if _, err := client.Delete(ctx, domain); err != nil {
 				return err
 			}
 			m.applyManaged(ctx)

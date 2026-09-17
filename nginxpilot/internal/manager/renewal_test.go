@@ -103,8 +103,8 @@ func renewalTestManager(t *testing.T, renewErr map[string]bool) (*Manager, *[]ce
 		log:     logger,
 		cfg:     cfg,
 		certDir: live,
-		acme:    acme.NewWithRun(cfg.Acme, nil, dir, logger, run),
 	}
+	m.acme.Store(acme.NewWithRun(cfg.Acme, nil, dir, logger, run))
 	return m, calls
 }
 

@@ -398,6 +398,8 @@ acme:
 
 Per-cert state (`renew_managed`, `last_renew_time`, `last_renew_error`, `expires_in_seconds`) shows in `GET /certs`; the scheduler summary in `GET /status` under `certs_renewal`. `POST /certs/renew` / `POST /certs/{domain}/renew` remain the manual force paths.
 
+**Issuance never blocks the rest of the daemon.** `POST /certs` registers a job and returns `202` with its id (poll `GET /certs/jobs/{id}`), and certbot then runs in the background. One lock serializes certbot invocations — they share the cert dir and certbot locks its own config dir — and that lock is held for the whole run, up to `propagation_seconds + 120s` on DNS-01. Nothing else waits on it: the client handle is swapped atomically, so `POST /reload`, SIGHUP and every fragment write (`/sites`, `/proxies`, `/upstreams`, …) keep answering while a certificate is being issued, and so does every read. The renewal sweep takes the lock per certificate rather than per batch, so a manual issue/renew waits for at most the one cert in flight.
+
 ### Pre-flight target checks
 
 Backend targets are checked in three tiers: strict lexical validation always runs (the injection guard above); DNS resolution and an optional TCP reachability probe run on admin API writes:

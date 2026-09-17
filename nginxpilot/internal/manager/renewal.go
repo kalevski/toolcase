@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"time"
 
@@ -125,10 +126,15 @@ func (m *Manager) runRenewalLoop(ctx context.Context) {
 }
 
 // renewDueOnce loads the cert index, splits due certs into certbot-managed vs
-// manual, renews the managed ones sequentially under acmeMu, and runs ONE
-// applyManaged after the batch iff at least one renewal succeeded (RenewCert's
-// one-cert-one-reload behavior is right for the manual API path, wrong for a
-// batch). A failing cert is logged and recorded but never starves the rest.
+// manual, renews the managed ones sequentially, and runs ONE applyManaged after
+// the batch iff at least one renewal succeeded (RenewCert's one-cert-one-reload
+// behavior is right for the manual API path, wrong for a batch). A failing cert
+// is logged and recorded but never starves the rest.
+//
+// acmeMu is taken and released around EACH certbot run rather than held across
+// the batch: the lock still guarantees one certbot at a time, but an operator's
+// own issue/renew now only waits for the cert being renewed instead of for
+// every due cert in the sweep — N x RenewTimeout, unattended and on a timer.
 func (m *Manager) renewDueOnce(ctx context.Context, renewBefore time.Duration) {
 	dir := m.CertDir()
 	idx, err := certs.Load(dir)
@@ -144,11 +150,6 @@ func (m *Manager) renewDueOnce(ctx context.Context, renewBefore time.Duration) {
 	liveBase := filepath.Join(m.Config().Acme.ConfigDirOrDefault(), "live")
 
 	anySucceeded := false
-	m.acmeMu.Lock()
-	if m.acme == nil { // disabled by a concurrent Reload
-		m.acmeMu.Unlock()
-		return
-	}
 	for _, c := range due {
 		expiresIn := time.Until(c.NotAfter).Round(time.Minute)
 		if !isDir(filepath.Join(liveBase, c.Domain)) {
@@ -162,9 +163,12 @@ func (m *Manager) renewDueOnce(ctx context.Context, renewBefore time.Duration) {
 		}
 
 		m.log.Info("renewing certificate", "domain", c.Domain, "expires_in", expiresIn.String())
-		runCtx, cancel := context.WithTimeout(ctx, m.RenewTimeout())
-		_, rerr := m.acme.Renew(runCtx, c.Domain)
-		cancel()
+		rerr := m.renewOne(ctx, c.Domain)
+		if errors.Is(rerr, ErrAcmeDisabled) {
+			// Disabled by a concurrent Reload. Stop, but fall through to the
+			// apply below so certs renewed earlier in this batch still land.
+			break
+		}
 		st := RenewalState{LastAttempt: time.Now()}
 		if rerr != nil {
 			st.LastError = rerr.Error()
@@ -176,13 +180,27 @@ func (m *Manager) renewDueOnce(ctx context.Context, renewBefore time.Duration) {
 		}
 		m.recordRenewal(c.Domain, st)
 	}
-	m.acmeMu.Unlock()
 
 	// One reload for the whole batch. Lock order matches the existing
 	// issue/renew endpoints: acmeMu released before applyManaged takes applyMu.
 	if anySucceeded {
 		m.applyManaged(ctx)
 	}
+}
+
+// renewOne runs certbot for one cert under the run lock, bounded by
+// RenewTimeout. ErrAcmeDisabled when a concurrent Reload turned issuance off.
+func (m *Manager) renewOne(ctx context.Context, domain string) error {
+	m.acmeMu.Lock()
+	defer m.acmeMu.Unlock()
+	client := m.acme.Load()
+	if client == nil {
+		return ErrAcmeDisabled
+	}
+	runCtx, cancel := context.WithTimeout(ctx, m.RenewTimeout())
+	defer cancel()
+	_, err := client.Renew(runCtx, domain)
+	return err
 }
 
 // recordRenewal stores a per-cert state, preserving a previous LastSuccess
