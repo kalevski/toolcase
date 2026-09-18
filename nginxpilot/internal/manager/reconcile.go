@@ -132,7 +132,14 @@ func (m *Manager) reconcileOnce(ctx context.Context, policy string) {
 	last := m.lastApply
 	m.applyMu.Unlock()
 
-	if m.reconcileDiff(res, last, policy) {
+	needsApply := m.reconcileDiff(res, last, policy)
+	// Checked separately from the dry-run: a moved backend still RESOLVES, so
+	// nginx -t passes and no resource ever looks unhealthy — the drift is
+	// invisible to everything except the traffic.
+	if m.addressesDrifted(ctx) {
+		needsApply = true
+	}
+	if needsApply {
 		m.applyManaged(ctx) // takes applyMu itself; re-renders from live config
 	}
 }

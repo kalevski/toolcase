@@ -40,6 +40,9 @@ func (m *Manager) applyManaged(ctx context.Context) {
 	} else {
 		m.log.Info("nginx config applied", "resources", len(res.Resources))
 	}
+	// nginx has just re-read the config and cached its own DNS answers; record
+	// the same answers as the baseline the address watch compares against.
+	m.refreshAddrSnapshot(ctx)
 }
 
 // triggerApply schedules an apply off the lock path (Reload holds m.mu, and

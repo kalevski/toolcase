@@ -421,14 +421,16 @@ In managed mode the daemon re-checks the whole config against `nginx -t` (a stag
 ```yaml
 nginx:
   reconcile:
-    enabled: true        # default true in managed mode
-    interval: 1m         # default 1m, min 15s
-    on_failure: warn     # warn (default) | disable
+    enabled: true          # default true in managed mode
+    interval: 1m           # default 1m, min 15s
+    on_failure: warn       # warn (default) | disable
+    watch_addresses: true  # default true — re-resolve backends, apply when one moved
 ```
 
 - A live resource that starts failing the dry-run (e.g. its backend's DNS record was deleted — nginx caches load-time resolution, so traffic still flows) is marked **`at_risk`** in `GET /status` with a `since` timestamp. **Policy `warn` (default) never touches traffic.**
 - **`on_failure: disable` turns latent failures into immediate route removal**: after 2 consecutive failing ticks the loop triggers an apply whose quarantine pass disables exactly the failing resource.
 - **Auto-recovery is always on**: a quarantined resource that passes 2 consecutive ticks is re-applied (strictly safe — it only ever adds a resource back after the staged `nginx -t` proves the config valid). Flap damping in both directions prevents reload ping-pong; steady state costs zero reloads.
+- **`watch_addresses` (default true) catches the backend that moved rather than vanished.** nginx resolves the hostname in a `proxy_pass` or an `upstream` `server` **once, when it loads the config**, and then keeps that address for the life of that config. A backend that keeps its name but changes address — a recreated container is the everyday case — is therefore blackholed: it resolves perfectly from everywhere, `nginx -t` passes, no resource looks unhealthy, and every request still goes to the address that is gone. The loop re-resolves each backend hostname every tick, compares against what it resolved to at the last apply (the moment nginx read the same names), and applies when one moved, which makes nginx look again. A host that stops resolving is *not* drift — that is the `at_risk` case above, and a reload would not help it — and answers are compared as a sorted set, so a rotating round-robin reply is not drift either. Set `watch_addresses: false` where backend addresses are pinned and the lookups are unwanted — and note that `target_checks.dns: off` turns this off too, since both use the same resolver.
 
 ### Per-host toggles
 

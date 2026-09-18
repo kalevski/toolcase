@@ -53,6 +53,14 @@ type Manager struct {
 	lastApply nginxctl.ApplyResult
 	certIndex *certs.Index
 
+	// Backend DNS (annotate.go, addrwatch.go). checker is nil when target DNS
+	// checks are off. addrSnap is what every backend hostname resolved to at
+	// the last apply — that is, what the running nginx itself loaded — and
+	// addrMu guards it.
+	checker  *targetcheck.Checker
+	addrMu   sync.Mutex
+	addrSnap addrSet
+
 	// ACME / certbot issuance (the pointer is nil unless acme.enabled). creds is
 	// the runtime credentials store, always present so credentials can be saved
 	// before issuance is turned on. acmeMu serializes certbot RUNS + manual cert
@@ -146,9 +154,8 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		// Pre-flight DNS annotations: quarantined resources get "host does not
 		// resolve" instead of raw nginx -t stderr. Off when dns checks are off.
 		if cfg.Nginx.TargetChecks.DNSSeverity() != config.TargetDNSOff {
-			m.engine.SetAnnotator(checkerAnnotator{
-				checker: &targetcheck.Checker{Timeout: cfg.Nginx.TargetChecks.TimeoutOrDefault()},
-			})
+			m.checker = &targetcheck.Checker{Timeout: cfg.Nginx.TargetChecks.TimeoutOrDefault()}
+			m.engine.SetAnnotator(checkerAnnotator{checker: m.checker})
 		}
 		dir, err := cfg.Tls.ResolveDir()
 		if err != nil {

@@ -21,6 +21,7 @@ import (
 	"net"
 	"path"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -262,6 +263,25 @@ func (c *Checker) CheckDNS(ctx context.Context, t Target) error {
 		return fmt.Errorf("host %q does not resolve: %v", t.Host, err)
 	}
 	return nil
+}
+
+// ResolveHost returns the target host's addresses, sorted so that two lookups
+// of the same host compare equal however the resolver happened to order them.
+// IP literals and unix sockets resolve to nil (nothing to drift). The error is
+// the same shape CheckDNS reports, so a caller can use either tier.
+func (c *Checker) ResolveHost(ctx context.Context, t Target) ([]string, error) {
+	if t.IsIP || t.IsUnix || t.Host == "" {
+		return nil, nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, c.timeout())
+	defer cancel()
+	addrs, err := c.resolver().LookupHost(ctx, t.Host)
+	if err != nil {
+		return nil, fmt.Errorf("host %q does not resolve: %v", t.Host, err)
+	}
+	out := append([]string(nil), addrs...)
+	sort.Strings(out)
+	return out, nil
 }
 
 // CheckReachable TCP-dials the target with a bounded timeout (unix targets

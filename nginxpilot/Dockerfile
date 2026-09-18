@@ -95,6 +95,14 @@ RUN addgroup -S nginxpilot 2>/dev/null; \
 # a root master from an unprivileged process. setcap grants the low-port bind
 # (80/443); the pidfile moves to a daemon-owned dir; the `user` directive is
 # dropped (meaningless for a non-root master — workers inherit its uid).
+#
+# The temp dirs are created HERE rather than left to nginx. nginx creates a
+# missing one at 0700 owned by whoever creates it, so a dir left over from a
+# root master (uid 101 `nginx`) is unwritable by the uid 100 `nginxpilot`
+# workers — and 0700 means sharing the `nginx` group does not help. nginx then
+# fails to buffer any upstream response larger than proxy_buffers, aborting it
+# mid-body after Content-Length went out: ERR_CONTENT_LENGTH_MISMATCH on every
+# large proxied response. Pre-created, mkdir hits EEXIST and the owner stands.
 RUN printf '# nginxpilot managed http-context config (nested include).\ninclude /etc/nginx/nginxpilot/conf.d/*.conf;\n' \
         > /etc/nginx/conf.d/zz-nginxpilot-managed.conf && \
     printf '\n# nginxpilot managed stream-context (L4 TCP/UDP) config.\nstream {\n    include /etc/nginx/nginxpilot/stream.d/*.conf;\n}\n' \
@@ -102,6 +110,9 @@ RUN printf '# nginxpilot managed http-context config (nested include).\ninclude 
     sed -i -e 's|^pid[[:space:]].*|pid /run/nginxpilot/nginx.pid;|' \
            -e '/^user[[:space:]]/d' /etc/nginx/nginx.conf && \
     setcap cap_net_bind_service=+ep /usr/sbin/nginx && \
+    mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+             /var/cache/nginx/fastcgi_temp /var/cache/nginx/scgi_temp \
+             /var/cache/nginx/uwsgi_temp && \
     chown -R nginxpilot:nginx /var/cache/nginx
 
 # certbot state (account, archive/, live/, renewal/) + the default HTTP-01

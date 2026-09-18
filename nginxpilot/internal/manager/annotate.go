@@ -19,70 +19,21 @@ type checkerAnnotator struct {
 	checker *targetcheck.Checker
 }
 
-// Annotate walks proxy pass targets, upstream server addresses, stream passes
-// and stream-upstream server addresses. IP literals, unix sockets and named
-// upstream references are skipped (upstreams are checked per-server).
+// Annotate walks the backends (walkBackends, shared with the address watch)
+// and notes the ones that do not resolve.
 func (a checkerAnnotator) Annotate(ctx context.Context, cfg *config.Config) map[string]string {
 	out := map[string]string{}
 	if a.checker == nil {
 		return out
 	}
-	note := func(kind, key, msg string) {
+	walkBackends(cfg, func(kind, key string, t targetcheck.Target) {
 		k := nginxctl.AnnotationKey(kind, key)
-		if _, dup := out[k]; !dup {
-			out[k] = msg
-		}
-	}
-	checkPass := func(kind, key, pass string) {
-		if pass == "" {
-			return
-		}
-		t, err := targetcheck.ParsePass(pass)
-		if err != nil {
-			return // Tier 1 already rejected it upstream; nothing to add
-		}
-		if derr := a.checker.CheckDNS(ctx, t); derr != nil {
-			note(kind, key, "backend "+derr.Error()+" (checked before nginx -t)")
-		}
-	}
-	checkAddr := func(kind, key, addr string) {
-		if addr == "" {
-			return
-		}
-		t, err := targetcheck.ParseAddr(addr)
-		if err != nil {
+		if _, dup := out[k]; dup {
 			return
 		}
 		if derr := a.checker.CheckDNS(ctx, t); derr != nil {
-			note(kind, key, "backend "+derr.Error()+" (checked before nginx -t)")
+			out[k] = "backend " + derr.Error() + " (checked before nginx -t)"
 		}
-	}
-
-	for i := range cfg.Proxies {
-		p := &cfg.Proxies[i]
-		if !p.IsEnabled() {
-			continue
-		}
-		checkPass(nginxctl.KindProxy, p.Domain, p.Pass)
-		for _, loc := range p.Locations {
-			checkPass(nginxctl.KindProxy, p.Domain, loc.Pass)
-		}
-	}
-	for i := range cfg.Upstreams {
-		u := &cfg.Upstreams[i]
-		for _, s := range u.Servers {
-			checkAddr(nginxctl.KindUpstream, u.Name, s.Address)
-		}
-	}
-	for i := range cfg.Streams {
-		s := &cfg.Streams[i]
-		checkAddr(nginxctl.KindStream, s.Name, s.Pass)
-	}
-	for i := range cfg.StreamUpstreams {
-		u := &cfg.StreamUpstreams[i]
-		for _, s := range u.Servers {
-			checkAddr(nginxctl.KindStreamUpstream, u.Name, s.Address)
-		}
-	}
+	})
 	return out
 }

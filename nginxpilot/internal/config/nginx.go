@@ -194,11 +194,22 @@ type Reconcile struct {
 	Enabled   *bool    `yaml:"enabled"`    // nil = enabled (managed mode)
 	Interval  Duration `yaml:"interval"`   // default 1m, min 15s
 	OnFailure string   `yaml:"on_failure"` // warn (default) | disable
+	// WatchAddresses re-resolves every backend hostname each tick and applies
+	// when one now points somewhere else (default true). nginx resolves a
+	// hostname in proxy_pass / upstream server ONCE at config load, so a
+	// backend that keeps its name but changes address — a recreated container
+	// is the common case — is silently blackholed until the next reload.
+	WatchAddresses *bool `yaml:"watch_addresses"`
 }
 
 // ReconcileEnabled reports the effective enabled state (default true).
 func (r Reconcile) ReconcileEnabled() bool {
 	return r.Enabled == nil || *r.Enabled
+}
+
+// WatchAddressesEnabled reports the effective watch_addresses (default true).
+func (r Reconcile) WatchAddressesEnabled() bool {
+	return r.WatchAddresses == nil || *r.WatchAddresses
 }
 
 // IntervalOrDefault returns the effective tick interval (1m when unset).

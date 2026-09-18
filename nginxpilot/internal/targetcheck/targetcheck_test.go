@@ -183,3 +183,47 @@ func TestTargetAddrDefaults(t *testing.T) {
 		t.Errorf("plain addr default port: got %q", addrT.Addr())
 	}
 }
+
+// unsortedResolver answers with a deliberately unsorted address list, the way
+// a round-robin DNS server rotates its answer between queries.
+type unsortedResolver struct{ addrs []string }
+
+func (u *unsortedResolver) LookupHost(context.Context, string) ([]string, error) {
+	return u.addrs, nil
+}
+
+func TestResolveHostSorts(t *testing.T) {
+	c := &Checker{Resolver: &unsortedResolver{addrs: []string{"10.0.0.3", "10.0.0.1", "10.0.0.2"}}, Timeout: time.Second}
+	tgt, _ := ParsePass("http://backend:8080")
+
+	got, err := c.ResolveHost(context.Background(), tgt)
+	if err != nil {
+		t.Fatalf("ResolveHost: %v", err)
+	}
+	want := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3"}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("ResolveHost() = %v, want %v (sorted, so a rotated answer compares equal)", got, want)
+		}
+	}
+}
+
+func TestResolveHostSkipsIPLiteralAndReportsFailure(t *testing.T) {
+	res := &fakeResolver{}
+	c := &Checker{Resolver: res, Timeout: time.Second}
+
+	ipTgt, _ := ParsePass("http://10.1.2.3:80")
+	addrs, err := c.ResolveHost(context.Background(), ipTgt)
+	if err != nil || addrs != nil {
+		t.Fatalf("IP literal must resolve to (nil, nil), got (%v, %v)", addrs, err)
+	}
+	if res.calls != 0 {
+		t.Fatalf("IP literal must skip DNS, got %d calls", res.calls)
+	}
+
+	res.fail = true
+	tgt, _ := ParsePass("http://dead.internal")
+	if _, err := c.ResolveHost(context.Background(), tgt); err == nil || !strings.Contains(err.Error(), "does not resolve") {
+		t.Fatalf("expected resolve error, got %v", err)
+	}
+}
