@@ -27,3 +27,5 @@ ds-bundle/
 .design-sync/learnings/
 .design-sync/node_modules
 web-components/design-sync.entry.tsx
+notegraph/
+*.notegraph
