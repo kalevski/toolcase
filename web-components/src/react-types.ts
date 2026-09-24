@@ -456,6 +456,10 @@ import type {
     FilterBar as __FilterBar$FilterBar,
     FilterBarRow as __FilterBar$FilterBarRow,
 } from './FilterBar'
+import type {
+    FilterSearch as __FilterSearch$FilterSearch,
+    FilterSearchGroup as __FilterSearch$FilterSearchGroup,
+} from './FilterSearch'
 import type { FilterTrigger as __FilterTrigger$FilterTrigger } from './FilterTrigger'
 import type {
     FloatingActionBar as __FloatingActionBar$FloatingActionBar,
@@ -2761,6 +2765,25 @@ export interface ToolcaseIntrinsicElements {
             'ontc-clear'?: (e: CustomEvent) => void
         },
         __FilterBar$FilterBar
+    >
+    'tc-filter-search': TcProps<
+        {
+            disabled?: boolean
+            'filters-icon'?: string | number
+            'filters-label'?: string | number
+            icon?: string | number
+            label?: string | number
+            open?: boolean
+            placeholder?: string | number
+            value?: string | number
+            groups?: __FilterSearch$FilterSearchGroup[]
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-clear'?: (e: CustomEvent) => void
+            'ontc-input'?: (e: CustomEvent<{ value: any }>) => void
+            'ontc-open'?: (e: CustomEvent) => void
+            'ontc-search'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __FilterSearch$FilterSearch
     >
     'tc-filter-trigger': TcProps<
         {

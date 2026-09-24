@@ -158,6 +158,7 @@ import FilterTriggerDemo from './FilterTriggerDemo'
 import ResultsHeaderDemo from './ResultsHeaderDemo'
 import SignInGateDemo from './SignInGateDemo'
 import SearchBarDemo from './SearchBarDemo'
+import FilterSearchDemo from './FilterSearchDemo'
 import SegmentedToggleDemo from './SegmentedToggleDemo'
 import ConfirmSheetDemo from './ConfirmSheetDemo'
 import FacetPickerDemo from './FacetPickerDemo'
@@ -581,6 +582,7 @@ const demos: WebComponentDef[] = [
     { key: 'results-header', complexity: 'Simple', element: <ResultsHeaderDemo /> },
     { key: 'sign-in-gate', complexity: 'Simple', element: <SignInGateDemo /> },
     { key: 'search-bar', complexity: 'Simple', element: <SearchBarDemo /> },
+    { key: 'filter-search', complexity: 'Composite', element: <FilterSearchDemo /> },
     { key: 'segmented-toggle', complexity: 'Simple', element: <SegmentedToggleDemo /> },
     { key: 'confirm-sheet', complexity: 'Composite', element: <ConfirmSheetDemo /> },
     { key: 'facet-picker', complexity: 'Composite', element: <FacetPickerDemo /> },

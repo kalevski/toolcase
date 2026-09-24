@@ -127,10 +127,22 @@ for (const s of varOverride.keys()) {
 
 const scope = (s) => `[data-tc-theme='blueprint'] ${s},\ntc-theme[name='blueprint'] ${s}`
 
-const litBlock = (set, token) =>
-    set.size
-        ? `${[...set].sort().map(scope).join(',\n')} {\n    border-radius: var(${token});\n}`
-        : ''
+// A vendor-prefixed pseudo-element (`::-moz-range-track`, `::-webkit-color-swatch`)
+// is an INVALID selector in every engine but its own, and one invalid selector
+// drops the whole rule it sits in — so a single shared list meant Chrome rounded
+// no MD control at all, and Firefox none either. Each vendor selector gets a rule
+// of its own, where it can only ever drop itself.
+const VENDOR_PSEUDO = /::-(?:moz|webkit|ms)-/
+
+const litBlock = (set, token) => {
+    const sorted = [...set].sort()
+    const rule = (sels) => `${sels.map(scope).join(',\n')} {\n    border-radius: var(${token});\n}`
+    const shared = sorted.filter((s) => !VENDOR_PSEUDO.test(s))
+    const vendor = sorted.filter((s) => VENDOR_PSEUDO.test(s))
+    return [shared.length ? rule(shared) : '', ...vendor.map((s) => rule([s]))]
+        .filter(Boolean)
+        .join('\n\n')
+}
 
 const varBlocks = [...varOverride.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))

@@ -11,7 +11,7 @@
 //   node scripts/gen-blueprint-radius.mjs
 //   npm -w @toolcase/web-components run build:css
 //
-// 172 literal LG surfaces, 489 literal MD surfaces, 24 var-driven re-points.
+// 172 literal LG surfaces, 493 literal MD surfaces, 24 var-driven re-points.
 
 // ── Big framed surfaces → 8px (LG) ─────────────────────────────────────────
 [data-tc-theme='blueprint'] .tc-ability-card,
@@ -688,10 +688,14 @@ tc-theme[name='blueprint'] .tc-file-tags-chip-remove,
 tc-theme[name='blueprint'] .tc-file-tags-option,
 [data-tc-theme='blueprint'] .tc-file-tags-search,
 tc-theme[name='blueprint'] .tc-file-tags-search,
-[data-tc-theme='blueprint'] .tc-form-input-color::-moz-color-swatch,
-tc-theme[name='blueprint'] .tc-form-input-color::-moz-color-swatch,
-[data-tc-theme='blueprint'] .tc-form-input-color::-webkit-color-swatch,
-tc-theme[name='blueprint'] .tc-form-input-color::-webkit-color-swatch,
+[data-tc-theme='blueprint'] .tc-filter-search__chip,
+tc-theme[name='blueprint'] .tc-filter-search__chip,
+[data-tc-theme='blueprint'] .tc-filter-search__field,
+tc-theme[name='blueprint'] .tc-filter-search__field,
+[data-tc-theme='blueprint'] .tc-filter-search__filters,
+tc-theme[name='blueprint'] .tc-filter-search__filters,
+[data-tc-theme='blueprint'] .tc-filter-search__submit,
+tc-theme[name='blueprint'] .tc-filter-search__submit,
 [data-tc-theme='blueprint'] .tc-form-input-loading-bar,
 tc-theme[name='blueprint'] .tc-form-input-loading-bar,
 [data-tc-theme='blueprint'] .tc-form-wizard-back,
@@ -714,8 +718,6 @@ tc-theme[name='blueprint'] .tc-gamepad-button-prompt__glyph,
 tc-theme[name='blueprint'] .tc-gantt-chart,
 [data-tc-theme='blueprint'] .tc-gantt-chart-bar,
 tc-theme[name='blueprint'] .tc-gantt-chart-bar,
-[data-tc-theme='blueprint'] .tc-gantt-chart-scroll::-webkit-scrollbar-thumb,
-tc-theme[name='blueprint'] .tc-gantt-chart-scroll::-webkit-scrollbar-thumb,
 [data-tc-theme='blueprint'] .tc-gilded-frame,
 tc-theme[name='blueprint'] .tc-gilded-frame,
 [data-tc-theme='blueprint'] .tc-good-first-issues,
@@ -768,10 +770,6 @@ tc-theme[name='blueprint'] .tc-image,
 tc-theme[name='blueprint'] .tc-image-crop-stage,
 [data-tc-theme='blueprint'] .tc-image-crop-window,
 tc-theme[name='blueprint'] .tc-image-crop-window,
-[data-tc-theme='blueprint'] .tc-image-crop-zoom::-moz-range-track,
-tc-theme[name='blueprint'] .tc-image-crop-zoom::-moz-range-track,
-[data-tc-theme='blueprint'] .tc-image-crop-zoom::-webkit-slider-runnable-track,
-tc-theme[name='blueprint'] .tc-image-crop-zoom::-webkit-slider-runnable-track,
 [data-tc-theme='blueprint'] .tc-image-img,
 tc-theme[name='blueprint'] .tc-image-img,
 [data-tc-theme='blueprint'] .tc-install-tabs,
@@ -934,10 +932,6 @@ tc-theme[name='blueprint'] .tc-migration-diff-before code,
 tc-theme[name='blueprint'] .tc-migration-diff-before pre,
 [data-tc-theme='blueprint'] .tc-migration-guide,
 tc-theme[name='blueprint'] .tc-migration-guide,
-[data-tc-theme='blueprint'] .tc-mouse-sensitivity__input::-moz-range-track,
-tc-theme[name='blueprint'] .tc-mouse-sensitivity__input::-moz-range-track,
-[data-tc-theme='blueprint'] .tc-mouse-sensitivity__input::-webkit-slider-runnable-track,
-tc-theme[name='blueprint'] .tc-mouse-sensitivity__input::-webkit-slider-runnable-track,
 [data-tc-theme='blueprint'] .tc-newsletter-signup,
 tc-theme[name='blueprint'] .tc-newsletter-signup,
 [data-tc-theme='blueprint'] .tc-newsletter-signup-input,
@@ -1084,22 +1078,14 @@ tc-theme[name='blueprint'] .tc-scoring-rule.tc-accent-red::before,
 tc-theme[name='blueprint'] .tc-scoring-rule.tc-accent-yellow::before,
 [data-tc-theme='blueprint'] .tc-screen-flash-fill,
 tc-theme[name='blueprint'] .tc-screen-flash-fill,
-[data-tc-theme='blueprint'] .tc-scroll-area::-webkit-scrollbar-thumb,
-tc-theme[name='blueprint'] .tc-scroll-area::-webkit-scrollbar-thumb,
 [data-tc-theme='blueprint'] .tc-scroll-text,
 tc-theme[name='blueprint'] .tc-scroll-text,
-[data-tc-theme='blueprint'] .tc-scroll-text::-webkit-scrollbar-thumb,
-tc-theme[name='blueprint'] .tc-scroll-text::-webkit-scrollbar-thumb,
 [data-tc-theme='blueprint'] .tc-section-flag,
 tc-theme[name='blueprint'] .tc-section-flag,
 [data-tc-theme='blueprint'] .tc-section-flag-marker,
 tc-theme[name='blueprint'] .tc-section-flag-marker,
 [data-tc-theme='blueprint'] .tc-section-flag-title,
 tc-theme[name='blueprint'] .tc-section-flag-title,
-[data-tc-theme='blueprint'] .tc-setting-slider__input::-moz-range-track,
-tc-theme[name='blueprint'] .tc-setting-slider__input::-moz-range-track,
-[data-tc-theme='blueprint'] .tc-setting-slider__input::-webkit-slider-runnable-track,
-tc-theme[name='blueprint'] .tc-setting-slider__input::-webkit-slider-runnable-track,
 [data-tc-theme='blueprint'] .tc-setting-slider__mute-btn,
 tc-theme[name='blueprint'] .tc-setting-slider__mute-btn,
 [data-tc-theme='blueprint'] .tc-settings-category-list-item,
@@ -1260,8 +1246,6 @@ tc-theme[name='blueprint'] .tc-vertical-item-list-skeleton,
 tc-theme[name='blueprint'] .tc-video-embed-media,
 [data-tc-theme='blueprint'] .tc-virtual-list,
 tc-theme[name='blueprint'] .tc-virtual-list,
-[data-tc-theme='blueprint'] .tc-virtual-list::-webkit-scrollbar-thumb,
-tc-theme[name='blueprint'] .tc-virtual-list::-webkit-scrollbar-thumb,
 [data-tc-theme='blueprint'] .tc-waypoint-marker__text,
 tc-theme[name='blueprint'] .tc-waypoint-marker__text,
 [data-tc-theme='blueprint'] tc-buff-icon,
@@ -1312,6 +1296,66 @@ tc-theme[name='blueprint'] tc-transition-wipe,
 tc-theme[name='blueprint'] tc-vignette-overlay,
 [data-tc-theme='blueprint'] tc-vignette-overlay::after,
 tc-theme[name='blueprint'] tc-vignette-overlay::after {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-form-input-color::-moz-color-swatch,
+tc-theme[name='blueprint'] .tc-form-input-color::-moz-color-swatch {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-form-input-color::-webkit-color-swatch,
+tc-theme[name='blueprint'] .tc-form-input-color::-webkit-color-swatch {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-gantt-chart-scroll::-webkit-scrollbar-thumb,
+tc-theme[name='blueprint'] .tc-gantt-chart-scroll::-webkit-scrollbar-thumb {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-image-crop-zoom::-moz-range-track,
+tc-theme[name='blueprint'] .tc-image-crop-zoom::-moz-range-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-image-crop-zoom::-webkit-slider-runnable-track,
+tc-theme[name='blueprint'] .tc-image-crop-zoom::-webkit-slider-runnable-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-mouse-sensitivity__input::-moz-range-track,
+tc-theme[name='blueprint'] .tc-mouse-sensitivity__input::-moz-range-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-mouse-sensitivity__input::-webkit-slider-runnable-track,
+tc-theme[name='blueprint'] .tc-mouse-sensitivity__input::-webkit-slider-runnable-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-scroll-area::-webkit-scrollbar-thumb,
+tc-theme[name='blueprint'] .tc-scroll-area::-webkit-scrollbar-thumb {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-scroll-text::-webkit-scrollbar-thumb,
+tc-theme[name='blueprint'] .tc-scroll-text::-webkit-scrollbar-thumb {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-setting-slider__input::-moz-range-track,
+tc-theme[name='blueprint'] .tc-setting-slider__input::-moz-range-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-setting-slider__input::-webkit-slider-runnable-track,
+tc-theme[name='blueprint'] .tc-setting-slider__input::-webkit-slider-runnable-track {
+    border-radius: var(--bp-r-md);
+}
+
+[data-tc-theme='blueprint'] .tc-virtual-list::-webkit-scrollbar-thumb,
+tc-theme[name='blueprint'] .tc-virtual-list::-webkit-scrollbar-thumb {
     border-radius: var(--bp-r-md);
 }
 

@@ -42,6 +42,10 @@ export interface SelectedCountParams {
     count: number
 }
 
+export interface FilterRemoveParams {
+    label: string
+}
+
 export interface StepOfTotalParams {
     /** 1-based, so it reads out loud as-is. */
     current: number
@@ -109,6 +113,8 @@ export interface ToolcaseMessages {
     starsRating: MessageFormatter<StarsRatingParams>
     /** Multi-select trigger summary once the picked labels stop fitting, e.g. "4 selected". */
     selectedCount: MessageFormatter<SelectedCountParams>
+    /** Accessible name of a picked filter's remove chip, e.g. "Remove #urgent" — `tc-filter-search`. */
+    filterRemove: MessageFormatter<FilterRemoveParams>
 
     // ── Day-strip states ─────────────────────────────────────────────────────
     //
@@ -174,6 +180,7 @@ const DEFAULTS: ToolcaseMessages = {
     stepOfTotal: 'Step {current} of {total}',
     starsRating: '{value} out of {max} stars',
     selectedCount: '{count} selected',
+    filterRemove: 'Remove {label}',
 
     dayStateEmpty: 'Nothing planned',
     dayStatePlanned: 'Planned',

@@ -4,6 +4,52 @@ Entries start at `5.0.19`. Earlier versions are not covered here.
 
 ## Unreleased
 
+### Added — `tc-filter-search`
+
+A search field with a filter button on its leading edge, and every picked filter
+kept under the field as a removable chip. From notegraph's search page, where one
+query plus a set of tag and label picks narrows one result list.
+
+**The button opens nothing.** It fires `tc-open`, and the app decides what a filter
+surface is: a `tc-bottom-sheet` on a phone-first app, a side panel on a dashboard, a
+modal somewhere else — a dropdown drawn by the element would be the one shape every
+app then has to fight. The app sets `open` while its surface is up, which drives
+`aria-expanded` and the button's active state. What stays in the element is what is
+the same everywhere: the count on the button and the picks as chips, each of which
+removes its own pick.
+
+It is not `tc-search-bar`, which has no filters, and not `tc-filter-bar`, which
+keeps every dimension on screen.
+
+`groups` is a property of `{ key, options, selected? }`, each option
+`{ value, label, prefix?, color? }` — the vocabulary plus the current picks. The
+button's icon is `filters-icon`, any lucide name, `sliders-horizontal` by default,
+so a "sort" or "scope" surface can use the same element. An
+option is data, not a kind: a `prefix` of `#` reads as a tag, and a `color` draws a
+swatch and tints the chip in that tone. Events `tc-open`, `tc-input`, `tc-search`,
+`tc-change` (`{ key, selected, filters }`), `tc-clear`; methods `clearFilters()`,
+`submit()`, `focusInput()`, `focusFilters()`. The field is uncontrolled on
+`tc-search-bar`'s contract.
+
+Every colour is a `--tc-*` token behind a `--bs-filter-search-*` slot, so all eight
+themes re-skin it and all eleven variants re-tint it without a rule of their own;
+the submit fill and the count paint `--tc-app-accent-gradient`, which is what makes
+`sunset` and `twilight` sweep. New message key `filterRemove` (`'Remove {label}'`),
+the accessible name of a picked filter's chip.
+
+### Fixed — blueprint rounded no MD-tier control at all
+
+The blueprint radius sweep put every MD-tier selector in one list, and that list
+included vendor pseudo-elements (`::-moz-range-track`, `::-webkit-color-swatch`, …).
+A pseudo-element an engine does not know is an invalid selector there, and one
+invalid selector drops the whole rule — so Chrome discarded the rule for its
+`::-moz-*` entries and Firefox for its `::-webkit-*` ones, and **no** 5px control in
+the library was rounded in either. `gen-blueprint-radius.mjs` now gives each
+vendor-prefixed selector a rule of its own, where it can only ever drop itself.
+
+This is a visible change under `blueprint`: inputs, buttons, chips and the other
+controls in the MD tier gain the 5px corner they were always meant to have.
+
 ### Fixed — `tc-hint-tip` opened two tips per click, and nothing closed them
 
 Two defects that only showed up together, on a screen carrying a hundred glyphs.

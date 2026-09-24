@@ -13543,6 +13543,42 @@ A leading region, one field, and the button that submits it. `value`,
 The field is **uncontrolled**: `value` seeds it and is pushed in only when it
 differs, so it needs no `key` remount to stay in step with a router.
 
+#### tc-filter-search
+
+A search field with a filter button on its leading edge, and every picked filter
+kept below the field as a removable chip. **The button opens nothing:** it fires
+`tc-open` and the app shows its own filter surface — a `tc-bottom-sheet`, a side
+panel, a modal. Set `open` while that surface is up; it drives `aria-expanded` and
+the button's active state. `groups` (property: `{ key, options, selected? }[]`,
+each option `{ value, label, prefix?, color? }`), `value`, `placeholder`, `label`,
+`filters-label`, `filters-icon` (any lucide name, `sliders-horizontal` by default), `icon`
+(the submit button's), `disabled`, `open`. Read-only `filters` and `activeCount`;
+methods `clearFilters()`, `submit()`, `focusInput()`, `focusFilters()`.
+**Events:** `tc-open`, `tc-input`, `tc-search` (`{value}`), `tc-change`
+(`{key, selected, filters}` — a chip removed its pick), `tc-clear`.
+
+`groups` is the vocabulary plus the current picks: the element draws the count
+and the chips from it, and the app's surface updates it. An option is data, not a
+kind: a `prefix` of `#` makes a tag, a `color` draws a swatch and tints the chip in
+that tone. **Not `tc-filter-bar`,** which keeps every dimension on screen; **not
+`tc-search-bar`,** which has no filters. The field is uncontrolled on
+`tc-search-bar`'s contract. Every colour is a token, and the submit fill and count
+paint the accent gradient, so it re-skins with every theme and variant.
+
+```tsx
+<tc-filter-search
+    ref={search}
+    label="Search notes"
+    open={sheetOpen}
+    ontc-open={() => setSheetOpen(true)}
+    ontc-search={(e) => runSearch(e.detail.value)}
+    ontc-change={(e) => setFilters(e.detail.filters)}
+/>
+<tc-bottom-sheet heading="Filters" open={sheetOpen} ontc-sheet-close={() => setSheetOpen(false)}>
+    {/* the app's own filter controls, writing back into search.current.groups */}
+</tc-bottom-sheet>
+```
+
 #### tc-facet-picker
 
 One dimension of a narrowing pick, as chips. `options` (property), `value`,

@@ -380,6 +380,7 @@ import { FilterTrigger } from './FilterTrigger'
 import { ResultsHeader } from './ResultsHeader'
 import { SignInGate } from './SignInGate'
 import { SearchBar } from './SearchBar'
+import { FilterSearch } from './FilterSearch'
 import { SegmentedToggle } from './SegmentedToggle'
 import { ConfirmSheet } from './ConfirmSheet'
 import { FacetPicker } from './FacetPicker'
@@ -838,6 +839,7 @@ export function register(): void {
     define('tc-results-header', ResultsHeader)
     define('tc-sign-in-gate', SignInGate)
     define('tc-search-bar', SearchBar)
+    define('tc-filter-search', FilterSearch)
     define('tc-segmented-toggle', SegmentedToggle)
     define('tc-confirm-sheet', ConfirmSheet)
 

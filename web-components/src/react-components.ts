@@ -465,6 +465,11 @@ import type {
     FilterBar as __FilterBar$FilterBar,
     FilterBarRow as __FilterBar$FilterBarRow,
 } from './FilterBar'
+import type {
+    FilterSearch as __FilterSearch$FilterSearch,
+    FilterSearchChangeDetail as __FilterSearch$FilterSearchChangeDetail,
+    FilterSearchGroup as __FilterSearch$FilterSearchGroup,
+} from './FilterSearch'
 import type { FilterTrigger as __FilterTrigger$FilterTrigger } from './FilterTrigger'
 import type {
     FloatingActionBar as __FloatingActionBar$FloatingActionBar,
@@ -4958,6 +4963,71 @@ export const TcFilterBar = /*#__PURE__*/ createTcComponent<TcFilterBarProps, __F
         properties: ['matchCount', 'onChange', 'onClear', 'rows'],
     },
 )
+
+export type TcFilterSearchProps = Omit<
+    TcBaseProps,
+    | 'disabled'
+    | 'filtersIcon'
+    | 'filtersLabel'
+    | 'icon'
+    | 'label'
+    | 'open'
+    | 'placeholder'
+    | 'value'
+    | 'onTcChange'
+    | 'onTcClear'
+    | 'onTcInput'
+    | 'onTcOpen'
+    | 'onTcSearch'
+    | 'groups'
+    | 'onChange'
+    | 'onClear'
+    | 'onOpen'
+    | 'onSearch'
+> & {
+    disabled?: boolean
+    filtersIcon?: string | number
+    filtersLabel?: string | number
+    icon?: string | number
+    label?: string | number
+    open?: boolean
+    placeholder?: string | number
+    value?: string | number
+    onTcChange?: (e: CustomEvent) => void
+    onTcClear?: (e: CustomEvent) => void
+    onTcInput?: (e: CustomEvent<{ value: any }>) => void
+    onTcOpen?: (e: CustomEvent) => void
+    onTcSearch?: (e: CustomEvent<{ value: any }>) => void
+    groups?: __FilterSearch$FilterSearchGroup[]
+    onChange?: ((detail: __FilterSearch$FilterSearchChangeDetail) => void) | null
+    onClear?: (() => void) | null
+    onOpen?: (() => void) | null
+    onSearch?: ((value: string) => void) | null
+}
+
+export const TcFilterSearch = /*#__PURE__*/ createTcComponent<
+    TcFilterSearchProps,
+    __FilterSearch$FilterSearch
+>('tc-filter-search', {
+    attributes: [
+        'disabled',
+        'filters-icon',
+        'filters-label',
+        'icon',
+        'label',
+        'open',
+        'placeholder',
+        'value',
+    ],
+    events: {
+        onTcChange: 'tc-change',
+        onTcClear: 'tc-clear',
+        onTcInput: 'tc-input',
+        onTcOpen: 'tc-open',
+        onTcSearch: 'tc-search',
+    },
+    properties: ['groups', 'onChange', 'onClear', 'onOpen', 'onSearch'],
+})
 
 export type TcFilterTriggerProps = Omit<
     TcBaseProps,
