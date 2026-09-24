@@ -1,9 +1,4 @@
 lib
-# taskforge & quaykeeper use lib/ as a SOURCE dir (Next.js app helpers — the
-# @/lib/tc web-components interop shim), not build output — keep it tracked.
-!taskforge/lib/
-!quaykeeper/lib/
-!voxscribe/lib/
 node_modules
 .parcel-cache
 .DS_Store
@@ -16,11 +11,6 @@ examples/dist
 tasks/*.md
 tasks/logs/*.log
 
-# TaskForge multi-account registry — per-alias Claude config dirs hold
-# `.credentials.json` OAuth tokens (real secrets); never commit them.
-.claude-accounts/
-taskforge.db
-taskforge.db-*
 .ds-sync/
 ds-bundle/
 .design-sync/.cache/

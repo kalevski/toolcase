@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, ReactNode } from 'react'
 import { Routes, Route, useNavigate, useLocation, Link as RouterLink } from 'react-router'
 import { packageRoutes, topPages, type DemoEntry, type PackageRoute } from './routes'
 import { NginxPilotPage } from './pages/NginxPilotPage'
-import { TaskForgePage } from './pages/TaskForgePage'
 
 // Header dogfoods <tc-navbar>: the glass app-chrome bar. Nav links are
 // React-controlled (RouterLink) so SPA navigation + active state keep working;
@@ -262,7 +261,6 @@ export const App = () => {
                 <Route path="/" element={topPages.home} />
                 <Route path="/apps" element={topPages.apps} />
                 <Route path="/apps/nginxpilot" element={<NginxPilotPage />} />
-                <Route path="/apps/taskforge" element={<TaskForgePage />} />
                 <Route path="/skills" element={topPages.skills} />
                 {packageRoutes.map((route) => (
                     <Route key={route.key} path={route.basePath} element={route.page} />

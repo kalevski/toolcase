@@ -1,7 +1,6 @@
 import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import prettierConfig from 'eslint-config-prettier'
-import reactHooks from 'eslint-plugin-react-hooks'
 
 export default tseslint.config(
     eslint.configs.recommended,
@@ -57,16 +56,6 @@ export default tseslint.config(
                 clearTimeout: 'readonly',
                 URL: 'readonly',
             },
-        },
-    },
-    {
-        // React app workspaces use hooks; register the plugin so the existing
-        // `react-hooks/exhaustive-deps` disable directives resolve (and the rule
-        // runs as a warning, mirroring eslint-config-next).
-        files: ['quaykeeper/**/*.{ts,tsx}', 'taskforge/**/*.{ts,tsx}'],
-        plugins: { 'react-hooks': reactHooks },
-        rules: {
-            'react-hooks/exhaustive-deps': 'warn',
         },
     },
     {
