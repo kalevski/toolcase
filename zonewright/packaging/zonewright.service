@@ -1,0 +1,52 @@
+[Unit]
+Description=zonewright — manage BIND 9 zones and records over an HTTP API
+Documentation=https://github.com/kalevski/toolcase/tree/main/zonewright
+After=network-online.target named.service bind9.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/zonewright run --config /etc/zonewright/config.yml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+# Run unprivileged, in BIND's group: the zone files zonewright writes (0640)
+# must be readable by named, and the rndc key (root:<group> 0640) readable by
+# zonewright. The group is `bind` on Debian/Ubuntu, `named` on RHEL/Alpine.
+User=zonewright
+Group=bind
+UMask=0027
+
+# Hardening — the daemon only ever writes inside its data_dir.
+ProtectSystem=strict
+ReadWritePaths=/var/lib/zonewright
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+# The daemon needs no capabilities at all, only TCP/UDP (rndc, the API) and
+# unix sockets (sd_notify).
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+# Secrets: prefer environment files or systemd LoadCredential + *_file refs.
+# EnvironmentFile=-/etc/zonewright/env
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+# zonewright config for the container image (mounted at /etc/zonewright/config.yml).
+#
+# Inside a container the admin API must bind 0.0.0.0 to be reachable at all.
+# It is plain HTTP here (allow_insecure_http), so publish it on the HOST's
+# loopback only (-p 127.0.0.1:9053:9053) or put a TLS proxy in front. For a
+# directly exposed API, set admin.tls instead.
+data_dir: /var/lib/zonewright
+admin:
+  listen: 0.0.0.0:9053
+  token_env: ZONEWRIGHT_TOKEN
+  allow_insecure_http: true
+defaults:
+  ttl: 1h
+  nameservers:
+    - ns1.example.net
+    - ns2.example.net
+  soa:
+    admin_email: hostmaster@example.net
+# Hand-written local zones (not replicated) can be dropped here.
+include:
+  - /var/lib/zonewright/zones.d/*.yml
+
+# Replication — uncomment on every server, with the SAME url list:
+# cluster:
+#   key_env: ZONEWRIGHT_CLUSTER_KEY        # same value everywhere: openssl rand -hex 32
+#   listen: 0.0.0.0:9153
+#   tls:
+#     cert_file: /etc/zonewright/tls/peer.crt
+#     key_file: /etc/zonewright/tls/peer.key
+#   urls:
+#     - https://ns1.example.com:9153
+#     - https://ns2.example.com:9153
