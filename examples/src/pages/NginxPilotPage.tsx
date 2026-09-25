@@ -1,16 +1,18 @@
-import { Link as RouterLink } from 'react-router'
-import { CodeBlock, CopyLine } from './_chrome'
+import { CopyLine } from './_chrome'
+import { AppIntro, CodeSection, FeatureGrid, SectionHead, SourceCard } from './_app'
 
 const archDiagram = `git remotes / zip endpoints ──fetch──► nginxpilot ──writes──► data_dir/sites/<domain>/
                                                                     releases/<ts>-<ref>/
                                                                     current -> releases/...  (atomic symlink)
                                                                              ▲
-                                             nginx  root = .../current ─────┘`
+                                             nginx  root = .../current ─────┘
+
+managed mode (opt-in):  nginxpilot ──renders──► conf.d/nginxpilot.d/*.conf ──nginx -t──► reload`
 
 const configExample = `# /etc/nginxpilot/config.yml — globals + includes
 data_dir: /var/lib/nginxpilot
 admin:
-  listen: 127.0.0.1:9090          # health + status + manual sync trigger
+  listen: 127.0.0.1:9090          # health, status, REST config API
   # token_env: NGINXPILOT_TOKEN   # bearer auth on all admin routes; omit to disable
 
 defaults:
@@ -18,8 +20,9 @@ defaults:
   keep_releases: 3
 
 include:
-  - sites.d/*.yml                 # fragments may contain only sites: lists
-                                  # duplicate domains across files are a validation error
+  - sites.d/*.yml                 # fragments may hold sites:, upstreams:, proxies:, …
+                                  # sites, apps, proxies, redirects and dead hosts share
+                                  # one domain namespace — duplicates are a validation error
                                   # drop a file in, kill -HUP — that's onboarding`
 
 const gitSourceExample = `# /etc/nginxpilot/sites.d/example.com.yml
@@ -31,13 +34,20 @@ sites:
       branch: main
       interval: 2m                # min 30s; defaults to defaults.interval
       auth:
-        method: ssh-key           # ssh-key | https-token | none
+        method: ssh-key           # ssh-key | https-token | github-token | none
         key_file: /etc/nginxpilot/keys/example_ed25519
-        # known_hosts: /etc/nginxpilot/known_hosts   # strict check; default: accept-new (TOFU)
+        # key_env: SSH_KEY        # or: env var holding the key material (containers)
+        # known_hosts: /etc/nginxpilot/known_hosts   # strict; default accept-new (TOFU)
       subdir: dist/               # serve only this subtree of the repo
       require_file: [index.html]  # post-fetch gate: reject release if file is absent
-    exclude: ["*.map"]            # extends defaults strip list:
-                                  # .env*, .htaccess, .DS_Store  (.git* always stripped)`
+    exclude: ["*.map"]            # extends defaults: .env*, .htaccess, .DS_Store (.git* always)
+    routing: spa                  # static (default) | spa | clean-urls
+    not_found: /404.html          # custom 404 (static / clean-urls only)
+    cache_assets: true            # immutable Cache-Control for fingerprinted assets
+
+# github-token: token-only auth for a private GitHub repo over https://
+#   auth: { method: github-token, token_env: GITHUB_TOKEN }
+#   export GITHUB_TOKEN=$(gh auth token)`
 
 const httpZipSourceExample = `sites:
   - domain: blog.example.com
@@ -60,280 +70,340 @@ const httpZipSourceExample = `sites:
 # Downloads use conditional GET (ETag / Last-Modified) — unchanged content is a cheap no-op.
 # Extraction rejects zip-slip paths and symlinks outright.`
 
+const proxiesExample = `upstreams:
+  - name: api_pool
+    balancer: least_conn           # round_robin | least_conn | ip_hash
+    keepalive: 32
+    servers:
+      - { address: 10.0.0.1:8080, weight: 2, max_fails: 3, fail_timeout: 30s }
+      - { address: 10.0.0.2:8080, backup: true }
+
+proxies:
+  - domain: api.example.com
+    upstream: api_pool             # … or pass: http://127.0.0.1:9000 (exactly one)
+    client_max_body_size: 20MiB
+    locations:
+      - path: /ws
+        upstream: api_pool
+        websocket: true            # Upgrade/Connection headers + HTTP/1.1
+
+redirects:
+  - domain: old.example.com
+    to: new.example.com
+    code: 301                      # 301 | 302 | 303 | 307 | 308
+    preserve_path: true
+
+dead_hosts:
+  - domain: gone.example.com
+    code: 410                      # 404 | 410 | 444 | 503
+
+# Proxies, redirects and dead hosts accept one leading wildcard label (*.example.com).
+# Generate-only mode: nginxpilot print-vhost api.example.com → paste into nginx.`
+
+const managedExample = `nginx:
+  manage: true                                        # opt-in; default false
+  conf_dir: /etc/nginx/conf.d/nginxpilot.d
+  stream_conf_dir: /etc/nginx/stream.d/nginxpilot.d
+  default_catch_all: false                            # silent 444 for unclaimed hosts
+  reconcile:
+    interval: 1m                                      # staged nginx -t dry-run every tick
+    on_failure: warn                                  # warn | disable
+    watch_addresses: true                             # reload when a backend's IP moved
+tls:
+  cert_dir: /etc/letsencrypt/live                     # certbot live or flat <domain>.crt/.key
+  reload_on_change: true
+acme:
+  enabled: true
+  renewal: { check_interval: 1h, renew_before: 24h }
+
+proxies:
+  - domain: app.example.com
+    upstream: app_pool
+    tls: auto                    # off | auto | required
+    force_ssl: true
+    http2: true
+    hsts: true
+    block_exploits: true
+    cache: { enabled: true, valid: ["200 10m", "404 1m"] }
+    gzip: true
+    advanced: |                  # raw escape hatch — rides the same nginx -t gate
+      add_header X-Frame-Options SAMEORIGIN;
+
+streams:                         # L4 TCP/UDP in nginx's stream {} context
+  - name: postgres
+    listen: 5432
+    pass: 10.0.0.9:5432`
+
+const crashProofSnippet = `render one file per resource → nginx -t on the whole set in a staging dir
+  all valid        → atomic swap into the live dirs → reload
+  something broken → quarantine pass: add resources one at a time, nginx -t after each,
+                     disable only the offender (its nginx -t stderr lands in /status)
+  reload fails     → roll the live dirs back to the previous snapshot
+
+nginx is only ever handed config that already passed nginx -t.`
+
+const phpExample = `php:
+  enabled: true
+  pool_dir: /etc/php/pool.d
+  socket_dir: /run/php
+
+apps:
+  - domain: shop.example.com
+    runtime: php
+    source:
+      type: git
+      url: https://github.com/acme/shop.git
+      branch: main
+    php:
+      routing: front-controller   # front-controller (default) | static-first
+      index: index.php
+      persistent:                 # outside the release, symlinked into every deploy
+        - wp-content/uploads
+      max_body_size: 32MiB
+      memory_limit: 256M
+      max_children: 8
+    tls: auto
+    force_ssl: true
+
+# One php-fpm pool per app: own uid, open_basedir, pm = ondemand.
+# An uploaded .php never executes — only the front controller reaches fastcgi.
+# A pool that is down disables the app instead of serving index.php as text.`
+
+const logsExample = `logs:
+  access:
+    enabled: true                  # JSON access log → loopback UDP syslog the daemon owns
+    syslog_listen: 127.0.0.1:5514
+  daemon:
+    enabled: true                  # also ship nginxpilot's own records (syncs, applies, renewals)
+    level: info
+  redact:
+    anonymize_ip: false            # query-param deny-list always runs at intake
+
+log_destinations:
+  - name: main-loki
+    type: loki                     # loki | http | file | stdout
+    url: https://loki.example.com/loki/api/v1/push
+    auth: { method: basic, username: loki, password_env: LOKI_PASSWORD }
+    labels: { job: nginx, host: $resource, status_code: $status_class }
+    filter:
+      status: ["4xx", "5xx"]
+      path: ["!/healthz"]
+
+# Bounded ring buffers, batching, backoff honouring Retry-After —
+# a dead Loki never blocks nginx, a sync, or the daemon.`
+
 const secretsExample = `# Inline secrets are a PARSE-TIME ERROR — only _env / _file refs are accepted.
 # Config files stay safe to commit.
 auth:
   method: https-token
+  username: deploy
   token_env: MY_TOKEN           # reads $MY_TOKEN at runtime
-  # token_file: /run/secrets/my_token   # or point at a file
+  # token_file: /run/secrets/my_token
 
 # Secret files must be 0600 or 0640 and owned by the daemon user or root.
-# The daemon refuses to start if permissions are wrong.
-
-# systemd LoadCredential integration:
-# [Service]
-# LoadCredential=my_token:/etc/nginxpilot/tokens/my_token
-# then in config:
-#   token_file: /run/credentials/nginxpilot.service/my_token`
+# systemd LoadCredential works via token_file + $CREDENTIALS_DIRECTORY.`
 
 const cliReference = `nginxpilot run [--config PATH] [--log-format logfmt|json] [--prune-orphans]
-                        # the daemon; --prune-orphans deletes content dirs for sites
-                        # that were removed from config (orphans are warned, not deleted, by default)
-nginxpilot validate             # parse + validate merged config, CI exit codes
-nginxpilot sync <domain>        # one-shot sync, no daemon needed (onboarding)
-nginxpilot print-vhost <domain> # nginx server-block starting snippet
-nginxpilot status [--json]      # per-site table from the daemon
-nginxpilot version              # build info`
+nginxpilot validate [--check-targets]  # merged config + secret refs; nginx -t in managed mode
+nginxpilot sync <domain>               # one-shot sync, no daemon needed (onboarding)
+nginxpilot print-vhost <domain>        # server block for a site, or upstream{} + proxy_pass
+nginxpilot print-include               # nginx.conf include + stream{} block for managed mode
+nginxpilot print-logformat             # JSON access-log log_format for generate-only setups
+nginxpilot status [--json]             # per-site table from the daemon
+nginxpilot version`
 
-const adminEndpoints = `GET  /healthz           — liveness probe
-GET  /status            — per-site JSON: deployed ref, last success/error,
-                          failure_streak, never_synced, next sync time
-POST /sync/<domain>     — force an immediate out-of-schedule sync
+const adminEndpoints = `GET  /healthz                 liveness
+GET  /status                  per-site: deployed ref, bytes, streak, next sync
+                              + nginx resources, php pools, certs_renewal, logs
+POST /sync/<domain>           force an out-of-schedule sync
+GET  /vhost/<domain>          generated nginx config (same as print-vhost)
+POST /reload                  diff-based reload (same as SIGHUP)
+POST /nginx/test              managed-mode dry run, per-resource pass/fail
 
-# admin.token_env enables bearer auth on all three routes:
-# admin:
-#   listen: 127.0.0.1:9090
-#   token_env: NGINXPILOT_TOKEN
+# REST config — each write validates the merged candidate before touching disk
+GET|POST       /sites  /upstreams  /proxies  /redirects  /dead-hosts
+GET|POST       /apps  /streams  /stream-upstreams  /log-destinations
+DELETE         /<kind>/{domain|name}       (409 if an upstream is still referenced)
+GET|POST       /certs            POST returns 202 + job id; certbot runs in the background
+POST           /certs/{domain}/renew
 
-curl -H "Authorization: Bearer $NGINXPILOT_TOKEN" http://127.0.0.1:9090/status
-curl -X POST -H "Authorization: Bearer $NGINXPILOT_TOKEN" http://127.0.0.1:9090/sync/example.com`
+curl -X POST -H "Authorization: Bearer $NGINXPILOT_TOKEN" \\
+  http://127.0.0.1:9090/proxies --data-binary @proxy.yml`
 
 const signalsSnippet = `SIGHUP   — diff-based reload
            added sites:    start and sync immediately
            removed sites:  stop the watcher; content stays on disk (orphan, warned)
                            remove orphaned content by restarting with --prune-orphans
            invalid config: rejected wholesale; running config stays active
+           managed mode:   re-render, nginx -t, quarantine, reload
 
 SIGTERM / SIGINT — graceful shutdown
            in-flight symlink swaps finish; downloads abort cleanly`
 
 const releasesSnippet = `data_dir/sites/<domain>/
   releases/
-    20240601T120000-abc1234/    # <RFC3339-ts>-<git-ref|etag>
-    20240601T120512-def5678/
-    20240602T080000-ghi9012/    # newest successful sync
-  current -> releases/20240602T080000-ghi9012   # atomic rename(2) swap
+    20260601T120000-abc1234/    # <RFC3339-ts>-<git-ref|etag>
+    20260601T120512-def5678/
+    20260602T080000-ghi9012/    # newest successful sync
+  current -> releases/20260602T080000-ghi9012   # atomic rename(2) swap
 
 # keep_releases: 3 (default) — oldest release dirs pruned after each sync
-# Manual rollback: point current at an older release directory (no restart needed)`
+# Failures back off as interval × 2^streak, capped at 4× interval;
+# current is never touched on failure — last good content stays live.`
 
-const backoffSnippet = `# Retry formula: interval × 2^streak — capped at 4× interval
-# streak resets to 0 on success; visible in GET /status as failure_streak
-# current symlink is never overwritten on failure — last good content stays live
-#
-# Example with defaults.interval: 5m
-#   streak 0 → next retry in  5m
-#   streak 1 → next retry in 10m
-#   streak 2 → next retry in 20m
-#   streak 3+ → retry in 20m  (4 × 5m cap)`
+const dockerSnippet = `# nginx:alpine + the daemon in one container (linux/amd64 + linux/arm64)
+docker run -d \\
+  -p 80:80 -p 443:443 \\
+  -v /etc/nginxpilot:/etc/nginxpilot:ro \\
+  -v nginxpilot-sites:/var/lib/nginxpilot \\
+  ghcr.io/kalevski/toolcase/nginxpilot:latest
 
-const nginxSnippet = `server {
-    listen 80;
-    server_name example.com;
+# nginx and the daemon both run as the unprivileged nginxpilot user;
+# managed-mode dirs live under /etc/nginx/nginxpilot/ and are baked into nginx.conf.
+# php-fpm ships when built with PHP_VERSION (default 83); --build-arg PHP_VERSION="" drops it.
 
-    # swapped atomically via rename(2) — no nginx reload on content updates
-    root /var/lib/nginxpilot/sites/example.com/current;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}`
-
-const systemdSnippet = `# packaging/nginxpilot.service (ships in the repo)
-[Service]
-Type=notify
-Restart=on-failure
-User=nginxpilot
-UMask=0027
-ProtectSystem=strict
-NoNewPrivileges=true
-PrivateTmp=true
-# Run as a dedicated nginxpilot user owning data_dir;
-# the nginx worker user joins the nginxpilot group.
-# Dirs 0750, files 0640 (enforced by umask 027).
-
-# SELinux — RHEL-family only:
-semanage fcontext -a -t httpd_sys_content_t '/var/lib/nginxpilot/sites(/.*)?' \\
-  && restorecon -R /var/lib/nginxpilot/sites`
+# Any argument runs the CLI instead of the supervisor:
+docker run --rm -v /etc/nginxpilot:/etc/nginxpilot:ro \\
+  ghcr.io/kalevski/toolcase/nginxpilot:latest validate`
 
 const features = [
     {
         title: 'Atomic deploys',
-        body: 'Content is staged, fsynced, then made live with a rename(2) symlink swap. nginx never serves a half-written directory; updates need no nginx reload.',
+        body: 'Content is staged, fsynced, then made live with a rename(2) symlink swap. nginx never serves a half-written directory; content updates need no nginx reload.',
     },
     {
         title: 'Last known-good wins',
         body: 'Any sync failure — network error, bad auth, corrupt archive — leaves the current release untouched. Retries back off exponentially, capped at 4× the interval.',
     },
     {
-        title: 'Two source types',
-        body: 'git (shallow single-branch via the system git binary) and http-zip (conditional GET, checksum option). Both support private sources via env/file secret refs.',
+        title: 'Optional managed mode',
+        body: 'Opt in and nginxpilot writes the live nginx config: TLS from a cert dir, certbot renewal, per-host toggles, L4 streams. A resource that fails nginx -t is quarantined, never fatal.',
+    },
+    {
+        title: 'Sites, proxies, PHP apps',
+        body: 'Static sites (static / spa / clean-urls), reverse proxies with upstream pools, redirects, parked hosts, and PHP apps on isolated per-app php-fpm pools with persistent paths.',
+    },
+    {
+        title: 'Driven over REST',
+        body: 'Every entity has GET/POST/DELETE endpoints that validate the merged candidate config before writing, so a control plane never hand-edits sites.d/.',
     },
     {
         title: 'Hardened by default',
-        body: 'Zip-slip and symlink rejection, zip-bomb limits, .git*/.env* always stripped, inline secrets are a parse error, unprivileged daemon with a strict systemd unit.',
+        body: 'Zip-slip and symlink rejection, zip-bomb limits, inline secrets are a parse error, strict backend-target grammar, unprivileged daemon with a strict systemd unit.',
     },
 ]
 
 export const NginxPilotPage = () => {
     return (
         <main className="site-container">
-            <div className="breadcrumbs">
-                <RouterLink to="/apps">Apps</RouterLink>
-                <span className="sep">/</span>
-                <span className="current mono">nginxpilot</span>
-            </div>
+            <AppIntro
+                name="nginxpilot"
+                eyebrow="App · Daemon · Go"
+                lead="A Go daemon that runs alongside nginx and keeps static sites and PHP apps in sync with git repositories or HTTP zip archives. By default it never touches nginx config; opt into managed mode and it writes and validates the live config too — TLS, reverse proxies, streams — without ever handing nginx a config that fails nginx -t."
+                chips={['Go', 'git', 'http-zip', 'managed mode', 'TLS · ACME', 'PHP', 'Loki', 'Docker']}
+                meta={[
+                    { label: 'Language', value: 'Go 1.24' },
+                    { label: 'Modes', value: 'generate · managed' },
+                    { label: 'Dependencies', value: '2' },
+                    { label: 'License', value: 'MIT' },
+                ]}
+            />
 
-            <section className="page-intro">
-                <div>
-                    <div className="eyebrow">App · Daemon · Go</div>
-                    <h1 className="page-title mono">nginxpilot</h1>
-                    <p className="page-lead">
-                        A standalone Go daemon that runs alongside nginx and keeps directories of
-                        static files in sync with remote sources — git repositories or HTTP zip
-                        archives. nginx serves the files; the daemon never sits in the request path.
-                    </p>
-                    <div className="chip-row">
-                        {['Go', 'git', 'http-zip', 'systemd', 'Docker', 'zero request-path coupling'].map((chip) => (
-                            <span key={chip} className="tag">{chip}</span>
-                        ))}
-                    </div>
-                </div>
-                <dl className="page-meta">
-                    <div>
-                        <dt>Language</dt>
-                        <dd>Go 1.24</dd>
-                    </div>
-                    <div>
-                        <dt>Source types</dt>
-                        <dd>git · http-zip</dd>
-                    </div>
-                    <div>
-                        <dt>Dependencies</dt>
-                        <dd>2</dd>
-                    </div>
-                    <div>
-                        <dt>License</dt>
-                        <dd>MIT</dd>
-                    </div>
-                </dl>
-            </section>
+            <CodeSection
+                title="How it works"
+                count="pull → stage → atomic swap"
+                file="architecture"
+                code={archDiagram}
+            />
+            <FeatureGrid features={features} />
 
-            <div className="section-head">
-                <h2>How it works</h2>
-                <span className="count">pull → stage → atomic swap</span>
-            </div>
-            <CodeBlock file="architecture" code={archDiagram} />
+            <CodeSection
+                title="Configuration"
+                count="declarative YAML · strict unknown-key errors · sites.d/ fragments"
+                file="config.yml"
+                code={configExample}
+            />
+            <CodeSection
+                title="git source"
+                count="ssh-key · https-token · github-token · routing · cache_assets"
+                file="sites.d/example.com.yml"
+                code={gitSourceExample}
+            />
+            <CodeSection
+                title="http-zip source"
+                count="conditional GET · checksum · zip-bomb limits"
+                file="sites.d/blog.example.com.yml"
+                code={httpZipSourceExample}
+            />
+            <CodeSection
+                title="Proxies, redirects, parked hosts"
+                count="upstream pools · websockets · wildcards"
+                file="sites.d/proxies.yml"
+                code={proxiesExample}
+            />
+            <CodeSection
+                title="Managed mode"
+                count="writes the live config · TLS · renewal · per-host toggles · streams"
+                file="config.yml"
+                code={managedExample}
+            />
+            <CodeSection
+                title="Crash-proof apply"
+                count="never crash nginx"
+                file="apply.txt"
+                code={crashProofSnippet}
+            />
+            <CodeSection
+                title="PHP apps"
+                count="per-app php-fpm pools · persistent paths · isolation"
+                file="sites.d/shop.example.com.yml"
+                code={phpExample}
+            />
+            <CodeSection
+                title="Log shipping"
+                count="structured access logs · Loki / http / file / stdout"
+                file="config.yml"
+                code={logsExample}
+            />
+            <CodeSection
+                title="Secrets"
+                count="_env / _file refs only · 0600/0640 enforcement"
+                file="secrets.yml"
+                code={secretsExample}
+            />
+            <CodeSection title="CLI" count="single binary" file="cli-reference.sh" code={cliReference} />
+            <CodeSection
+                title="Admin API"
+                count="loopback HTTP · status · REST config · certs"
+                file="admin.sh"
+                code={adminEndpoints}
+            />
+            <CodeSection
+                title="Signals"
+                count="SIGHUP diff-reload · SIGTERM/SIGINT graceful shutdown"
+                file="signals.txt"
+                code={signalsSnippet}
+            />
+            <CodeSection
+                title="Releases & failure"
+                count="keep_releases · atomic current symlink · capped backoff"
+                file="releases.txt"
+                code={releasesSnippet}
+            />
+            <CodeSection
+                title="Docker"
+                count="nginx + daemon in one image · or static binary + systemd"
+                file="docker.sh"
+                code={dockerSnippet}
+            />
 
-            <div className="lib-grid">
-                {features.map((f) => (
-                    <div key={f.title} className="lib-card">
-                        <div className="lib-card-head">
-                            <div>
-                                <h3 className="lib-name">{f.title}</h3>
-                                <p className="lib-tagline">{f.body}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="section-head">
-                <h2>Configuration</h2>
-                <span className="count">declarative YAML · strict unknown-key errors · sites.d/ fragments</span>
-            </div>
-            <CodeBlock file="config.yml" code={configExample} />
-
-            <div className="section-head">
-                <h2>git source</h2>
-                <span className="count">shallow single-branch · subdir · require_file · TOFU or known_hosts</span>
-            </div>
-            <CodeBlock file="sites.d/example.com.yml" code={gitSourceExample} />
-
-            <div className="section-head">
-                <h2>http-zip source</h2>
-                <span className="count">conditional GET · checksum · zip-bomb limits · bearer / basic / header auth</span>
-            </div>
-            <CodeBlock file="sites.d/blog.example.com.yml" code={httpZipSourceExample} />
-
-            <div className="section-head">
-                <h2>Secrets</h2>
-                <span className="count">_env / _file refs only · 0600/0640 enforcement · systemd LoadCredential</span>
-            </div>
-            <CodeBlock file="secrets.yml" code={secretsExample} />
-
-            <div className="section-head">
-                <h2>CLI</h2>
-                <span className="count">single binary</span>
-            </div>
-            <CodeBlock file="cli-reference.sh" code={cliReference} />
-
-            <div className="section-head">
-                <h2>Admin endpoint</h2>
-                <span className="count">loopback HTTP · /healthz · /status · /sync/&lt;domain&gt;</span>
-            </div>
-            <CodeBlock file="admin.sh" code={adminEndpoints} />
-
-            <div className="section-head">
-                <h2>Signals</h2>
-                <span className="count">SIGHUP diff-reload · SIGTERM/SIGINT graceful shutdown</span>
-            </div>
-            <CodeBlock file="signals.txt" code={signalsSnippet} />
-
-            <div className="section-head">
-                <h2>Release retention</h2>
-                <span className="count">keep_releases · timestamped dirs · atomic current symlink</span>
-            </div>
-            <CodeBlock file="releases.txt" code={releasesSnippet} />
-
-            <div className="section-head">
-                <h2>Failure &amp; backoff</h2>
-                <span className="count">interval × 2^streak · capped at 4× · streak visible in /status</span>
-            </div>
-            <CodeBlock file="backoff.txt" code={backoffSnippet} />
-
-            <div className="section-head">
-                <h2>nginx integration</h2>
-                <span className="count">the daemon never touches nginx config</span>
-            </div>
-            <CodeBlock file="example.com.conf" code={nginxSnippet} />
-
-            <div className="section-head">
-                <h2>systemd &amp; SELinux</h2>
-                <span className="count">Type=notify · hardening · 0750/0640 umask · httpd_sys_content_t</span>
-            </div>
-            <CodeBlock file="nginxpilot.service" code={systemdSnippet} />
-
-            <div className="section-head">
-                <h2>Run it</h2>
-                <span className="count">binary, systemd or Docker</span>
-            </div>
+            <SectionHead title="Run it" count="binary, systemd or Docker" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 720 }}>
                 <CopyLine cmd="docker pull ghcr.io/kalevski/toolcase/nginxpilot:latest" />
                 <CopyLine cmd="nginxpilot validate && nginxpilot sync example.com" />
             </div>
 
-            <div className="section-head">
-                <h2>Source</h2>
-                <span className="count">lives in the toolcase monorepo</span>
-            </div>
-            <div className="lib-grid">
-                <a
-                    href="https://github.com/kalevski/toolcase/tree/main/nginxpilot"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="lib-card"
-                >
-                    <div className="lib-card-head">
-                        <div>
-                            <h3 className="lib-name">kalevski/toolcase</h3>
-                            <p className="lib-tagline">nginxpilot/ — Go module, README, systemd unit, Dockerfile</p>
-                        </div>
-                        <span className="lib-arrow">→</span>
-                    </div>
-                </a>
-            </div>
+            <SourceCard dir="nginxpilot" tagline="Go module, README, systemd unit, Dockerfile" />
         </main>
     )
 }
