@@ -36,10 +36,6 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("defaults.keep_releases must be >= 1")
 	}
 
-	if cfg.Admin.TokenEnv != "" && cfg.Admin.TokenFile != "" {
-		return fmt.Errorf("admin.token_env and admin.token_file are mutually exclusive")
-	}
-
 	if err := validateNginx(cfg); err != nil {
 		return err
 	}

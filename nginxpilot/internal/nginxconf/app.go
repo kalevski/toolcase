@@ -57,7 +57,8 @@ func AppVhost(cfg *config.Config, app *config.App, opts Options) (string, error)
 	}
 	b.WriteByte('\n')
 
-	writeRedirectIfForceSSL(&b, app.Domain, 80, tls, app.WebOptions)
+	acmeRoot := acmeWebroot(cfg)
+	writeRedirectIfForceSSL(&b, app.Domain, 80, tls, app.WebOptions, acmeRoot)
 
 	b.WriteString("server {\n")
 	writeListeners(&b, 80, tls, app.WebOptions)
@@ -65,6 +66,9 @@ func AppVhost(cfg *config.Config, app *config.App, opts Options) (string, error)
 	writeSSL(&b, tls)
 	writeAccessLog(&b, cfg, opts, app.Domain, LogResourceApp)
 	writeServerToggles(&b, app.WebOptions, opts, tls)
+	if acmeRoot != "" {
+		writeACMEChallengeLocation(&b, acmeRoot, "    ")
+	}
 
 	fmt.Fprintf(&b, "\n    root %s;\n", root)
 	fmt.Fprintf(&b, "    index %s index.html;\n", index)

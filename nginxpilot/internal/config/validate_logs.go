@@ -15,6 +15,9 @@ import (
 // against path tricks — same regex and rationale as the credstore (G10).
 var logDestNameRe = regexp.MustCompile(`^[a-z0-9-]+$`)
 
+// headerNameRe is the RFC 7230 token grammar for a custom auth header name.
+var headerNameRe = regexp.MustCompile(`^[!#$%&'*+.^_|~0-9A-Za-z-]+$`)
+
 // lokiLabelNameRe is Loki's label-name grammar (G16).
 var lokiLabelNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 
@@ -107,6 +110,9 @@ func validateLogDestination(d *LogDestination, hasWildcardVhost bool) error {
 		if err := validateLogAuth(d.Auth); err != nil {
 			return err
 		}
+		if err := validateLogTLSFiles(d); err != nil {
+			return err
+		}
 		if d.Path != "" || d.MaxSize != 0 || d.MaxFiles != 0 {
 			return fmt.Errorf("path / max_size / max_files only apply to type: file")
 		}
@@ -162,8 +168,9 @@ func validateLogDestination(d *LogDestination, hasWildcardVhost bool) error {
 
 // noPushFields rejects push-only fields on local destination types.
 func noPushFields(d *LogDestination) error {
-	if d.URL != "" || d.Tenant != "" || d.CAFile != "" || d.InsecureSkipVerify || d.AllowInsecure {
-		return fmt.Errorf("url / tenant / ca_file / tls options only apply to type: loki | http")
+	if d.URL != "" || d.Tenant != "" || d.CAFile != "" || d.InsecureSkipVerify || d.AllowInsecure ||
+		d.ClientCertFile != "" || d.ClientKeyFile != "" {
+		return fmt.Errorf("url / tenant / ca_file / client_cert_file / tls options only apply to type: loki | http")
 	}
 	if d.Auth.MethodOrNone() != AuthNone {
 		return fmt.Errorf("auth only applies to type: loki | http")
@@ -200,11 +207,34 @@ func validateLogDestURL(d *LogDestination) error {
 	return nil
 }
 
+// validateLogTLSFiles enforces the certificate-file rules: inline PEM traps
+// empty (the admin API moves them into files), and a client certificate
+// comes with its key.
+func validateLogTLSFiles(d *LogDestination) error {
+	for key, val := range map[string]string{"ca_pem": d.CAPEM, "client_cert_pem": d.ClientCertPEM, "client_key_pem": d.ClientKeyPEM} {
+		if val != "" {
+			return fmt.Errorf("inline certificates are only accepted through the admin API: use %s_file instead of %s", strings.TrimSuffix(key, "_pem"), key)
+		}
+	}
+	if (d.ClientCertFile == "") != (d.ClientKeyFile == "") {
+		return fmt.Errorf("client_cert_file and client_key_file must be set together")
+	}
+	if d.ClientKeyFile != "" {
+		if err := CheckSecretFile(d.ClientKeyFile); err != nil {
+			return fmt.Errorf("client_key_file: %w", err)
+		}
+	}
+	return nil
+}
+
 func validateLogAuth(a LogAuth) error {
-	for key, val := range map[string]string{"password": a.Password, "token": a.Token} {
+	for key, val := range map[string]string{"password": a.Password, "token": a.Token, "header_value": a.HeaderValue} {
 		if val != "" {
 			return fmt.Errorf("inline secrets are not allowed: use auth.%s_env or auth.%s_file instead of auth.%s", key, key, key)
 		}
+	}
+	if a.MethodOrNone() != AuthHeader && (a.HeaderName != "" || a.HeaderValueEnv != "" || a.HeaderValueFile != "") {
+		return fmt.Errorf("header_name / header_value refs only apply to auth.method: header")
 	}
 	switch a.MethodOrNone() {
 	case AuthNone:
@@ -231,8 +261,18 @@ func validateLogAuth(a LogAuth) error {
 		if a.PasswordEnv != "" || a.PasswordFile != "" {
 			return fmt.Errorf("password refs only apply to auth.method: basic")
 		}
+	case AuthHeader:
+		if !headerNameRe.MatchString(a.HeaderName) {
+			return fmt.Errorf("auth.header_name %q: must be a valid HTTP header name", a.HeaderName)
+		}
+		if a.Username != "" || a.PasswordEnv != "" || a.PasswordFile != "" || a.TokenEnv != "" || a.TokenFile != "" {
+			return fmt.Errorf("username / password / token refs do not apply to auth.method: header")
+		}
+		if err := exactlyOneRef("header_value", a.HeaderValueEnv, a.HeaderValueFile); err != nil {
+			return err
+		}
 	default:
-		return fmt.Errorf("auth.method %q: log destinations support basic | bearer | none", a.Method)
+		return fmt.Errorf("auth.method %q: log destinations support basic | bearer | header | none", a.Method)
 	}
 	return nil
 }

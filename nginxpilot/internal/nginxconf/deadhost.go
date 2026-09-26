@@ -12,7 +12,7 @@ import (
 // zero response bytes. Unlike redirects, force_ssl IS allowed — an https-only
 // parked domain that 301s plain HTTP up first is legitimate.
 func DeadHostVhost(cfg *config.Config, d *config.DeadHost, opts Options) (string, error) {
-	return renderSimpleVhost(cfg, "dead host", d.Domain, d.ListenPort(), d.WebOptions, d.AccessList, opts, func(b *strings.Builder) {
-		fmt.Fprintf(b, "\n    return %d;\n", d.CodeOrDefault())
+	return renderSimpleVhost(cfg, "dead host", d.Domain, d.ListenPort(), d.WebOptions, d.AccessList, opts, func(b *strings.Builder, indent string) {
+		fmt.Fprintf(b, "\n%sreturn %d;\n", indent, d.CodeOrDefault())
 	})
 }

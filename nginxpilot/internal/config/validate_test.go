@@ -14,17 +14,15 @@ func minValidConfig() Config {
 	}
 }
 
-func TestValidateAdminTokenMutualExclusion(t *testing.T) {
+// token_env alongside token_file is the seeding setup (the env var seeds the
+// hashed file on first start), so the pair must validate.
+func TestValidateAdminTokenEnvSeedsFile(t *testing.T) {
 	cfg := minValidConfig()
 	cfg.Admin.TokenEnv = "SOME_ENV"
 	cfg.Admin.TokenFile = "/some/file"
 
-	err := Validate(&cfg)
-	if err == nil {
-		t.Fatal("expected error when both token_env and token_file are set, got nil")
-	}
-	if !strings.Contains(err.Error(), "mutually exclusive") {
-		t.Fatalf("expected 'mutually exclusive' in error, got: %v", err)
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("token_env + token_file must validate, got: %v", err)
 	}
 }
 

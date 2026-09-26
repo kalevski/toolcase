@@ -13,6 +13,16 @@ RUN CGO_ENABLED=0 go build -trimpath \
     -ldflags "-s -w -X main.version=${VERSION}" \
     -o /out/nginxpilot ./cmd/nginxpilot
 
+# ── certbot-dns-zonewright (optional build context) ─────────────────────────
+# The certbot DNS-01 plugin for zonewright lives next to zonewright in this
+# repo. It is handed to the build as a named build context, so the image
+# carries the plugin from the same checkout as the daemon:
+#   docker build --build-context certbot-dns-zonewright=zonewright/certbot-dns-zonewright nginxpilot
+# (the nginxpilot workflow passes it). Without that context this empty stage
+# stands in and the plugin is skipped: the image still builds, just without
+# DNS-01 through zonewright.
+FROM scratch AS certbot-dns-zonewright
+
 # ── Runtime stage ────────────────────────────────────────────────────────
 # nginx base image: one container runs nginx AND the sync daemon, sharing
 # /var/lib/nginxpilot directly. git + openssh-client are required
@@ -50,6 +60,17 @@ ARG PHP_EXTENSIONS="fpm opcache session mysqli pdo pdo_mysql pdo_pgsql pdo_sqlit
 RUN apk add --no-cache --upgrade libexpat git openssh-client ca-certificates \
     tzdata su-exec libcap certbot py3-pip curl && \
     pip install --break-system-packages certbot-nginx ${CERTBOT_DNS_PLUGINS}
+
+# certbot-dns-zonewright from the build context above, when one was given.
+# The bind mount is rw because setuptools writes build metadata into the
+# source tree; those writes are discarded with the mount.
+RUN --mount=type=bind,from=certbot-dns-zonewright,target=/tmp/certbot-dns-zonewright,rw \
+    if [ -f /tmp/certbot-dns-zonewright/pyproject.toml ]; then \
+        pip install --break-system-packages --no-cache-dir /tmp/certbot-dns-zonewright && \
+        certbot plugins --text 2>/dev/null | grep -q '^\* dns-zonewright$'; \
+    else \
+        echo "certbot-dns-zonewright: no build context given, plugin not installed"; \
+    fi
 
 # php-fpm + extensions, only when PHP_VERSION is set. The pool files nginxpilot
 # writes live in /etc/php/pool.d (created by the entrypoint on the writable

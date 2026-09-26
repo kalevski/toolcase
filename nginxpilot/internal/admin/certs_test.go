@@ -4,8 +4,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
 	"math/big"
@@ -119,5 +122,217 @@ func writeFlatCert(t *testing.T, dir, domain string, sans []string, notAfter tim
 	}
 	if err := os.WriteFile(filepath.Join(dir, domain+".key"), keyPEM, 0o600); err != nil {
 		t.Fatalf("write key: %v", err)
+	}
+}
+
+// GET /certs/bundle/{domain} exports a flat cert with its key, leaf identity and
+// a no-store header — the material a control plane re-uploads elsewhere.
+func TestCertBundleFlat(t *testing.T) {
+	env := newSitesEnv(t, "")
+	dir := t.TempDir()
+	writeFlatCert(t, dir, "webapp.mk", []string{"webapp.mk", "*.webapp.mk"}, time.Now().Add(90*24*time.Hour))
+	env.cfg.Tls = config.Tls{CertDir: dir}
+
+	rec := do(env, http.MethodGet, "/certs/bundle/webapp.mk", "", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("bundle: want 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if got := rec.Header().Get("Cache-Control"); got != "no-store" {
+		t.Errorf("Cache-Control: want no-store, got %q", got)
+	}
+	var out certBundle
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatalf("decode bundle: %v", err)
+	}
+	crt, _ := os.ReadFile(filepath.Join(dir, "webapp.mk.crt"))
+	key, _ := os.ReadFile(filepath.Join(dir, "webapp.mk.key"))
+	if out.Key != string(key) {
+		t.Errorf("key: want the on-disk key")
+	}
+	if out.Cert != string(crt) || out.Fullchain != string(crt) || out.Chain != "" {
+		t.Errorf("a lone leaf must be cert == fullchain with an empty chain: %+v", out)
+	}
+	block, _ := pem.Decode(crt)
+	sum := sha256.Sum256(block.Bytes)
+	if out.FingerprintSHA256 != hex.EncodeToString(sum[:]) {
+		t.Errorf("fingerprint: want %x, got %s", sum, out.FingerprintSHA256)
+	}
+	if out.Serial != "1" || out.Domain != "webapp.mk" || len(out.Names) != 2 || out.RenewManaged {
+		t.Errorf("identity fields wrong: %+v", out)
+	}
+	if _, err := tls.X509KeyPair([]byte(out.Fullchain), []byte(out.Key)); err != nil {
+		t.Errorf("exported pair does not load: %v", err)
+	}
+}
+
+// A certbot live lineage exports its leaf and chain separately, and a wildcard
+// path segment addresses the lineage the way renew does ("*." stripped).
+func TestCertBundleLiveLayoutWithChain(t *testing.T) {
+	env := newSitesEnv(t, "")
+	dir := t.TempDir()
+	leafPEM, chainPEM, keyPEM := chainedCert(t, []string{"example.com", "*.example.com"})
+	live := filepath.Join(dir, "example.com")
+	if err := os.MkdirAll(live, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(live, "fullchain.pem"), append(append([]byte{}, leafPEM...), chainPEM...), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(live, "privkey.pem"), keyPEM, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	env.cfg.Tls = config.Tls{CertDir: dir}
+
+	rec := do(env, http.MethodGet, "/certs/bundle/*.example.com", "", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("bundle: want 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	var out certBundle
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatalf("decode bundle: %v", err)
+	}
+	if out.Domain != "example.com" {
+		t.Errorf("domain: want example.com, got %q", out.Domain)
+	}
+	if out.Cert != string(leafPEM) || out.Chain != string(chainPEM) {
+		t.Errorf("leaf/chain split wrong:\ncert=%q\nchain=%q", out.Cert, out.Chain)
+	}
+	if out.Fullchain != string(leafPEM)+string(chainPEM) {
+		t.Errorf("fullchain must be leaf + chain")
+	}
+	if out.Issuer != "Test CA" {
+		t.Errorf("issuer: want Test CA, got %q", out.Issuer)
+	}
+}
+
+// Only the exact cert name is exported: a wildcard neighbour that would serve
+// the host is never handed out in its place.
+func TestCertBundleExactNameOnly(t *testing.T) {
+	env := newSitesEnv(t, "")
+	dir := t.TempDir()
+	writeFlatCert(t, dir, "webapp.mk", []string{"webapp.mk", "*.webapp.mk"}, time.Now().Add(time.Hour))
+	env.cfg.Tls = config.Tls{CertDir: dir}
+
+	if rec := do(env, http.MethodGet, "/certs/bundle/shop.webapp.mk", "", ""); rec.Code != http.StatusNotFound {
+		t.Fatalf("SAN-covered name: want 404, got %d", rec.Code)
+	}
+}
+
+// A key that does not belong to the cert (a torn write) is refused, never exported.
+func TestCertBundleMismatchedKey(t *testing.T) {
+	env := newSitesEnv(t, "")
+	dir := t.TempDir()
+	writeFlatCert(t, dir, "a.example", []string{"a.example"}, time.Now().Add(time.Hour))
+	writeFlatCert(t, dir, "b.example", []string{"b.example"}, time.Now().Add(time.Hour))
+	other, _ := os.ReadFile(filepath.Join(dir, "b.example.key"))
+	if err := os.WriteFile(filepath.Join(dir, "a.example.key"), other, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	env.cfg.Tls = config.Tls{CertDir: dir}
+
+	rec := do(env, http.MethodGet, "/certs/bundle/a.example", "", "")
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("mismatched key: want 500, got %d", rec.Code)
+	}
+	if strings.Contains(rec.Body.String(), "PRIVATE KEY") {
+		t.Errorf("key material leaked in the error: %s", rec.Body.String())
+	}
+}
+
+func TestCertBundleNoCertDir(t *testing.T) {
+	env := newSitesEnv(t, "")
+	if rec := do(env, http.MethodGet, "/certs/bundle/webapp.mk", "", ""); rec.Code != http.StatusNotImplemented {
+		t.Fatalf("no cert dir: want 501, got %d", rec.Code)
+	}
+}
+
+// chainedCert issues a leaf for sans from a throwaway CA and returns the leaf,
+// chain (the CA) and leaf key as PEM.
+func chainedCert(t *testing.T, sans []string) (leafPEM, chainPEM, keyPEM []byte) {
+	t.Helper()
+	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	caTmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(10),
+		Subject:               pkix.Name{CommonName: "Test CA"},
+		NotBefore:             time.Now().Add(-time.Hour),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		IsCA:                  true,
+		BasicConstraintsValid: true,
+		KeyUsage:              x509.KeyUsageCertSign,
+	}
+	caDER, err := x509.CreateCertificate(rand.Reader, caTmpl, caTmpl, &caKey.PublicKey, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ca, _ := x509.ParseCertificate(caDER)
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmpl := &x509.Certificate{
+		SerialNumber: big.NewInt(11),
+		Subject:      pkix.Name{CommonName: sans[0]},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(12 * time.Hour),
+		DNSNames:     sans,
+	}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, ca, &key.PublicKey, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keyDER, _ := x509.MarshalECPrivateKey(key)
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}),
+		pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caDER}),
+		pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyDER})
+}
+
+// GET /certs carries each cert's serial and leaf fingerprint, equal to what the
+// bundle export reports, and a re-issued cert under the same name shows a new
+// fingerprint — the signal a control plane uses to spot a renewal.
+func TestListCertsSerialAndFingerprint(t *testing.T) {
+	env := newSitesEnv(t, "")
+	dir := t.TempDir()
+	writeFlatCert(t, dir, "webapp.mk", []string{"webapp.mk"}, time.Now().Add(time.Hour))
+	env.cfg.Tls = config.Tls{CertDir: dir}
+
+	type listed struct {
+		Certs []struct {
+			Serial            string `json:"serial"`
+			FingerprintSHA256 string `json:"fingerprint_sha256"`
+		} `json:"certs"`
+	}
+	list := func() (string, string) {
+		t.Helper()
+		var out listed
+		rec := do(env, http.MethodGet, "/certs", "", "")
+		if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil || len(out.Certs) != 1 {
+			t.Fatalf("GET /certs: %v %s", err, rec.Body.String())
+		}
+		return out.Certs[0].Serial, out.Certs[0].FingerprintSHA256
+	}
+
+	serial, fp := list()
+	crt, _ := os.ReadFile(filepath.Join(dir, "webapp.mk.crt"))
+	block, _ := pem.Decode(crt)
+	sum := sha256.Sum256(block.Bytes)
+	if serial != "1" || fp != hex.EncodeToString(sum[:]) {
+		t.Fatalf("want serial 1 and fingerprint %x, got %q %q", sum, serial, fp)
+	}
+
+	var bundle certBundle
+	rec := do(env, http.MethodGet, "/certs/bundle/webapp.mk", "", "")
+	if err := json.Unmarshal(rec.Body.Bytes(), &bundle); err != nil {
+		t.Fatalf("decode bundle: %v", err)
+	}
+	if bundle.FingerprintSHA256 != fp || bundle.Serial != serial {
+		t.Errorf("listing and bundle disagree: %q/%q vs %q/%q", serial, fp, bundle.Serial, bundle.FingerprintSHA256)
+	}
+
+	writeFlatCert(t, dir, "webapp.mk", []string{"webapp.mk"}, time.Now().Add(2*time.Hour))
+	if _, fp2 := list(); fp2 == fp {
+		t.Errorf("re-issued cert kept the old fingerprint %s", fp)
 	}
 }

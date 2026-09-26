@@ -13,8 +13,8 @@ import (
 // redirects too. force_ssl is rejected in validation (the redirect IS the
 // redirect).
 func RedirectVhost(cfg *config.Config, r *config.Redirect, opts Options) (string, error) {
-	return renderSimpleVhost(cfg, "redirect", r.Domain, r.ListenPort(), r.WebOptions, r.AccessList, opts, func(b *strings.Builder) {
-		fmt.Fprintf(b, "\n    return %d %s;\n", r.CodeOrDefault(), redirectTarget(r))
+	return renderSimpleVhost(cfg, "redirect", r.Domain, r.ListenPort(), r.WebOptions, r.AccessList, opts, func(b *strings.Builder, indent string) {
+		fmt.Fprintf(b, "\n%sreturn %d %s;\n", indent, r.CodeOrDefault(), redirectTarget(r))
 	})
 }
 

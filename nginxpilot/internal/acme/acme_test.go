@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -69,10 +71,13 @@ func TestIssueDNSDigitalOceanArgv(t *testing.T) {
 	if cap.name != "certbot" {
 		t.Fatalf("binary = %q, want certbot", cap.name)
 	}
-	for _, want := range []string{"certonly", "--dns-digitalocean", "--staging", "--cert-name", "example.com"} {
+	for _, want := range []string{"certonly", "--staging", "--cert-name", "example.com"} {
 		if !contains(cap.args, want) {
 			t.Errorf("argv missing %q: %v", want, cap.args)
 		}
+	}
+	if !hasFlagPair(cap.args, "--authenticator", "dns-digitalocean") || contains(cap.args, "--dns-digitalocean") {
+		t.Errorf("plugin must be selected with --authenticator dns-digitalocean: %v", cap.args)
 	}
 	if !hasFlagPair(cap.args, "--dns-digitalocean-propagation-seconds", "45") {
 		t.Errorf("propagation-seconds not 45: %v", cap.args)
@@ -115,6 +120,40 @@ func TestIssueHTTPWebrootArgv(t *testing.T) {
 	}
 	if contains(cap.args, "--staging") {
 		t.Errorf("unexpected --staging: %v", cap.args)
+	}
+	if contains(cap.args, "--dry-run") {
+		t.Errorf("unexpected --dry-run: %v", cap.args)
+	}
+}
+
+// DryRun adds certbot's --dry-run to an otherwise identical certonly: against
+// staging by default, against acme.server when one is configured (certbot runs
+// a dry run against any non-production directory it is pointed at).
+func TestIssueDryRunArgv(t *testing.T) {
+	cfg := config.Acme{
+		Enabled: true, Email: "a@b.com", Challenge: config.ChallengeHTTP,
+		ConfigDir: t.TempDir(), HTTP: config.AcmeHTTP{Webroot: "/var/www/acme"},
+	}
+	c, cap := newClient(t, cfg, nil)
+	if _, err := c.Issue(context.Background(), "wmk-test-1", []string{"t1.example.com"}, IssueOptions{DryRun: true, Staging: true}); err != nil {
+		t.Fatalf("Issue: %v", err)
+	}
+	for _, want := range []string{"certonly", "--dry-run", "--staging", "--webroot"} {
+		if !contains(cap.args, want) {
+			t.Errorf("argv missing %q: %v", want, cap.args)
+		}
+	}
+	if !hasFlagPair(cap.args, "--cert-name", "wmk-test-1") {
+		t.Errorf("cert-name missing: %v", cap.args)
+	}
+
+	cfg.Server = "https://localhost:14000/dir"
+	c, cap = newClient(t, cfg, nil)
+	if _, err := c.Issue(context.Background(), "", []string{"t2.example.com"}, IssueOptions{DryRun: true}); err != nil {
+		t.Fatalf("Issue: %v", err)
+	}
+	if !contains(cap.args, "--dry-run") || !hasFlagPair(cap.args, "--server", cfg.Server) || contains(cap.args, "--staging") {
+		t.Errorf("dry run against acme.server: %v", cap.args)
 	}
 }
 
@@ -173,7 +212,7 @@ func TestIssueOptionOverrides(t *testing.T) {
 	if hasFlagPair(cap.args, "-m", "config@b.com") {
 		t.Errorf("config email should be overridden: %v", cap.args)
 	}
-	if !contains(cap.args, "--dns-cloudflare") || contains(cap.args, "--dns-digitalocean") {
+	if !hasFlagPair(cap.args, "--authenticator", "dns-cloudflare") || hasFlagPair(cap.args, "--authenticator", "dns-digitalocean") {
 		t.Errorf("override provider not used: %v", cap.args)
 	}
 	if !contains(cap.args, "--dns-cloudflare-credentials") {
@@ -190,5 +229,139 @@ func TestCertName(t *testing.T) {
 	}
 	if got := CertName([]string{"a.example.com"}); got != "a.example.com" {
 		t.Errorf("CertName = %q", got)
+	}
+}
+
+// Revoke goes to the directory that issued the lineage (renewal/<name>.conf),
+// passes the reason, and never deletes unless asked.
+func TestRevokeArgv(t *testing.T) {
+	cfgDir := t.TempDir()
+	cfg := config.Acme{Enabled: true, Email: "a@b.com", ConfigDir: cfgDir, Staging: true}
+	if err := os.MkdirAll(filepath.Join(cfgDir, "renewal"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	conf := "version = 2.11.0\narchive_dir = /x\n[renewalparams]\nserver = https://acme-staging-v02.api.letsencrypt.org/directory\n"
+	if err := os.WriteFile(filepath.Join(cfgDir, "renewal", "wmk-1-g1.conf"), []byte(conf), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c, cap := newClient(t, cfg, nil)
+
+	if _, err := c.Revoke(context.Background(), "wmk-1-g1", "", false); err != nil {
+		t.Fatalf("Revoke: %v", err)
+	}
+	if !contains(cap.args, "revoke") || !hasFlagPair(cap.args, "--cert-name", "wmk-1-g1") ||
+		!hasFlagPair(cap.args, "--reason", "unspecified") || !contains(cap.args, "--no-delete-after-revoke") {
+		t.Errorf("revoke argv: %v", cap.args)
+	}
+	if !hasFlagPair(cap.args, "--server", "https://acme-staging-v02.api.letsencrypt.org/directory") || contains(cap.args, "--staging") {
+		t.Errorf("revoke must target the lineage's own server: %v", cap.args)
+	}
+
+	if _, err := c.Revoke(context.Background(), "other", "superseded", true); err != nil {
+		t.Fatalf("Revoke: %v", err)
+	}
+	if !contains(cap.args, "--delete-after-revoke") || !hasFlagPair(cap.args, "--reason", "superseded") || !contains(cap.args, "--staging") {
+		t.Errorf("no renewal conf → daemon server flags; delete honoured: %v", cap.args)
+	}
+
+	cap.args = nil
+	if _, err := c.Revoke(context.Background(), "wmk-1-g1", "because", false); err == nil || cap.args != nil {
+		t.Errorf("an unknown reason must be refused before certbot runs (err=%v argv=%v)", err, cap.args)
+	}
+}
+
+// A provider's own propagation entry wins over the global value in the argv.
+func TestIssuePropagationPerProvider(t *testing.T) {
+	store := credstore.New(t.TempDir())
+	for _, p := range []string{"zonewright", "cloudflare"} {
+		if err := store.Set(p, "", []byte("k = v\n")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cfg := config.Acme{
+		Enabled: true, Email: "a@b.com", Challenge: config.ChallengeDNS, ConfigDir: t.TempDir(),
+		DNS: config.AcmeDNS{Provider: "cloudflare", PropagationSeconds: 45, PropagationSecondsByProvider: map[string]int{"zonewright": 10}},
+	}
+	c, cap := newClient(t, cfg, store)
+	if _, err := c.Issue(context.Background(), "", []string{"example.com"}, IssueOptions{Provider: "zonewright"}); err != nil {
+		t.Fatalf("Issue: %v", err)
+	}
+	if !hasFlagPair(cap.args, "--dns-zonewright-propagation-seconds", "10") {
+		t.Errorf("zonewright wait not 10: %v", cap.args)
+	}
+	if _, err := c.Issue(context.Background(), "", []string{"example.com"}, IssueOptions{}); err != nil {
+		t.Fatalf("Issue: %v", err)
+	}
+	if !hasFlagPair(cap.args, "--dns-cloudflare-propagation-seconds", "45") {
+		t.Errorf("default provider must fall back to the global 45: %v", cap.args)
+	}
+}
+
+func flagValue(args []string, flag string) string {
+	for i := 0; i+1 < len(args); i++ {
+		if args[i] == flag {
+			return args[i+1]
+		}
+	}
+	return ""
+}
+
+// A config-referenced credential serves only acme.dns.provider's default
+// account, lives at a stable 0600 path that survives the run (certbot's renewal
+// config points at it), and is rewritten from the current secret before every
+// renewal.
+func TestConfigCredentialsScopedAndStable(t *testing.T) {
+	t.Setenv("NP_TEST_DNS_CREDS", "dns_cloudflare_api_token = FIRST")
+	store := credstore.New(t.TempDir())
+	if err := store.Set("zonewright", "", []byte("dns_zonewright_token = STORE\n")); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Set("cloudflare", "edge", []byte("dns_cloudflare_api_token = NAMED\n")); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Acme{
+		Enabled: true, Email: "a@b.com", Challenge: config.ChallengeDNS, ConfigDir: t.TempDir(),
+		DNS: config.AcmeDNS{Provider: "cloudflare", CredentialsEnv: "NP_TEST_DNS_CREDS"},
+	}
+	c, cap := newClient(t, cfg, store)
+
+	if _, err := c.Issue(context.Background(), "", []string{"example.com"}, IssueOptions{}); err != nil {
+		t.Fatalf("Issue: %v", err)
+	}
+	path := flagValue(cap.args, "--dns-cloudflare-credentials")
+	if path != c.ConfigCredentialsPath() {
+		t.Fatalf("default provider must use the stable config path %q, got %q", c.ConfigCredentialsPath(), path)
+	}
+	fi, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("config credential must outlive the run (renewals re-read it): %v", err)
+	}
+	if fi.Mode().Perm() != 0o600 {
+		t.Errorf("config credential mode = %v, want 0600", fi.Mode().Perm())
+	}
+
+	if _, err := c.Issue(context.Background(), "", []string{"example.org"}, IssueOptions{Provider: "zonewright"}); err != nil {
+		t.Fatalf("Issue zonewright: %v", err)
+	}
+	if got := flagValue(cap.args, "--dns-zonewright-credentials"); got == "" || got == c.ConfigCredentialsPath() {
+		t.Errorf("another provider must use its stored credential, got %q", got)
+	}
+	if _, err := c.Issue(context.Background(), "", []string{"example.net"}, IssueOptions{Account: "edge"}); err != nil {
+		t.Fatalf("Issue named account: %v", err)
+	}
+	if got := flagValue(cap.args, "--dns-cloudflare-credentials"); got == c.ConfigCredentialsPath() {
+		t.Errorf("a named account must use its stored credential, got the config one")
+	}
+
+	t.Setenv("NP_TEST_DNS_CREDS", "dns_cloudflare_api_token = ROTATED")
+	if _, err := c.Renew(context.Background(), "example.com"); err != nil {
+		t.Fatalf("Renew: %v", err)
+	}
+	body, _ := os.ReadFile(path)
+	if !strings.Contains(string(body), "ROTATED") {
+		t.Errorf("renewal must refresh the config credential, file has %q", body)
+	}
+	if !c.UsesConfigCredentials("cloudflare", "") || c.UsesConfigCredentials("cloudflare", "edge") || c.UsesConfigCredentials("zonewright", "") {
+		t.Errorf("UsesConfigCredentials scope wrong")
 	}
 }

@@ -26,7 +26,8 @@ func StaticVhost(cfg *config.Config, site *config.Site, opts Options) (string, e
 	}
 	b.WriteByte('\n')
 
-	writeRedirectIfForceSSL(&b, site.Domain, 80, tls, site.WebOptions)
+	acmeRoot := acmeWebroot(cfg)
+	writeRedirectIfForceSSL(&b, site.Domain, 80, tls, site.WebOptions, acmeRoot)
 
 	b.WriteString("server {\n")
 	writeListeners(&b, 80, tls, site.WebOptions)
@@ -34,6 +35,9 @@ func StaticVhost(cfg *config.Config, site *config.Site, opts Options) (string, e
 	writeSSL(&b, tls)
 	writeAccessLog(&b, cfg, opts, site.Domain, LogResourceSite)
 	writeServerToggles(&b, site.WebOptions, opts, tls)
+	if acmeRoot != "" {
+		writeACMEChallengeLocation(&b, acmeRoot, "    ")
+	}
 
 	fmt.Fprintf(&b, "\n    root %s;\n    index index.html;\n", root)
 	if site.NotFound != "" {
@@ -97,7 +101,8 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 		}
 	}
 
-	writeRedirectIfForceSSL(&b, p.Domain, p.ListenPort(), tls, p.WebOptions)
+	acmeRoot := acmeWebroot(cfg)
+	writeRedirectIfForceSSL(&b, p.Domain, p.ListenPort(), tls, p.WebOptions, acmeRoot)
 
 	httpPort := p.ListenPort()
 	b.WriteString("server {\n")
@@ -110,6 +115,9 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 	}
 	writeServerToggles(&b, p.WebOptions, opts, tls)
 	writeAccessControl(&b, cfg, p.AccessList)
+	if acmeRoot != "" {
+		writeACMEChallengeLocation(&b, acmeRoot, "    ")
+	}
 
 	consumeAuth := consumesAuthHeader(cfg, p.AccessList)
 	for _, loc := range effectiveLocations(p) {
@@ -124,11 +132,15 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 // renderSimpleVhost emits the shared server-block frame every "simple" http
 // vhost uses: resolveTLS → generation-comment header → writeRedirectIfForceSSL
 // → "server {" → writeListeners → server_name → writeSSL → writeServerToggles
-// → access list → body(b) → "}" → writeTLSHint. Redirect and dead-host
+// → access list → body(b, indent) → "}" → writeTLSHint. Redirect and dead-host
 // renderers differ ONLY in their body callback; ProxyVhost keeps its own frame
 // (it interleaves upstream inlining, client_max_body_size and cache concerns).
+// Their bodies are a bare `return`, which at server level would answer before
+// any location — so with an ACME webroot the body goes inside `location /`,
+// next to the challenge location, and with an access list it goes behind the
+// access check (see below); indent says how deep it is.
 func renderSimpleVhost(cfg *config.Config, kind, domain string, listen int, w config.WebOptions,
-	accessList string, opts Options, body func(b *strings.Builder)) (string, error) {
+	accessList string, opts Options, body func(b *strings.Builder, indent string)) (string, error) {
 	tls, err := resolveTLS(w.TLSMode(), domain, opts)
 	if err != nil {
 		return "", err
@@ -141,7 +153,8 @@ func renderSimpleVhost(cfg *config.Config, kind, domain string, listen int, w co
 	}
 	b.WriteByte('\n')
 
-	writeRedirectIfForceSSL(&b, domain, listen, tls, w)
+	acmeRoot := acmeWebroot(cfg)
+	writeRedirectIfForceSSL(&b, domain, listen, tls, w, acmeRoot)
 
 	b.WriteString("server {\n")
 	writeListeners(&b, listen, tls, w)
@@ -150,7 +163,29 @@ func renderSimpleVhost(cfg *config.Config, kind, domain string, listen int, w co
 	writeAccessLog(&b, cfg, opts, domain, simpleVhostResourceType(kind))
 	writeServerToggles(&b, w, opts, tls)
 	writeAccessControl(&b, cfg, accessList)
-	body(&b)
+	guarded := accessList != "" && findAccessList(cfg, accessList) != nil
+	switch {
+	case guarded:
+		// A return runs in the rewrite phase, BEFORE allow/deny and auth_basic
+		// (access phase), so a bare return would answer every client and the
+		// access list would guard nothing. try_files runs in the content phase,
+		// after the access check: a file that cannot exist falls through to the
+		// named location holding the return.
+		if acmeRoot != "" {
+			writeACMEChallengeLocation(&b, acmeRoot, "    ")
+		}
+		b.WriteString("\n    location / {\n        try_files /.nginxpilot-no-such-file @nginxpilot_answer;\n    }\n")
+		b.WriteString("\n    location @nginxpilot_answer {")
+		body(&b, "        ")
+		b.WriteString("    }\n")
+	case acmeRoot != "":
+		writeACMEChallengeLocation(&b, acmeRoot, "    ")
+		b.WriteString("\n    location / {")
+		body(&b, "        ")
+		b.WriteString("    }\n")
+	default:
+		body(&b, "    ")
+	}
 	b.WriteString("}\n")
 
 	writeTLSHint(&b, domain, w, opts, tls)
@@ -211,15 +246,22 @@ func writeListeners(b *strings.Builder, httpPort int, tls tlsState, w config.Web
 }
 
 // writeRedirectIfForceSSL emits the 80 → 301 https server when force_ssl is set
-// (validation guarantees force_ssl implies TLS).
-func writeRedirectIfForceSSL(b *strings.Builder, domain string, httpPort int, tls tlsState, w config.WebOptions) {
+// (validation guarantees force_ssl implies TLS). With an ACME webroot the
+// redirect moves into `location /`: a server-level return runs before any
+// location is matched, so it would redirect the HTTP-01 challenge too.
+func writeRedirectIfForceSSL(b *strings.Builder, domain string, httpPort int, tls tlsState, w config.WebOptions, acmeRoot string) {
 	if !w.ForceSSL || !tls.enabled {
 		return
 	}
 	b.WriteString("server {\n")
 	fmt.Fprintf(b, "    listen %d;\n    listen [::]:%d;\n", httpPort, httpPort)
 	fmt.Fprintf(b, "    server_name %s;\n", domain)
-	b.WriteString("    return 301 https://$host$request_uri;\n}\n\n")
+	if acmeRoot == "" {
+		b.WriteString("    return 301 https://$host$request_uri;\n}\n\n")
+		return
+	}
+	writeACMEChallengeLocation(b, acmeRoot, "    ")
+	b.WriteString("\n    location / {\n        return 301 https://$host$request_uri;\n    }\n}\n\n")
 }
 
 // writeSSL writes ssl_certificate/key plus nginxpilot's modern TLS defaults.

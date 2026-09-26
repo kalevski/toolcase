@@ -10,21 +10,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/acme"
 	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/credstore"
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 )
 
-// issueRequest is the POST /certs body. Email and Provider are optional per-call
-// overrides (empty → the daemon's acme.email / acme.dns.provider config defaults).
+// issueRequest is the POST /certs body. Email, Provider and Challenge are
+// optional per-call overrides (empty → the daemon's acme.email /
+// acme.dns.provider / acme.challenge defaults). Challenge must be one of
+// acme.challenges.
 type issueRequest struct {
-	Domains  []string `json:"domains"`
-	CertName string   `json:"cert_name"`
-	Email    string   `json:"email"`
-	Provider string   `json:"provider"`
-	Account  string   `json:"account"`
-	Staging  bool     `json:"staging"`
+	Domains   []string `json:"domains"`
+	CertName  string   `json:"cert_name"`
+	Email     string   `json:"email"`
+	Provider  string   `json:"provider"`
+	Account   string   `json:"account"`
+	Challenge string   `json:"challenge"`
+	Staging   bool     `json:"staging"`
+	DryRun    bool     `json:"dry_run"`
 }
 
 // uploadRequest is the PUT /certs/{domain} body (manual bring-your-own cert).
@@ -54,6 +59,15 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 	}
 	req.Email = strings.TrimSpace(req.Email)
 	req.Provider = strings.TrimSpace(req.Provider)
+	challenge, err := acme.EffectiveChallenge(s.mgr.Config().Acme, strings.TrimSpace(req.Challenge))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if (req.Provider != "" || req.Account != "") && challenge != config.ChallengeDNS {
+		http.Error(w, fmt.Sprintf("provider and account apply only to challenge dns (this request uses %s)", challenge), http.StatusBadRequest)
+		return
+	}
 	if req.Provider != "" && !credstore.ValidProvider(req.Provider) {
 		http.Error(w, "invalid provider (must match [a-z0-9-]+)", http.StatusBadRequest)
 		return
@@ -68,7 +82,6 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	challenge := s.mgr.Config().Acme.ChallengeOrDefault()
 	domains := make([]string, 0, len(req.Domains))
 	for _, d := range req.Domains {
 		nd, err := normalizeCertDomain(d)
@@ -77,35 +90,48 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if strings.HasPrefix(nd, "*.") && challenge != config.ChallengeDNS {
-			http.Error(w, fmt.Sprintf("wildcard domain %q requires acme.challenge: dns (current: %s)", d, challenge), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("wildcard domain %q requires challenge dns (this request uses %s)", d, challenge), http.StatusBadRequest)
 			return
 		}
 		domains = append(domains, nd)
 	}
 
-	name := req.CertName
-	if name == "" {
-		name = manager.CertName(domains)
+	name := manager.CertName(domains)
+	if req.CertName != "" {
+		n, err := normalizeCertName(req.CertName)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("invalid cert_name %q: %v", req.CertName, err), http.StatusBadRequest)
+			return
+		}
+		name = n
 	}
 
 	// Async: certbot (DNS-01 especially) can take minutes, so we don't block the
 	// request on it. Register a job, run the issuance in a detached goroutine, and
 	// return 202 + the job id immediately; the caller polls GET /certs/jobs/{id}.
-	job := s.jobs.create(name, domains, req.Staging)
-	email, provider, account, staging := req.Email, req.Provider, req.Account, req.Staging
+	job := s.jobs.create(name, domains, challenge, req.Staging, req.DryRun)
+	opts := acme.IssueOptions{
+		Email: req.Email, Provider: req.Provider, Account: req.Account,
+		Challenge: challenge, Staging: req.Staging, DryRun: req.DryRun,
+	}
 	go func() {
 		s.jobs.update(job.ID, func(j *certJob) { j.State = jobRunning })
 		// Detached from the request context (the HTTP response has already
 		// returned, which would cancel r.Context()); bounded by the same per-issue
 		// timeout the synchronous path used.
-		ctx, cancel := context.WithTimeout(context.Background(), s.issueTimeout())
+		ctx, cancel := context.WithTimeout(context.Background(), s.mgr.IssueTimeout(challenge, opts.Provider))
 		defer cancel()
-		if err := s.mgr.IssueCert(ctx, name, domains, email, provider, account, staging); err != nil {
+		if err := s.mgr.IssueCert(ctx, name, domains, opts); err != nil {
 			s.log.Warn("cert issue failed", "cert_name", name, "job", job.ID, "error", err)
 			s.jobs.update(job.ID, func(j *certJob) {
 				j.State = jobFailed
 				j.Error = err.Error()
 			})
+			return
+		}
+		if opts.DryRun {
+			s.log.Info("cert dry run passed", "cert_name", name, "job", job.ID)
+			s.jobs.update(job.ID, func(j *certJob) { j.State = jobSucceeded })
 			return
 		}
 		s.log.Info("cert issued", "cert_name", name, "job", job.ID)
@@ -122,6 +148,8 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 		"state":     job.State,
 		"cert_name": name,
 		"domains":   domains,
+		"challenge": challenge,
+		"dry_run":   req.DryRun,
 	}, s)
 }
 
@@ -219,6 +247,67 @@ func (s *Server) handleRenewCert(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte("renewed\n"))
+}
+
+// revokeRequest is the optional POST /certs/{domain}/revoke body. Reason is one
+// of acme.RevokeReasons (empty → unspecified); Delete also removes the lineage.
+type revokeRequest struct {
+	Reason string `json:"reason"`
+	Delete bool   `json:"delete"`
+}
+
+// handleRevokeCert revokes a certbot-issued cert at its CA
+// (POST /certs/{domain}/revoke). Synchronous like renew — no challenge runs, so
+// it returns within seconds. Without "delete" the lineage stays on disk and
+// keeps being served (revoked); the usual order is to install the replacement
+// first, then revoke the old one with reason "superseded" and delete it.
+func (s *Server) handleRevokeCert(w http.ResponseWriter, r *http.Request) {
+	if !s.mgr.AcmeEnabled() {
+		http.Error(w, "acme is not enabled", http.StatusNotImplemented)
+		return
+	}
+	name, err := normalizeCertDomain(r.PathValue("domain"))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("invalid domain: %v", err), http.StatusBadRequest)
+		return
+	}
+	name = strings.TrimPrefix(name, "*.")
+	var req revokeRequest
+	if r.ContentLength != 0 {
+		body, ok := readFragmentBody(w, r)
+		if !ok {
+			return
+		}
+		if len(strings.TrimSpace(string(body))) > 0 {
+			if err := json.Unmarshal(body, &req); err != nil {
+				http.Error(w, fmt.Sprintf("invalid JSON: %v", err), http.StatusBadRequest)
+				return
+			}
+		}
+	}
+	req.Reason = strings.ToLower(strings.TrimSpace(req.Reason))
+	if req.Reason == "" {
+		req.Reason = "unspecified"
+	}
+	if !acme.ValidRevokeReason(req.Reason) {
+		http.Error(w, fmt.Sprintf("invalid reason %q (one of %s)", req.Reason, strings.Join(acme.RevokeReasons, ", ")), http.StatusBadRequest)
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), s.issueTimeout())
+	defer cancel()
+	if err := s.mgr.RevokeCert(ctx, name, req.Reason, req.Delete); err != nil {
+		switch {
+		case errors.Is(err, os.ErrNotExist):
+			http.Error(w, "no such cert", http.StatusNotFound)
+		case errors.Is(err, manager.ErrManualCert):
+			http.Error(w, err.Error(), http.StatusConflict)
+		default:
+			http.Error(w, fmt.Sprintf("revoke failed: %v", err), http.StatusBadGateway)
+		}
+		return
+	}
+	s.log.Info("cert revoked", "cert_name", name, "reason", req.Reason, "deleted", req.Delete)
+	writeJSON(w, map[string]any{"status": "revoked", "domain": name, "reason": req.Reason, "deleted": req.Delete}, s)
 }
 
 // handleDeleteCert deletes a certbot-managed or manually uploaded cert
@@ -336,14 +425,16 @@ func (s *Server) certInfoFor(key string) *certInfo {
 				names = []string{}
 			}
 			return &certInfo{
-				Domain:    c.Domain,
-				Names:     names,
-				CertPath:  c.CertPath,
-				KeyPath:   c.KeyPath,
-				ModTime:   c.ModTime,
-				NotBefore: nonZeroTime(c.NotBefore),
-				NotAfter:  nonZeroTime(c.NotAfter),
-				Issuer:    c.Issuer,
+				Domain:            c.Domain,
+				Names:             names,
+				CertPath:          c.CertPath,
+				KeyPath:           c.KeyPath,
+				ModTime:           c.ModTime,
+				NotBefore:         nonZeroTime(c.NotBefore),
+				NotAfter:          nonZeroTime(c.NotAfter),
+				Issuer:            c.Issuer,
+				Serial:            c.Serial,
+				FingerprintSHA256: c.FingerprintSHA256,
 			}
 		}
 	}
@@ -358,6 +449,33 @@ func (s *Server) issueTimeout() time.Duration {
 
 // normalizeCertDomain normalizes a domain, allowing a single leading "*."
 // wildcard (which config.NormalizeDomain rejects).
+// normalizeCertName validates a caller-chosen cert_name and returns the form
+// certbot is given. The name becomes a certbot argv value (--cert-name), the
+// lineage directory live/<name>/ and the {domain} segment of every later route
+// (/certs/{domain}/renew, DELETE /certs/{domain}, /certs/bundle/{domain}), so it
+// must be exactly what those routes normalize to: a domain-shaped name (letters,
+// digits, hyphens; dots between labels; no wildcard), IDNA-normalized. A single
+// label such as "wmk-3f9a12-g1" is fine. Anything that could read as a flag,
+// escape the lineage directory or never be addressable again is refused.
+func normalizeCertName(name string) (string, error) {
+	if len(name) > 253 {
+		return "", fmt.Errorf("longer than 253 characters")
+	}
+	if strings.HasPrefix(name, "-") || strings.HasPrefix(name, ".") || strings.HasSuffix(name, ".") || strings.Contains(name, "..") {
+		return "", fmt.Errorf("must not start with '-' or '.', end with '.', or contain '..'")
+	}
+	n, err := config.NormalizeDomain(name)
+	if err != nil {
+		return "", err
+	}
+	for _, r := range n {
+		if !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '-' || r == '.') {
+			return "", fmt.Errorf("only letters, digits, '-' and '.' are allowed")
+		}
+	}
+	return n, nil
+}
+
 func normalizeCertDomain(d string) (string, error) {
 	if base, isWild := strings.CutPrefix(d, "*."); isWild {
 		nd, err := config.NormalizeDomain(base)

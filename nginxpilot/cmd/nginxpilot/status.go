@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"text/tabwriter"
@@ -29,25 +28,9 @@ func cmdStatus(args []string) int {
 		fmt.Fprintf(os.Stderr, "config error: %v\n", err)
 		return 1
 	}
-	listen := res.Config.Admin.ListenAddr()
-	if listen == "" {
-		fmt.Fprintln(os.Stderr, "admin endpoint is disabled (admin.listen is empty); status unavailable")
-		return 1
-	}
-	listen = normalizeListenAddr(listen)
-
-	req, err := http.NewRequest(http.MethodGet, "http://"+listen+"/status", nil)
+	resp, err := adminDo(res.Config.Admin, http.MethodGet, "/status", nil, "", 10*time.Second)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return 1
-	}
-	if token := clientAdminToken(res.Config.Admin); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "cannot reach the daemon at %s: %v (is it running?)\n", listen, err)
 		return 1
 	}
 	defer resp.Body.Close()
@@ -128,23 +111,6 @@ func cmdStatus(args []string) int {
 	return 0
 }
 
-// clientAdminToken resolves the bearer token the status client should present,
-// matching the daemon's own resolution (admin.token_env OR admin.token_file).
-// Returns "" when no auth is configured, or when a configured ref can't be
-// resolved here — in which case we still issue the request and let the daemon's
-// 401 surface a clear message rather than failing silently.
-func clientAdminToken(a config.Admin) string {
-	if a.TokenEnv == "" && a.TokenFile == "" {
-		return ""
-	}
-	token, err := config.ResolveSecret(a.TokenEnv, a.TokenFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "warning: cannot resolve admin token (%v); requesting without auth\n", err)
-		return ""
-	}
-	return token
-}
-
 func fmtTime(t *time.Time) string {
 	if t == nil || t.IsZero() {
 		return "-"
@@ -157,14 +123,6 @@ func orDash(s string) string {
 		return "-"
 	}
 	return s
-}
-
-func normalizeListenAddr(listen string) string {
-	host, port, err := net.SplitHostPort(listen)
-	if err == nil && (host == "" || host == "0.0.0.0" || host == "::") {
-		listen = net.JoinHostPort("127.0.0.1", port)
-	}
-	return listen
 }
 
 func truncate(s string, n int) string {

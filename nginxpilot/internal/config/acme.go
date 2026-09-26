@@ -37,8 +37,15 @@ type Acme struct {
 	// ZeroSSL/Buypass/etc.
 	Server string `yaml:"server"`
 
-	// Challenge selects how domain control is proven (default "dns").
+	// Challenge selects how domain control is proven (default "dns"). It is
+	// the challenge used when a POST /certs request names none.
 	Challenge string `yaml:"challenge"`
+
+	// Challenges is the set a POST /certs request may pick from with its
+	// "challenge" field, so one daemon can issue DNS-01 and HTTP-01
+	// certificates side by side. Default: just Challenge. Every entry's own
+	// settings must be valid (dns needs a provider, http a webroot).
+	Challenges []string `yaml:"challenges"`
 
 	DNS  AcmeDNS  `yaml:"dns"`
 	HTTP AcmeHTTP `yaml:"http"`
@@ -104,7 +111,17 @@ type AcmeDNS struct {
 	CredentialsFile string `yaml:"credentials_file"`
 
 	// PropagationSeconds → --dns-<provider>-propagation-seconds (default 60).
+	// The fallback for any provider not listed in PropagationSecondsByProvider.
 	PropagationSeconds int `yaml:"propagation_seconds"`
+
+	// PropagationSecondsByProvider overrides the wait per DNS plugin, keyed by
+	// the plugin suffix: a plugin that confirms its own record (zonewright waits
+	// until every server has it) needs far less than a slow public provider.
+	// A listed 0 is honoured as 0 — no wait — unlike the global fallback.
+	// certbot records the value used in each lineage's renewal config, so a
+	// change applies to new issuances; existing lineages keep theirs until
+	// re-issued.
+	PropagationSecondsByProvider map[string]int `yaml:"propagation_seconds_by_provider"`
 
 	// Inline-secret trap (mirrors Auth.Token et al.): declared so strict decode
 	// accepts the key and validation can emit a targeted error.
@@ -118,12 +135,35 @@ type AcmeHTTP struct {
 	Webroot string `yaml:"webroot"`
 }
 
-// PropagationSecondsOrDefault returns the effective DNS propagation wait.
+// PropagationSecondsOrDefault returns the global DNS propagation wait (the
+// fallback for providers without their own entry).
 func (d AcmeDNS) PropagationSecondsOrDefault() int {
 	if d.PropagationSeconds > 0 {
 		return d.PropagationSeconds
 	}
 	return DefaultAcmePropagationSeconds
+}
+
+// PropagationSecondsFor returns the wait for one DNS plugin: its entry in
+// propagation_seconds_by_provider when present, else the global value.
+func (d AcmeDNS) PropagationSecondsFor(provider string) int {
+	if s, ok := d.PropagationSecondsByProvider[provider]; ok {
+		return s
+	}
+	return d.PropagationSecondsOrDefault()
+}
+
+// MaxPropagationSeconds is the longest wait any provider may use — what a
+// renewal (which replays whichever provider a lineage was issued with) must
+// allow for.
+func (d AcmeDNS) MaxPropagationSeconds() int {
+	longest := d.PropagationSecondsOrDefault()
+	for _, s := range d.PropagationSecondsByProvider {
+		if s > longest {
+			longest = s
+		}
+	}
+	return longest
 }
 
 // ChallengeOrDefault returns the effective challenge method.
@@ -132,6 +172,25 @@ func (a Acme) ChallengeOrDefault() string {
 		return ChallengeDNS
 	}
 	return a.Challenge
+}
+
+// ChallengesOrDefault returns the challenges a request may pick: the
+// configured set, or just the default challenge.
+func (a Acme) ChallengesOrDefault() []string {
+	if len(a.Challenges) > 0 {
+		return a.Challenges
+	}
+	return []string{a.ChallengeOrDefault()}
+}
+
+// AllowsChallenge reports whether a request may use challenge c.
+func (a Acme) AllowsChallenge(c string) bool {
+	for _, x := range a.ChallengesOrDefault() {
+		if x == c {
+			return true
+		}
+	}
+	return false
 }
 
 // ConfigDirOrDefault returns the effective certbot --config-dir.
@@ -161,13 +220,13 @@ func applyAcmeDefaults(cfg *Config) {
 	if a.ConfigDir == "" {
 		a.ConfigDir = DefaultAcmeConfigDir
 	}
-	if a.Challenge == ChallengeDNS && a.DNS.Provider == "" {
+	if a.AllowsChallenge(ChallengeDNS) && a.DNS.Provider == "" {
 		a.DNS.Provider = DefaultAcmeProvider
 	}
-	if a.Challenge == ChallengeDNS && a.DNS.PropagationSeconds == 0 {
+	if a.AllowsChallenge(ChallengeDNS) && a.DNS.PropagationSeconds == 0 {
 		a.DNS.PropagationSeconds = DefaultAcmePropagationSeconds
 	}
-	if a.Challenge == ChallengeHTTP && a.HTTP.Webroot == "" {
+	if a.AllowsChallenge(ChallengeHTTP) && a.HTTP.Webroot == "" {
 		a.HTTP.Webroot = DefaultAcmeWebroot
 	}
 	if a.Renewal.CheckInterval == 0 {
@@ -176,6 +235,14 @@ func applyAcmeDefaults(cfg *Config) {
 	if a.Renewal.RenewBefore == 0 {
 		a.Renewal.RenewBefore = Duration(DefaultRenewalRenewBefore)
 	}
+}
+
+func knownChallenge(c string) bool {
+	switch c {
+	case ChallengeDNS, ChallengeHTTP, ChallengeNginx, ChallengeStandalone:
+		return true
+	}
+	return false
 }
 
 // validateAcme checks the acme block. Inert when disabled. Soft mismatches
@@ -192,30 +259,51 @@ func validateAcme(cfg *Config) error {
 	if !a.AgreeTOS {
 		return fmt.Errorf("acme.agree_tos must be true to issue certificates (you accept the CA's Terms of Service)")
 	}
-	switch a.Challenge {
-	case ChallengeDNS, ChallengeHTTP, ChallengeNginx, ChallengeStandalone:
-	default:
+	if !knownChallenge(a.Challenge) {
 		return fmt.Errorf("acme.challenge %q must be dns | http | nginx | standalone", a.Challenge)
+	}
+	seen := map[string]bool{}
+	for _, c := range a.Challenges {
+		if !knownChallenge(c) {
+			return fmt.Errorf("acme.challenges: %q must be dns | http | nginx | standalone", c)
+		}
+		if seen[c] {
+			return fmt.Errorf("acme.challenges: %q is listed twice", c)
+		}
+		seen[c] = true
+	}
+	if len(a.Challenges) > 0 && !seen[a.Challenge] {
+		return fmt.Errorf("acme.challenge %q must be one of acme.challenges %v (it is the default a request falls back to)", a.Challenge, a.Challenges)
 	}
 
 	if a.DNS.Credentials != "" {
 		return fmt.Errorf("inline secrets are not allowed: use acme.dns.credentials_env or acme.dns.credentials_file instead of acme.dns.credentials")
 	}
 
-	switch a.Challenge {
-	case ChallengeDNS:
-		if a.DNS.Provider == "" {
-			return fmt.Errorf("acme.dns.provider is required for challenge: dns")
-		}
-		if a.DNS.CredentialsEnv != "" && a.DNS.CredentialsFile != "" {
-			return fmt.Errorf("acme.dns.credentials_env and acme.dns.credentials_file are mutually exclusive")
-		}
-		if a.DNS.PropagationSeconds < 0 {
-			return fmt.Errorf("acme.dns.propagation_seconds must not be negative")
-		}
-	case ChallengeHTTP:
-		if a.HTTP.Webroot == "" {
-			return fmt.Errorf("acme.http.webroot is required for challenge: http")
+	for _, c := range a.ChallengesOrDefault() {
+		switch c {
+		case ChallengeDNS:
+			if a.DNS.Provider == "" {
+				return fmt.Errorf("acme.dns.provider is required for challenge: dns")
+			}
+			if a.DNS.CredentialsEnv != "" && a.DNS.CredentialsFile != "" {
+				return fmt.Errorf("acme.dns.credentials_env and acme.dns.credentials_file are mutually exclusive")
+			}
+			if a.DNS.PropagationSeconds < 0 {
+				return fmt.Errorf("acme.dns.propagation_seconds must not be negative")
+			}
+			for p, s := range a.DNS.PropagationSecondsByProvider {
+				if !validPluginName(p) {
+					return fmt.Errorf("acme.dns.propagation_seconds_by_provider: %q is not a plugin name (must match [a-z0-9-]+)", p)
+				}
+				if s < 0 || s > 3600 {
+					return fmt.Errorf("acme.dns.propagation_seconds_by_provider.%s: %d must be between 0 and 3600", p, s)
+				}
+			}
+		case ChallengeHTTP:
+			if a.HTTP.Webroot == "" {
+				return fmt.Errorf("acme.http.webroot is required for challenge: http")
+			}
 		}
 	}
 
@@ -229,4 +317,18 @@ func validateAcme(cfg *Config) error {
 	// mean a served expired cert) — surfaced as a startup warning by the
 	// manager (warnAcmeMismatches pattern), not a hard error here.
 	return nil
+}
+
+// validPluginName mirrors credstore.ValidProvider ([a-z0-9-]+) without the
+// import: a certbot DNS plugin suffix.
+func validPluginName(p string) bool {
+	if p == "" {
+		return false
+	}
+	for _, r := range p {
+		if !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '-') {
+			return false
+		}
+	}
+	return true
 }

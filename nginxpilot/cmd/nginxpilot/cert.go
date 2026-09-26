@@ -18,10 +18,12 @@ const certUsage = `nginxpilot cert — manage TLS certificates via the running d
 
 Usage:
   nginxpilot cert list
-  nginxpilot cert issue <domain> [<domain>...] [--cert-name NAME] [--staging]
+  nginxpilot cert issue <domain> [<domain>...] [--cert-name NAME] [--staging] [--dry-run]
   nginxpilot cert upload <domain> --cert FILE --key FILE
   nginxpilot cert renew [<domain>]
   nginxpilot cert delete <domain>
+  nginxpilot cert revoke <domain> [--reason R] [--delete]
+  nginxpilot cert export <domain>          # JSON bundle incl. the private key
   nginxpilot cert creds set <provider> [--token T | --file FILE | --access-key K --secret-key S]
   nginxpilot cert creds list
   nginxpilot cert creds rm <provider>
@@ -50,6 +52,10 @@ func cmdCert(args []string) int {
 		return certRenewCmd(rest)
 	case "delete":
 		return certDeleteCmd(rest)
+	case "export":
+		return certExportCmd(rest)
+	case "revoke":
+		return certRevokeCmd(rest)
 	case "creds":
 		return certCredsCmd(rest)
 	default:
@@ -71,6 +77,7 @@ func certIssueCmd(args []string) int {
 	configPath := fs.String("config", config.DefaultPath, "config file path")
 	certName := fs.String("cert-name", "", "cert name (default: first domain, wildcard-stripped)")
 	staging := fs.Bool("staging", false, "use the ACME staging endpoint")
+	dryRun := fs.Bool("dry-run", false, "run the whole ACME exchange without saving a certificate")
 	_ = fs.Parse(args)
 	domains := fs.Args()
 	if len(domains) == 0 {
@@ -81,7 +88,7 @@ func certIssueCmd(args []string) int {
 	if cfg == nil {
 		return code
 	}
-	body, _ := json.Marshal(map[string]any{"domains": domains, "cert_name": *certName, "staging": *staging})
+	body, _ := json.Marshal(map[string]any{"domains": domains, "cert_name": *certName, "staging": *staging, "dry_run": *dryRun})
 	return certDo(cfg, http.MethodPost, "/certs", body)
 }
 
@@ -142,6 +149,41 @@ func certDeleteCmd(args []string) int {
 		return code
 	}
 	return certDo(cfg, http.MethodDelete, "/certs/"+rest[0], nil)
+}
+
+func certRevokeCmd(args []string) int {
+	fs := flag.NewFlagSet("cert revoke", flag.ExitOnError)
+	configPath := fs.String("config", config.DefaultPath, "config file path")
+	reason := fs.String("reason", "unspecified", "unspecified | keycompromise | affiliationchanged | superseded | cessationofoperation")
+	del := fs.Bool("delete", false, "also delete the lineage after revoking it")
+	_ = fs.Parse(args)
+	rest := fs.Args()
+	if len(rest) != 1 {
+		fmt.Fprintln(os.Stderr, "usage: cert revoke <domain> [--reason R] [--delete]")
+		return 2
+	}
+	cfg, code := loadCertConfig(*configPath)
+	if cfg == nil {
+		return code
+	}
+	body, _ := json.Marshal(map[string]any{"reason": *reason, "delete": *del})
+	return certDo(cfg, http.MethodPost, "/certs/"+rest[0]+"/revoke", body)
+}
+
+func certExportCmd(args []string) int {
+	fs := flag.NewFlagSet("cert export", flag.ExitOnError)
+	configPath := fs.String("config", config.DefaultPath, "config file path")
+	_ = fs.Parse(args)
+	rest := fs.Args()
+	if len(rest) != 1 {
+		fmt.Fprintln(os.Stderr, "usage: cert export <domain>")
+		return 2
+	}
+	cfg, code := loadCertConfig(*configPath)
+	if cfg == nil {
+		return code
+	}
+	return certDo(cfg, http.MethodGet, "/certs/bundle/"+rest[0], nil)
 }
 
 func certCredsCmd(args []string) int {
@@ -241,36 +283,20 @@ func loadCertConfig(configPath string) (*config.Config, int) {
 		fmt.Fprintf(os.Stderr, "config error: %v\n", err)
 		return nil, 1
 	}
-	listen := res.Config.Admin.ListenAddr()
-	if listen == "" {
-		fmt.Fprintln(os.Stderr, "admin endpoint is disabled (admin.listen is empty)")
-		return nil, 1
-	}
 	return res.Config, 0
 }
 
 // certDo issues an admin-API request and prints the response body.
 func certDo(cfg *config.Config, method, path string, body []byte) int {
-	listen := normalizeListenAddr(cfg.Admin.ListenAddr())
 	var rdr io.Reader
+	contentType := ""
 	if body != nil {
 		rdr = bytes.NewReader(body)
+		contentType = "application/json"
 	}
-	req, err := http.NewRequest(method, "http://"+listen+path, rdr)
+	resp, err := adminDo(cfg.Admin, method, path, rdr, contentType, 10*time.Minute)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return 1
-	}
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-	if token := clientAdminToken(cfg.Admin); token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-	client := &http.Client{Timeout: 10 * time.Minute}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "cannot reach the daemon at %s: %v (is it running?)\n", listen, err)
 		return 1
 	}
 	defer resp.Body.Close()

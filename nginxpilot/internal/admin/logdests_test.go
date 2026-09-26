@@ -66,14 +66,6 @@ func TestCreateLogDestRejectsInvalidDestination(t *testing.T) {
     filter:
       remote_addr: ["1.2.3.4"]
 `,
-		"inline secret": `log_destinations:
-  - name: x
-    type: loki
-    url: https://loki.example.com/push
-    auth:
-      method: bearer
-      token: inline-secret
-`,
 		"plain http url": `log_destinations:
   - name: x
     type: http
@@ -95,6 +87,49 @@ func TestCreateLogDestRejectsInvalidDestination(t *testing.T) {
 	entries, _ := os.ReadDir(env.sitesDir)
 	if len(entries) != 0 {
 		t.Errorf("rejected fragments must never land on disk: %v", entries)
+	}
+}
+
+func TestCreateLogDestStoresInlineCredentials(t *testing.T) {
+	env := newSitesEnv(t, "")
+	frag := `log_destinations:
+  - name: x
+    type: loki
+    url: https://loki.example.com/push
+    auth:
+      method: header
+      header_name: X-Api-Key
+      header_value: inline-secret
+`
+	rec := logDestReq(env, http.MethodPost, "/log-destinations", frag)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("want 201, got %d (%s)", rec.Code, rec.Body.String())
+	}
+	written, err := os.ReadFile(filepath.Join(env.sitesDir, "logdest-x.yml"))
+	if err != nil {
+		t.Fatalf("fragment not written: %v", err)
+	}
+	if strings.Contains(string(written), "inline-secret") {
+		t.Fatalf("the secret must not reach the fragment:\n%s", written)
+	}
+	path := filepath.Join(env.cfg.DataDir, "log-credentials", "x", "header-value")
+	if !strings.Contains(string(written), "header_value_file: "+path) {
+		t.Errorf("fragment should reference %s:\n%s", path, written)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("credential file not written: %v", err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Errorf("credential file mode = %v, want 0600", info.Mode().Perm())
+	}
+
+	rec = logDestReq(env, http.MethodDelete, "/log-destinations/x", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("delete: want 200, got %d (%s)", rec.Code, rec.Body.String())
+	}
+	if _, err := os.Stat(filepath.Dir(path)); !os.IsNotExist(err) {
+		t.Errorf("credential dir should be removed with the destination")
 	}
 }
 

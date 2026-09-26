@@ -26,6 +26,7 @@ Usage:
   nginxpilot print-logformat       print the JSON access-log log_format snippet (generate-only setups)
   nginxpilot status [--json]       show per-site status from the daemon
   nginxpilot cert <action>         manage TLS certificates (issue/upload/renew/delete/list, creds)
+  nginxpilot token set [flags]     replace the stored admin token hash (prompted or stdin; restart to apply)
   nginxpilot version               print build info
 
 Common flags:
@@ -62,6 +63,8 @@ func main() {
 		code = cmdStatus(args)
 	case "cert":
 		code = cmdCert(args)
+	case "token":
+		code = cmdToken(args)
 	case "version":
 		fmt.Printf("nginxpilot %s\n", version)
 	case "help", "--help", "-h":

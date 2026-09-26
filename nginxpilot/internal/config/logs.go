@@ -119,6 +119,17 @@ type LogDestination struct {
 	CAFile string `yaml:"ca_file" json:"ca_file,omitempty"`
 	// InsecureSkipVerify disables TLS verification; requires allow_insecure.
 	InsecureSkipVerify bool `yaml:"insecure_skip_verify" json:"insecure_skip_verify,omitempty"`
+	// ClientCertFile / ClientKeyFile present a client certificate for mTLS —
+	// both or neither.
+	ClientCertFile string `yaml:"client_cert_file" json:"client_cert_file,omitempty"`
+	ClientKeyFile  string `yaml:"client_key_file" json:"client_key_file,omitempty"`
+
+	// Inline certificate traps — the admin API moves these into files under
+	// data_dir/log-credentials/<name>/ before validation, so they are always
+	// empty in a validated config.
+	CAPEM         string `yaml:"ca_pem" json:"-"`
+	ClientCertPEM string `yaml:"client_cert_pem" json:"-"`
+	ClientKeyPEM  string `yaml:"client_key_pem" json:"-"`
 
 	// Auth carries push credentials — secret material by reference only
 	// (*_env / *_file), same parse-time rule as git tokens.
@@ -165,18 +176,24 @@ func (d LogDestination) JobLabel() string {
 // traps so strict decoding accepts the key and validation can emit a targeted
 // error instead of "unknown field" (mirrors Auth).
 type LogAuth struct {
-	// Method: none (default) | basic | bearer.
+	// Method: none (default) | basic | bearer | header.
 	Method   string `yaml:"method" json:"method,omitempty"`
 	Username string `yaml:"username" json:"username,omitempty"`
+	// HeaderName is the header header-auth sets (header only).
+	HeaderName string `yaml:"header_name" json:"header_name,omitempty"`
 
-	PasswordEnv  string `yaml:"password_env" json:"password_env,omitempty"`
-	PasswordFile string `yaml:"password_file" json:"password_file,omitempty"`
-	TokenEnv     string `yaml:"token_env" json:"token_env,omitempty"`
-	TokenFile    string `yaml:"token_file" json:"token_file,omitempty"`
+	PasswordEnv     string `yaml:"password_env" json:"password_env,omitempty"`
+	PasswordFile    string `yaml:"password_file" json:"password_file,omitempty"`
+	TokenEnv        string `yaml:"token_env" json:"token_env,omitempty"`
+	TokenFile       string `yaml:"token_file" json:"token_file,omitempty"`
+	HeaderValueEnv  string `yaml:"header_value_env" json:"header_value_env,omitempty"`
+	HeaderValueFile string `yaml:"header_value_file" json:"header_value_file,omitempty"`
 
-	// Inline secret traps — always empty in a validated config.
-	Password string `yaml:"password" json:"-"`
-	Token    string `yaml:"token" json:"-"`
+	// Inline secret traps — always empty in a validated config (the admin API
+	// moves them into files first).
+	Password    string `yaml:"password" json:"-"`
+	Token       string `yaml:"token" json:"-"`
+	HeaderValue string `yaml:"header_value" json:"-"`
 }
 
 // MethodOrNone returns the effective auth method.
@@ -230,6 +247,8 @@ func (d *LogDestination) ShipDestination() (logship.Destination, error) {
 		Labels:             labels,
 		CAFile:             d.CAFile,
 		InsecureSkipVerify: d.InsecureSkipVerify,
+		ClientCertFile:     d.ClientCertFile,
+		ClientKeyFile:      d.ClientKeyFile,
 		Path:               d.Path,
 		MaxSize:            int64(d.MaxSize),
 		MaxFiles:           d.MaxFiles,
@@ -243,12 +262,14 @@ func (d *LogDestination) ShipDestination() (logship.Destination, error) {
 		out.Sample = *d.Sample
 	}
 
-	out.Auth = logship.Auth{Method: d.Auth.MethodOrNone(), Username: d.Auth.Username}
+	out.Auth = logship.Auth{Method: d.Auth.MethodOrNone(), Username: d.Auth.Username, HeaderName: d.Auth.HeaderName}
 	switch out.Auth.Method {
 	case AuthBasic:
 		out.Auth.Secret = secretResolver(d.Auth.PasswordEnv, d.Auth.PasswordFile)
 	case AuthBearer:
 		out.Auth.Secret = secretResolver(d.Auth.TokenEnv, d.Auth.TokenFile)
+	case AuthHeader:
+		out.Auth.Secret = secretResolver(d.Auth.HeaderValueEnv, d.Auth.HeaderValueFile)
 	}
 
 	// Fingerprint the destination from its canonical serialized config so the

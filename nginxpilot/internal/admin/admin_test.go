@@ -28,7 +28,7 @@ func newTestServerReload(t *testing.T, cfg *config.Config, reload func() error) 
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	mgr := manager.New(cfg, store, log)
-	return New(mgr, "", log, reload).routes()
+	return New(mgr, nil, log, reload).routes(true)
 }
 
 func TestVhostEndpointProxy(t *testing.T) {

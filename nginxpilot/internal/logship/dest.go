@@ -31,6 +31,8 @@ const (
 	AuthNone   = "none"
 	AuthBasic  = "basic"
 	AuthBearer = "bearer"
+	// AuthHeader sends one custom header (HeaderName: <secret>).
+	AuthHeader = "header"
 )
 
 // SecretFunc resolves a secret at use time. Env-backed secrets resolve once,
@@ -40,9 +42,10 @@ type SecretFunc func() (string, error)
 
 // Auth carries a destination's resolved credential plumbing.
 type Auth struct {
-	Method   string
-	Username string
-	Secret   SecretFunc // password (basic) or token (bearer)
+	Method     string
+	Username   string
+	HeaderName string     // header auth only
+	Secret     SecretFunc // password (basic), token (bearer) or header value (header)
 }
 
 // Labels is the Loki label contract (§3.2): a static job, whitelisted dynamic
@@ -73,6 +76,9 @@ type Destination struct {
 	// TLS: a private CA bundle and/or (explicitly opted-in) verify skip (G12).
 	CAFile             string
 	InsecureSkipVerify bool
+	// ClientCertFile / ClientKeyFile present a client certificate (mTLS).
+	ClientCertFile string
+	ClientKeyFile  string
 
 	// file
 	Path     string

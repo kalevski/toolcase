@@ -33,9 +33,10 @@ type RunFunc func(ctx context.Context, env []string, name string, args ...string
 type Client struct {
 	cfg     config.Acme
 	store   *credstore.Store // runtime credentials (may be nil)
-	dataDir string           // for the 0600 tmp creds file (config-env path)
+	dataDir string           // holds acme/config-credentials/ (the config-referenced credential)
 	run     RunFunc
 	log     *slog.Logger
+	plugins pluginProbe
 }
 
 // New builds a Client. store may be nil (only config-ref / ambient creds then).
@@ -84,6 +85,29 @@ type IssueOptions struct {
 	// means credstore.DefaultAccount, which is the legacy single-credential slot.
 	Account string
 	Staging bool
+	// Challenge picks the challenge for this issuance (dns | http | nginx |
+	// standalone). Empty means acme.challenge; anything else must be in
+	// acme.challenges. certbot records it in the cert's renewal config, so
+	// renewals keep using it.
+	Challenge string
+	// DryRun runs certbot with --dry-run: the whole ACME exchange (account,
+	// order, challenge, validation) against the staging directory — or the
+	// configured acme.server — without saving a certificate or touching any
+	// lineage. It proves a challenge and its credentials work at no cost to
+	// production rate limits.
+	DryRun bool
+}
+
+// EffectiveChallenge resolves a requested challenge against the config: empty
+// → acme.challenge; a challenge outside acme.challenges is an error.
+func EffectiveChallenge(cfg config.Acme, requested string) (string, error) {
+	if requested == "" {
+		return cfg.ChallengeOrDefault(), nil
+	}
+	if !cfg.AllowsChallenge(requested) {
+		return "", fmt.Errorf("challenge %q is not allowed here (acme.challenges: %s)", requested, strings.Join(cfg.ChallengesOrDefault(), ", "))
+	}
+	return requested, nil
 }
 
 // Issue runs `certbot certonly` for one cert (>=1 domains; wildcards only with
@@ -96,10 +120,14 @@ func (c *Client) Issue(ctx context.Context, name string, domains []string, opts 
 	if name == "" {
 		name = CertName(domains)
 	}
-	if c.cfg.ChallengeOrDefault() != config.ChallengeDNS {
+	challenge, err := EffectiveChallenge(c.cfg, opts.Challenge)
+	if err != nil {
+		return "", err
+	}
+	if challenge != config.ChallengeDNS {
 		for _, d := range domains {
 			if strings.HasPrefix(d, "*.") {
-				return "", fmt.Errorf("wildcard domain %q requires challenge: dns (current: %s)", d, c.cfg.ChallengeOrDefault())
+				return "", fmt.Errorf("wildcard domain %q requires challenge: dns (current: %s)", d, challenge)
 			}
 		}
 	}
@@ -112,8 +140,11 @@ func (c *Client) Issue(ctx context.Context, name string, domains []string, opts 
 	args := c.baseArgs()
 	args = append(args, "certonly", "--agree-tos", "-m", email, "--cert-name", name)
 	args = append(args, c.serverArgs(opts.Staging)...)
+	if opts.DryRun {
+		args = append(args, "--dry-run")
+	}
 
-	chArgs, env, cleanup, err := c.challengeArgs(opts.Provider, opts.Account)
+	chArgs, env, cleanup, err := c.challengeArgs(challenge, opts.Provider, opts.Account)
 	if err != nil {
 		return "", err
 	}
@@ -136,6 +167,9 @@ func (c *Client) Issue(ctx context.Context, name string, domains []string, opts 
 // from the stored renewal config, so the credential must still exist on disk —
 // the credstore path is stable; a config-env tmp path is not).
 func (c *Client) Renew(ctx context.Context, name string) (string, error) {
+	if _, err := c.RefreshConfigCredentials(); err != nil {
+		return "", err
+	}
 	args := c.baseArgs()
 	args = append(args, "renew", "--cert-name", name, "--force-renewal", "--no-random-sleep-on-renew")
 	out, err := c.run(ctx, nil, "certbot", args...)
@@ -145,8 +179,74 @@ func (c *Client) Renew(ctx context.Context, name string) (string, error) {
 	return out, nil
 }
 
+// RevokeReasons are the reasons certbot's --reason accepts (RFC 5280 codes
+// Let's Encrypt honours), in certbot's spelling.
+var RevokeReasons = []string{"unspecified", "keycompromise", "affiliationchanged", "superseded", "cessationofoperation"}
+
+// ValidRevokeReason reports whether r is one of RevokeReasons.
+func ValidRevokeReason(r string) bool {
+	for _, v := range RevokeReasons {
+		if r == v {
+			return true
+		}
+	}
+	return false
+}
+
+// Revoke revokes one certbot lineage at its CA (`certbot revoke --cert-name`).
+// The request goes to the directory that issued the cert: the `server` recorded
+// in renewal/<name>.conf, so a staging or acme.server lineage is revoked where
+// it came from; only when that file has none does it fall back to the daemon's
+// own server flags. deleteAfter also removes the lineage (--delete-after-revoke);
+// otherwise it stays on disk, still served but revoked.
+func (c *Client) Revoke(ctx context.Context, name, reason string, deleteAfter bool) (string, error) {
+	if reason == "" {
+		reason = "unspecified"
+	}
+	if !ValidRevokeReason(reason) {
+		return "", fmt.Errorf("invalid revoke reason %q (one of %s)", reason, strings.Join(RevokeReasons, ", "))
+	}
+	args := c.baseArgs()
+	args = append(args, "revoke", "--cert-name", name, "--reason", reason)
+	if server := c.lineageServer(name); server != "" {
+		args = append(args, "--server", server)
+	} else {
+		args = append(args, c.serverArgs(false)...)
+	}
+	if deleteAfter {
+		args = append(args, "--delete-after-revoke")
+	} else {
+		args = append(args, "--no-delete-after-revoke")
+	}
+	out, err := c.run(ctx, nil, "certbot", args...)
+	if err != nil {
+		return out, fmt.Errorf("certbot revoke failed: %s", lastLines(out, err))
+	}
+	return out, nil
+}
+
+// lineageServer reads the ACME directory a lineage was issued from out of
+// certbot's renewal/<name>.conf ("server = https://…"); "" when the file or the
+// key is missing.
+func (c *Client) lineageServer(name string) string {
+	data, err := os.ReadFile(filepath.Join(c.cfg.ConfigDirOrDefault(), "renewal", name+".conf"))
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		key, value, ok := strings.Cut(line, "=")
+		if ok && strings.TrimSpace(key) == "server" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
 // RenewDue renews every cert near expiry (`certbot renew`).
 func (c *Client) RenewDue(ctx context.Context) (string, error) {
+	if _, err := c.RefreshConfigCredentials(); err != nil {
+		return "", err
+	}
 	args := c.baseArgs()
 	args = append(args, "renew", "--no-random-sleep-on-renew")
 	out, err := c.run(ctx, nil, "certbot", args...)
@@ -191,11 +291,11 @@ func (c *Client) serverArgs(staging bool) []string {
 	return nil
 }
 
-// challengeArgs builds the authenticator flags + any process env for the
-// configured challenge, plus a cleanup func that removes a materialized
-// config-env creds file.
-func (c *Client) challengeArgs(provider, account string) (args []string, env []string, cleanup func(), err error) {
-	switch c.cfg.ChallengeOrDefault() {
+// challengeArgs builds the authenticator flags + any process env for one
+// challenge, plus a cleanup func that removes a materialized config-env creds
+// file.
+func (c *Client) challengeArgs(challenge, provider, account string) (args []string, env []string, cleanup func(), err error) {
+	switch challenge {
 	case config.ChallengeHTTP:
 		return []string{"--webroot", "-w", c.cfg.HTTP.Webroot}, nil, nil, nil
 	case config.ChallengeNginx:
@@ -205,7 +305,7 @@ func (c *Client) challengeArgs(provider, account string) (args []string, env []s
 	case config.ChallengeDNS:
 		return c.dnsArgs(provider, account)
 	default:
-		return nil, nil, nil, fmt.Errorf("unknown challenge %q", c.cfg.ChallengeOrDefault())
+		return nil, nil, nil, fmt.Errorf("unknown challenge %q", challenge)
 	}
 }
 
@@ -218,7 +318,12 @@ func (c *Client) dnsArgs(providerOverride, account string) (args []string, env [
 	if provider == "" {
 		provider = c.cfg.DNS.Provider
 	}
-	args = []string{"--dns-" + provider}
+	// --authenticator dns-<provider> selects any installed DNS plugin. The
+	// --dns-<provider> shortcut only exists for certbot's own bundled plugins:
+	// for a third-party one (certbot-dns-zonewright) argparse reads it as an
+	// ambiguous abbreviation of --dns-<provider>-credentials / -propagation-seconds
+	// and certbot refuses to start.
+	args = []string{"--authenticator", "dns-" + provider}
 
 	credPath, cleanup, err := c.resolveCredPath(provider, account)
 	if err != nil {
@@ -241,44 +346,22 @@ func (c *Client) dnsArgs(providerOverride, account string) (args []string, env [
 	// propagation-seconds is a flag-credential plugin convention; route53/google
 	// do not accept it.
 	if mechanism == credstore.MechanismFlag {
-		args = append(args, "--dns-"+provider+"-propagation-seconds", strconv.Itoa(c.cfg.DNS.PropagationSecondsOrDefault()))
+		args = append(args, "--dns-"+provider+"-propagation-seconds", strconv.Itoa(c.cfg.DNS.PropagationSecondsFor(provider)))
 	}
 	return args, env, cleanup, nil
 }
 
 // resolveCredPath returns the on-disk credentials path for the provider, or ""
-// to fall back to ambient SDK env. Order: config ref (materialized to a 0600
-// tmp file) → credstore → none.
+// to fall back to ambient SDK env. A config-referenced credential
+// (acme.dns.credentials_env / credentials_file) belongs to acme.dns.provider's
+// default account only: a request naming another provider, or a named account,
+// always uses the credstore. The config credential is materialized at a stable
+// path (ConfigCredentialsPath), never a temp file, because certbot records the
+// path in the lineage's renewal config and every renewal re-reads it.
 func (c *Client) resolveCredPath(provider, account string) (path string, cleanup func(), err error) {
-	if c.cfg.DNS.CredentialsEnv != "" || c.cfg.DNS.CredentialsFile != "" {
-		body, err := config.ResolveSecret(c.cfg.DNS.CredentialsEnv, c.cfg.DNS.CredentialsFile)
-		if err != nil {
-			return "", nil, fmt.Errorf("resolve acme.dns credentials: %w", err)
-		}
-		tmpDir := filepath.Join(c.dataDir, "tmp")
-		if err := os.MkdirAll(tmpDir, 0o700); err != nil {
-			return "", nil, err
-		}
-		f, err := os.CreateTemp(tmpDir, "acme-creds-*.ini")
-		if err != nil {
-			return "", nil, err
-		}
-		name := f.Name()
-		if _, err := f.WriteString(body); err != nil {
-			f.Close()
-			os.Remove(name)
-			return "", nil, err
-		}
-		if err := f.Chmod(0o600); err != nil {
-			f.Close()
-			os.Remove(name)
-			return "", nil, err
-		}
-		if err := f.Close(); err != nil {
-			os.Remove(name)
-			return "", nil, err
-		}
-		return name, func() { os.Remove(name) }, nil
+	if c.UsesConfigCredentials(provider, account) {
+		path, err := c.RefreshConfigCredentials()
+		return path, nil, err
 	}
 	if c.store != nil {
 		if r, ok := c.store.Get(provider, account); ok {
@@ -286,6 +369,70 @@ func (c *Client) resolveCredPath(provider, account string) (path string, cleanup
 		}
 	}
 	return "", nil, nil
+}
+
+// HasConfigCredentials reports whether acme.dns references a credential
+// (credentials_env or credentials_file).
+func (c *Client) HasConfigCredentials() bool {
+	return c.cfg.DNS.CredentialsEnv != "" || c.cfg.DNS.CredentialsFile != ""
+}
+
+// UsesConfigCredentials reports whether this provider/account pair is the one
+// the config-referenced credential is for.
+func (c *Client) UsesConfigCredentials(provider, account string) bool {
+	return c.HasConfigCredentials() && provider == c.cfg.DNS.Provider &&
+		credstore.NormalizeAccount(account) == credstore.DefaultAccount
+}
+
+// ConfigCredentialsPath is where the config-referenced credential is written:
+// <data_dir>/acme/config-credentials/<provider>.ini. Stable across runs, so a
+// lineage issued with it renews with it.
+func (c *Client) ConfigCredentialsPath() string {
+	return filepath.Join(c.dataDir, "acme", "config-credentials", c.cfg.DNS.Provider+".ini")
+}
+
+// RefreshConfigCredentials (re)writes the config-referenced credential to
+// ConfigCredentialsPath (0600, atomically) from its current env/file value and
+// returns the path; "" when none is configured. Called before every issuance
+// that uses it and before every renewal, so a rotated secret reaches certbot
+// without re-issuing.
+func (c *Client) RefreshConfigCredentials() (string, error) {
+	if !c.HasConfigCredentials() {
+		return "", nil
+	}
+	body, err := config.ResolveSecret(c.cfg.DNS.CredentialsEnv, c.cfg.DNS.CredentialsFile)
+	if err != nil {
+		return "", fmt.Errorf("resolve acme.dns credentials: %w", err)
+	}
+	path := c.ConfigCredentialsPath()
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return "", err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".creds-*")
+	if err != nil {
+		return "", err
+	}
+	name := tmp.Name()
+	defer os.Remove(name)
+	if err := tmp.Chmod(0o600); err != nil {
+		tmp.Close()
+		return "", err
+	}
+	if _, err := tmp.WriteString(body); err != nil {
+		tmp.Close()
+		return "", err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return "", err
+	}
+	if err := tmp.Close(); err != nil {
+		return "", err
+	}
+	if err := os.Rename(name, path); err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 // lastLines collapses certbot output to a short single line for error messages,

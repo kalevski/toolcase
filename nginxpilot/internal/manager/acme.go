@@ -20,6 +20,9 @@ import (
 var (
 	ErrAcmeDisabled = errors.New("acme is not enabled (acme.enabled: false)")
 	ErrNoCertDir    = errors.New("no cert directory configured (tls.cert_dir)")
+	// ErrManualCert is returned by RevokeCert for a flat uploaded cert: it has
+	// no certbot lineage (and no account here that issued it) to revoke with.
+	ErrManualCert = errors.New("manual cert: not issued by this daemon's certbot, revoke it where it was issued")
 )
 
 // AcmeEnabled reports whether certbot issuance is configured. It reads the
@@ -30,22 +33,34 @@ func (m *Manager) AcmeEnabled() bool {
 	return m.acme.Load() != nil
 }
 
+// storeAcme installs a certbot client. On a running daemon it also starts the
+// background probe of installed DNS plugins (acme.dns_providers in /status);
+// Run starts it for the client installed at construction.
+func (m *Manager) storeAcme(client *acme.Client) {
+	m.acme.Store(client)
+	if m.running.Load() {
+		go client.ProbeDNSPlugins(context.Background())
+	}
+}
+
 // IssueCert issues one certificate (>=1 domains; wildcard only with dns), then
-// re-applies managed nginx so the new cert is served immediately. email,
-// provider and account are per-call overrides (empty → the daemon's acme.email /
-// acme.dns.provider config defaults, and the provider's default account).
-func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, email, provider, account string, staging bool) error {
+// re-applies managed nginx so the new cert is served immediately. opts carries
+// the per-call overrides (empty email / provider / account / challenge → the
+// daemon's acme.email / acme.dns.provider / acme.challenge defaults, and the
+// provider's default account). A dry run saves nothing, so nginx is left alone.
+func (m *Manager) IssueCert(ctx context.Context, name string, domains []string, opts acme.IssueOptions) error {
 	m.acmeMu.Lock()
 	defer m.acmeMu.Unlock()
 	client := m.acme.Load()
 	if client == nil {
 		return ErrAcmeDisabled
 	}
-	opts := acme.IssueOptions{Email: email, Provider: provider, Account: account, Staging: staging}
 	if _, err := client.Issue(ctx, name, domains, opts); err != nil {
 		return err
 	}
-	m.applyManaged(ctx)
+	if !opts.DryRun {
+		m.applyManaged(ctx)
+	}
 	return nil
 }
 
@@ -58,6 +73,30 @@ func (m *Manager) RenewCert(ctx context.Context, name string) error {
 		return ErrAcmeDisabled
 	}
 	if _, err := client.Renew(ctx, name); err != nil {
+		return err
+	}
+	m.applyManaged(ctx)
+	return nil
+}
+
+// RevokeCert revokes one certbot lineage at its CA, optionally deleting it, then
+// re-applies managed nginx (a deleted cert must stop being served). A name with
+// only a flat uploaded cert is ErrManualCert; a name with nothing is
+// os.ErrNotExist.
+func (m *Manager) RevokeCert(ctx context.Context, name, reason string, deleteAfter bool) error {
+	m.acmeMu.Lock()
+	defer m.acmeMu.Unlock()
+	client := m.acme.Load()
+	if client == nil {
+		return ErrAcmeDisabled
+	}
+	if !isDir(filepath.Join(m.Config().Acme.ConfigDirOrDefault(), "live", name)) {
+		if dir := m.CertDir(); dir != "" && isFile(filepath.Join(dir, name+".crt")) {
+			return ErrManualCert
+		}
+		return os.ErrNotExist
+	}
+	if _, err := client.Revoke(ctx, name, reason, deleteAfter); err != nil {
 		return err
 	}
 	m.applyManaged(ctx)
@@ -180,6 +219,9 @@ func (m *Manager) ListAcmeCredentials() []credstore.Info {
 // credential, so the admin layer can refuse an issuance that would otherwise
 // fail minutes later inside certbot.
 func (m *Manager) HasAcmeCredentials(provider, account string) bool {
+	if client := m.acme.Load(); client != nil && client.UsesConfigCredentials(provider, account) {
+		return true
+	}
 	if m.creds == nil {
 		return false
 	}

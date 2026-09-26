@@ -392,13 +392,34 @@ func (a AccessList) HasUsers() bool {
 	return false
 }
 
-// Admin configures the loopback admin HTTP endpoint.
+// Admin configures the admin HTTP endpoint and its local Unix socket.
 type Admin struct {
 	// Listen is the address for the admin endpoint. nil means the default
 	// (127.0.0.1:9090); an explicit empty string disables the endpoint.
-	Listen    *string `yaml:"listen"`
-	TokenEnv  string  `yaml:"token_env"`
-	TokenFile string  `yaml:"token_file"`
+	Listen *string `yaml:"listen"`
+	// Socket is the Unix socket the in-container CLI talks to. It serves the
+	// same routes with no token: reaching it already means being inside the
+	// container as the daemon user or root. nil means the default
+	// (DefaultAdminSocket); an explicit empty string disables it.
+	Socket *string `yaml:"socket"`
+	// TokenEnv names the variable holding the bearer token. With TokenFile set
+	// it only seeds the file on the first start.
+	TokenEnv string `yaml:"token_env"`
+	// TokenFile holds the token's hash ("sha256:<hex>"), never the token.
+	TokenFile string `yaml:"token_file"`
+}
+
+// DefaultAdminSocket is where the admin socket lives when admin.socket is unset.
+// It is deliberately not under data_dir: data_dir is a volume, and the socket
+// must never be reachable from outside the container.
+const DefaultAdminSocket = "/run/nginxpilot/admin.sock"
+
+// SocketPath resolves the effective admin socket path ("" = disabled).
+func (a Admin) SocketPath() string {
+	if a.Socket == nil {
+		return DefaultAdminSocket
+	}
+	return *a.Socket
 }
 
 // ListenAddr resolves the effective admin listen address ("" = disabled).

@@ -1,8 +1,10 @@
 package admin
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
@@ -17,7 +19,8 @@ const logDestStemPrefix = "logdest-"
 var logDestNameRe = regexp.MustCompile(`^[a-z0-9-]+$`)
 
 // handleListLogDests lists configured log destinations. Secret material is
-// never present — auth carries only *_env / *_file references.
+// never present — auth carries only *_env / *_file references (inline values
+// sent to POST /log-destinations are stored as files first).
 func (s *Server) handleListLogDests(w http.ResponseWriter, _ *http.Request) {
 	cfg := s.mgr.Config()
 	dests := cfg.LogDestinations
@@ -39,6 +42,11 @@ func (s *Server) handleCreateLogDest(w http.ResponseWriter, r *http.Request) {
 	}
 	body, ok := readFragmentBody(w, r)
 	if !ok {
+		return
+	}
+	body, err := storeLogDestCredentials(cfg, body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("store credentials: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -89,6 +97,9 @@ func (s *Server) handleDeleteLogDest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.removeFragmentAndReload(w, target, "log_destination", name)
+	if _, err := os.Stat(target); errors.Is(err, os.ErrNotExist) {
+		removeLogCredentials(s.mgr.Config(), name)
+	}
 }
 
 // handleLogsStatus serves the shipping stats standalone (also embedded in

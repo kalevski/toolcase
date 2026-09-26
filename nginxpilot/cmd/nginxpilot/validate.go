@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/admintoken"
 	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
@@ -71,10 +75,8 @@ func cmdValidate(args []string) int {
 		}
 	}
 
-	if cfg.Admin.TokenEnv != "" || cfg.Admin.TokenFile != "" {
-		if err := config.CheckSecretRef(cfg.Admin.TokenEnv, cfg.Admin.TokenFile); err != nil {
-			fail("admin token: %v", err)
-		}
+	if err := checkAdminToken(cfg.Admin); err != nil {
+		fail("admin token: %v", err)
 	}
 
 	// Managed mode: render to a temp dir and run the real `nginx -t` so CI
@@ -239,4 +241,34 @@ func validateManaged(cfg *config.Config) error {
 		fmt.Fprintf(os.Stderr, "INVALID: nginx -t rejected %s %q: %s\n", r.Kind, r.Key, r.Reason)
 	}
 	return fmt.Errorf("%d resource(s) rejected by nginx -t", len(disabled))
+}
+
+// checkAdminToken mirrors what the daemon will do at startup without writing
+// anything: an existing token_file must hold a valid hash with safe
+// permissions; a missing one must be seedable from a set token_env.
+func checkAdminToken(a config.Admin) error {
+	if a.TokenFile == "" {
+		if a.TokenEnv == "" {
+			return nil
+		}
+		return config.CheckSecretRef(a.TokenEnv, "")
+	}
+	raw, err := os.ReadFile(a.TokenFile)
+	if errors.Is(err, fs.ErrNotExist) {
+		if a.TokenEnv == "" {
+			return fmt.Errorf("admin.token_file %s does not exist; run `nginxpilot token set`", a.TokenFile)
+		}
+		if strings.TrimSpace(os.Getenv(a.TokenEnv)) == "" {
+			return fmt.Errorf("admin.token_file %s does not exist and %s is empty, so it cannot be seeded", a.TokenFile, a.TokenEnv)
+		}
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if err := config.CheckSecretFile(a.TokenFile); err != nil {
+		return err
+	}
+	_, err = admintoken.Parse(string(raw))
+	return err
 }

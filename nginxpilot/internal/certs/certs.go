@@ -12,7 +12,9 @@ package certs
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"log/slog"
@@ -40,6 +42,12 @@ type Entry struct {
 	NotBefore time.Time
 	NotAfter  time.Time
 	Issuer    string
+	// Serial is the leaf's serial number (lowercase hex) and FingerprintSHA256
+	// the SHA-256 of its DER (lowercase hex). Both change on every issuance or
+	// renewal, so a control plane can tell a renewed cert from the old one from
+	// the listing alone. Empty when the cert could not be parsed.
+	Serial            string
+	FingerprintSHA256 string
 }
 
 // Cert pairs an index key with its Entry, for enumerating the whole index
@@ -107,6 +115,17 @@ func (i *Index) For(domain string) (cert, key string, ok bool) {
 		return "", "", false
 	}
 	return best.CertPath, best.KeyPath, true
+}
+
+// Get returns the entry indexed under exactly this directory/file-name key, with
+// none of For's SAN fallback — for addressing one specific cert (the bundle
+// export), where a wildcard or multi-SAN neighbour must never stand in.
+func (i *Index) Get(domain string) (Entry, bool) {
+	if i == nil {
+		return Entry{}, false
+	}
+	e, ok := i.entries[domain]
+	return e, ok
 }
 
 // matchName reports how pattern (a SAN DNS name) matches host: matchExact for
@@ -250,8 +269,23 @@ func newEntry(cert, key string) Entry {
 		if e.Issuer == "" {
 			e.Issuer = leaf.Issuer.String()
 		}
+		e.Serial = LeafSerial(leaf)
+		e.FingerprintSHA256 = LeafFingerprint(leaf)
 	}
 	return e
+}
+
+// LeafSerial renders a certificate's serial number as lowercase hex, the form
+// the admin API reports it in.
+func LeafSerial(c *x509.Certificate) string {
+	return strings.ToLower(c.SerialNumber.Text(16))
+}
+
+// LeafFingerprint is the lowercase-hex SHA-256 of a certificate's DER, the same
+// value `openssl x509 -fingerprint -sha256` prints (without the colons).
+func LeafFingerprint(c *x509.Certificate) string {
+	sum := sha256.Sum256(c.Raw)
+	return hex.EncodeToString(sum[:])
 }
 
 // parseLeaf parses the leaf certificate (the first CERTIFICATE block in a

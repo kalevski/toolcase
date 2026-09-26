@@ -69,9 +69,12 @@ type Manager struct {
 	// than guarded by that mutex: Reload swaps it on every config write, and
 	// waiting for the run lock there froze the daemon's whole write surface for
 	// the length of an issuance.
-	acme   atomic.Pointer[acme.Client]
-	creds  *credstore.Store
-	acmeMu sync.Mutex
+	acme atomic.Pointer[acme.Client]
+	// running is set by Run: only a running daemon probes certbot's DNS
+	// plugins, so constructing a Manager (tests, CLI helpers) spawns nothing.
+	running atomic.Bool
+	creds   *credstore.Store
+	acmeMu  sync.Mutex
 
 	// Git source credentials store (git-credentials admin API) — always
 	// present, so a control plane can save a repo token before (or while)
@@ -170,7 +173,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 	m.creds = credstore.New(filepath.Join(cfg.DataDir, "acme", "credentials"))
 	m.gitCreds = gitcreds.New(filepath.Join(cfg.DataDir, "git-credentials"))
 	if cfg.Acme.Enabled {
-		m.acme.Store(acme.New(cfg.Acme, m.creds, cfg.DataDir, log))
+		m.storeAcme(acme.New(cfg.Acme, m.creds, cfg.DataDir, log))
 		warnAcmeMismatches(cfg, log)
 	}
 	return m
@@ -186,11 +189,12 @@ func warnAcmeMismatches(cfg *config.Config, log *slog.Logger) {
 		log.Warn("tls.cert_dir does not match acme config_dir/live; issued certs may not be discovered",
 			"tls.cert_dir", dir, "expected", cfg.Acme.LiveDir())
 	}
-	switch cfg.Acme.ChallengeOrDefault() {
-	case config.ChallengeNginx, config.ChallengeStandalone:
-		if cfg.Nginx.Manage {
-			log.Warn("acme.challenge conflicts with managed nginx; prefer dns or http (webroot)",
-				"challenge", cfg.Acme.ChallengeOrDefault())
+	for _, c := range cfg.Acme.ChallengesOrDefault() {
+		switch c {
+		case config.ChallengeNginx, config.ChallengeStandalone:
+			if cfg.Nginx.Manage {
+				log.Warn("acme challenge conflicts with managed nginx; prefer dns or http (webroot)", "challenge", c)
+			}
 		}
 	}
 	if r := cfg.Acme.Renewal; r.RenewalEnabled() && r.RenewBeforeOrDefault() <= r.CheckIntervalOrDefault() {
@@ -203,6 +207,10 @@ func warnAcmeMismatches(cfg *config.Config, log *slog.Logger) {
 // loops have drained (graceful shutdown: in-flight swaps finish, in-flight
 // downloads abort via context).
 func (m *Manager) Run(ctx context.Context) {
+	m.running.Store(true)
+	if client := m.acme.Load(); client != nil {
+		go client.ProbeDNSPlugins(ctx)
+	}
 	m.mu.Lock()
 	m.ctx = ctx
 	m.reconcileState()
@@ -487,7 +495,7 @@ func (m *Manager) Reload(newCfg *config.Config) {
 	// the next one loads this one. m.creds is path-stable
 	// (DataDir/acme/credentials) and always present, so it is reused.
 	if newCfg.Acme.Enabled {
-		m.acme.Store(acme.New(newCfg.Acme, m.creds, newCfg.DataDir, m.log))
+		m.storeAcme(acme.New(newCfg.Acme, m.creds, newCfg.DataDir, m.log))
 		warnAcmeMismatches(newCfg, m.log)
 	} else {
 		m.acme.Store(nil)

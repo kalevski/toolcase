@@ -37,6 +37,13 @@ func httpClient(d *Destination) (*http.Client, error) {
 		}
 		tlsCfg.RootCAs = pool
 	}
+	if d.ClientCertFile != "" || d.ClientKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(d.ClientCertFile, d.ClientKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("client certificate: %w", err)
+		}
+		tlsCfg.Certificates = []tls.Certificate{cert}
+	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = tlsCfg
 	return &http.Client{Transport: transport, Timeout: httpSendTimeout}, nil
@@ -59,6 +66,12 @@ func applyAuth(req *http.Request, a Auth) error {
 			return fmt.Errorf("resolve bearer token: %w", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+secret)
+	case AuthHeader:
+		secret, err := a.Secret()
+		if err != nil {
+			return fmt.Errorf("resolve header value: %w", err)
+		}
+		req.Header.Set(a.HeaderName, secret)
 	default:
 		return fmt.Errorf("unknown auth method %q", a.Method)
 	}

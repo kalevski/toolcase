@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/admin"
+	"github.com/kalevski/toolcase/nginxpilot/internal/admintoken"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
@@ -64,11 +65,20 @@ func cmdRun(args []string) int {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer stop()
 
-	// Admin endpoint (loopback by default; empty listen disables).
-	token, err := resolveAdminToken(cfg.Admin.TokenEnv, cfg.Admin.TokenFile)
+	// Admin endpoint (loopback by default; empty listen disables). The token is
+	// read once, here: a `token set` takes effect on the next start.
+	resolved, err := admintoken.Resolve(cfg.Admin.TokenEnv, cfg.Admin.TokenFile)
 	if err != nil {
 		log.Error("admin token misconfiguration; refusing to start", "error", err)
 		return 1
+	}
+	if resolved.Seeded {
+		log.Info("stored the admin token hash in admin.token_file; admin.token_env may be removed now",
+			"token_file", cfg.Admin.TokenFile, "token_env", cfg.Admin.TokenEnv)
+	}
+	if resolved.EnvIgnored {
+		log.Warn("admin.token_env differs from the stored token and is ignored",
+			"token_file", cfg.Admin.TokenFile, "token_env", cfg.Admin.TokenEnv)
 	}
 	// reload performs a diff-based reload from the on-disk config; a config that
 	// fails validation is rejected wholesale and the running config stays active
@@ -87,9 +97,10 @@ func cmdRun(args []string) int {
 		return nil
 	}
 
-	adminSrv := admin.New(mgr, token, log, reload)
+	adminSrv := admin.New(mgr, resolved.Hash, log, reload)
+	adminSrv.Version = version
 	go func() {
-		if err := adminSrv.Run(ctx, cfg.Admin.ListenAddr()); err != nil {
+		if err := adminSrv.Run(ctx, cfg.Admin.ListenAddr(), cfg.Admin.SocketPath()); err != nil {
 			log.Error("admin endpoint failed", "error", err)
 		}
 	}()
@@ -112,24 +123,6 @@ func cmdRun(args []string) int {
 	sdNotify("STOPPING=1")
 	log.Info("shutdown complete")
 	return 0
-}
-
-// resolveAdminToken resolves the bearer token from an env var or a secret file.
-// When both refs are empty, no auth is configured and ("", nil) is returned.
-// If a ref is configured but resolves to an empty value, an error is returned
-// so the caller refuses to start rather than expose an unauthenticated endpoint.
-func resolveAdminToken(tokenEnv, tokenFile string) (string, error) {
-	if tokenEnv == "" && tokenFile == "" {
-		return "", nil
-	}
-	token, err := config.ResolveSecret(tokenEnv, tokenFile)
-	if err != nil {
-		return "", err
-	}
-	if token == "" {
-		return "", fmt.Errorf("admin token is empty")
-	}
-	return token, nil
 }
 
 // sdNotify implements the systemd Type=notify readiness protocol with no

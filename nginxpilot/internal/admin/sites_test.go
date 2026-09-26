@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/admintoken"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
@@ -58,8 +59,12 @@ func newSitesEnv(t *testing.T, token string, seed ...config.Site) sitesEnv {
 		n++
 		return rerr
 	}
+	var hash admintoken.Hash
+	if token != "" {
+		hash, _ = admintoken.Parse(admintoken.Sum(token))
+	}
 	return sitesEnv{
-		h:         New(mgr, token, log, reload).routes(),
+		h:         New(mgr, hash, log, reload).routes(true),
 		sitesDir:  sitesDir,
 		reloads:   &n,
 		reloadErr: &rerr,

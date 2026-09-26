@@ -241,9 +241,11 @@ dead_hosts:
 
 Self-redirects (`to:` equal to `domain`) and `force_ssl` on a redirect are validation errors. Both types support `enabled: false` (render nothing, keep the config) and wildcard domains.
 
+**Access lists work on both.** With `access_list: <name>`, the answer is rendered as `location / { try_files /.nginxpilot-no-such-file @nginxpilot_answer; }` plus a named location holding the `return`. A plain `return` runs in nginx's rewrite phase, before `allow`/`deny` and `auth_basic` (the access phase), so it would answer every client and the list would guard nothing. `try_files` runs in the content phase, after the access check: a refused client gets `403` (or `401` for basic auth), an allowed one the redirect or code. Without an access list the vhost keeps its plain server-level `return`.
+
 ### Wildcard vhosts
 
-Proxies, redirects and dead hosts accept one leading `*.` label (`*.example.com`); sites do not. Managed files and API fragments use certbot's `_wildcard.` stem on disk (`proxy-_wildcard.example.com.conf`). A wildcard vhost matches a cert whose SANs carry the identical `*.example.com` pattern — issuing one requires `acme.challenge: dns`. A wildcard and an exact vhost (`*.example.com` + `app.example.com`) may coexist; nginx prefers the exact `server_name`.
+Proxies, redirects and dead hosts accept one leading `*.` label (`*.example.com`); sites do not. Managed files and API fragments use certbot's `_wildcard.` stem on disk (`proxy-_wildcard.example.com.conf`). A wildcard vhost matches a cert whose SANs carry the identical `*.example.com` pattern — issuing one requires the `dns` challenge (the default `acme.challenge`, or `"challenge":"dns"` on the request when `acme.challenges` allows it). A wildcard and an exact vhost (`*.example.com` + `app.example.com`) may coexist; nginx prefers the exact `server_name`.
 
 ## PHP apps
 
@@ -400,6 +402,79 @@ Per-cert state (`renew_managed`, `last_renew_time`, `last_renew_error`, `expires
 
 **Issuance never blocks the rest of the daemon.** `POST /certs` registers a job and returns `202` with its id (poll `GET /certs/jobs/{id}`), and certbot then runs in the background. One lock serializes certbot invocations — they share the cert dir and certbot locks its own config dir — and that lock is held for the whole run, up to `propagation_seconds + 120s` on DNS-01. Nothing else waits on it: the client handle is swapped atomically, so `POST /reload`, SIGHUP and every fragment write (`/sites`, `/proxies`, `/upstreams`, …) keep answering while a certificate is being issued, and so does every read. The renewal sweep takes the lock per certificate rather than per batch, so a manual issue/renew waits for at most the one cert in flight.
 
+
+### Choosing the challenge per request
+
+`acme.challenge` is the default; `acme.challenges` lists every challenge a `POST /certs` request may pick with its `challenge` field, so one daemon can issue DNS-01 and HTTP-01 certificates side by side:
+
+```yaml
+acme:
+  enabled: true
+  email: ops@example.org
+  agree_tos: true
+  challenge: http                 # used when a request names none
+  challenges: [http, dns]         # default: just [challenge]
+  http: { webroot: /var/www/acme }
+  dns: { provider: cloudflare }   # default provider; a request may name another
+```
+
+```bash
+# HTTP-01 (the default here)
+curl -X POST localhost:9090/certs -d '{"domains":["shop.example.org"]}'
+# DNS-01 with another installed plugin and a stored credential, wildcard included
+curl -X POST localhost:9090/certs -d '{"domains":["example.com","*.example.com"],"challenge":"dns","provider":"zonewright","account":"edge"}'
+```
+
+- A `challenge` outside `acme.challenges` is `400`; so are `provider`/`account` on a non-DNS request, and a wildcard on anything but `dns`. Every allowed challenge's own settings must be valid (`dns` needs `acme.dns.provider`, `http` needs `acme.http.webroot`); `acme.challenge` must be one of the set.
+- `cert_name` (optional; default: the first domain without `*.`) names the certbot lineage and is the `{domain}` every later route addresses it by (`/certs/{domain}/renew`, `DELETE /certs/{domain}`, `/certs/bundle/{domain}`). It must be domain-shaped — letters, digits, `-` and `.` between labels, no wildcard, not starting with `-` or `.`, at most 253 characters — and is IDNA-normalized (lower-cased) before use; a single label such as `wmk-3f9a12-g1` is fine. Anything else is `400` and no job is created.
+- `dry_run: true` runs certbot with `--dry-run`: the whole ACME exchange — account, order, the challenge and its credentials, validation — against the staging directory (or `acme.server` when set), **without saving a certificate or touching any lineage**, and without reloading nginx. The job is recorded with `dry_run: true` and succeeds or fails like a real issuance, but never carries a `cert`. Use it to prove a DNS provider credential or an HTTP-01 path before a real issuance, at no cost to production rate limits. CLI: `nginxpilot cert issue … --dry-run`.
+- **Renewals need nothing.** certbot records each certificate's authenticator in its renewal config, and renewals pass no challenge flags, so every certificate renews the way it was issued. The renewal timeout allows for DNS propagation whenever `dns` is allowed.
+- The job (`GET /certs/jobs/{id}`) and the `202` response carry the `challenge` used.
+- **Jobs survive a restart.** They are persisted to `data_dir/acme/jobs.json` (written atomically on every change) and kept for 24 h after they finish. A job that was `pending` or `running` when the daemon stopped is settled on startup: `succeeded` (with its `cert`) when the cert dir holds a certificate under the job's name issued after the job began, otherwise `failed` with `interrupted: the daemon restarted before certbot finished`. An interrupted dry run always fails. A corrupt file is logged and replaced, never fatal.
+- DNS plugins are selected with `--authenticator dns-<provider>`, which works for certbot's bundled plugins and third-party ones alike (the `--dns-<provider>` shortcut exists only for bundled plugins; certbot rejects it as ambiguous for others such as `certbot-dns-zonewright`).
+- **Every managed vhost answers HTTP-01** whenever `http` is in `acme.challenges`: sites, proxies, redirects, dead hosts and apps all get `location ^~ /.well-known/acme-challenge/` serving `acme.http.webroot`, in the port-80 redirect server too. A `force_ssl` redirect, redirect host or dead host keeps its `return` but inside `location /` (or behind the access check, when it has an access list), because a server-level `return` would answer before the challenge. The location carries `allow all` and `auth_basic off`, so an access list never blocks the CA's validator, and a missing file is a plain 404. So a name already served by a vhost can be issued and renewed over HTTP-01, not only a name the catch-all answers. With HTTP-01 not in use the rendered config is unchanged.
+
+`GET /status` reports what the daemon can issue, under `acme`:
+
+```json
+"acme": {
+  "enabled": true,
+  "challenge": "http",
+  "challenges": ["http", "dns"],
+  "dns_provider": "cloudflare",
+  "dns_providers": ["cloudflare", "zonewright"],
+  "renew_before": "720h0m0s",
+  "propagation_seconds": 60,
+  "propagation_seconds_by_provider": { "zonewright": 10 }
+}
+```
+
+`dns_providers` lists the certbot DNS plugins actually installed, found once in the background at startup (`certbot plugins`); it is `null` until that finishes, and `dns_providers_error` explains a failed probe. With ACME off the block is `{"enabled": false, "dns_providers": null}`.
+
+**Where DNS credentials come from.** A request's provider/account pair picks the credential:
+
+- **`acme.dns.credentials_env` / `credentials_file`** (a reference in the config) serves **only `acme.dns.provider`'s default account**. It is written to `data_dir/acme/config-credentials/<provider>.ini` (`0600`, atomically) before each issuance that uses it and before every renewal, so a rotated secret reaches certbot without re-issuing. The path is stable, because certbot records it in the lineage's renewal config. (Before this, the reference overrode *every* provider and was written to a temp file that was deleted after issuance, so its lineages could not renew. Re-issue any lineage created that way.)
+- **Every other provider, and every named account**, uses the runtime store (`PUT /acme/credentials/{provider}[/{account}]`).
+- **Nothing found** falls back to the plugin's ambient SDK environment (`route53`, `google`).
+
+`GET /status → acme.dns_config_credentials` reports the config reference when one is set: `{"provider": "cloudflare", "account": "default", "source": "env" | "file"}`. A request that names that provider explicitly is accepted without a stored credential.
+
+**DNS propagation wait per provider.** `acme.dns.propagation_seconds` (default 60) is how long certbot waits after writing the TXT record before asking the CA to validate; `acme.dns.propagation_seconds_by_provider` overrides it per plugin, so a plugin that confirms its own write can skip most of it while a slow public provider keeps a long one:
+
+```yaml
+acme:
+  dns:
+    provider: cloudflare
+    propagation_seconds: 60                  # fallback for any provider not listed
+    propagation_seconds_by_provider:
+      zonewright: 10                         # waits for replication itself
+      cloudflare: 30
+```
+
+Keys are plugin suffixes (`[a-z0-9-]+`), values 0–3600; a listed `0` means no wait. The issue timeout follows the provider a request uses (`wait + 120s`), and the renewal timeout the longest configured wait. certbot stores the value in each lineage's renewal config, so a change applies to new issuances — existing lineages keep theirs until re-issued. Plugins that wait on their own (`route53`, `google`) never get the flag.
+
+The end-to-end test `test/e2e-acme-challenges.sh` runs one managed daemon with `challenges: [http, dns]` against Pebble and zonewright: an HTTP-01 certificate for a name already claimed by a `force_ssl` proxy whose access list refuses the CA, a DNS-01 apex + wildcard certificate through `certbot-dns-zonewright`, then a forced renewal of each. It also checks that guarded redirects and dead hosts answer `403` to a refused client and their code to an allowed one.
+
 ### Pre-flight target checks
 
 Backend targets are checked in three tiers: strict lexical validation always runs (the injection guard above); DNS resolution and an optional TCP reachability probe run on admin API writes:
@@ -504,20 +579,40 @@ Off by default: an existing managed deployment may already declare its own `defa
 | `print-vhost <domain>` | Print a commented nginx snippet — a content-serving block for a static site, or `upstream {}` + `proxy_pass` blocks for a reverse proxy. Honours TLS + toggles. |
 | `print-include` | Print the `nginx.conf` include snippet for managed mode (http include + the top-level `stream {}` block). |
 | `print-logformat` | Print the JSON access-log `log_format` declaration for generate-only setups (managed mode writes the include itself). Pairs with the commented `access_log` lines `print-vhost` emits when `logs.access.enabled` is on. |
-| `status [--json]` | Human table (or raw JSON) from the daemon's `/status` endpoint. |
+| `status [--json]` | Human table (or raw JSON) from the daemon's `/status` endpoint, over the local admin socket. |
+| `token set` | Replace the stored admin token: prompts with echo off (or reads stdin), writes its hash to `admin.token_file` atomically. Never takes the token as an argument. Takes effect on the next daemon restart. |
 | `version` | Build info. |
 
 ## Admin endpoint
 
-Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.token_env` adds bearer auth):
+Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.token_env` / `admin.token_file` add bearer auth), plus a local Unix socket for the CLI.
+
+### The admin token
+
+```yaml
+admin:
+  listen: 0.0.0.0:9090
+  token_env: NGINXPILOT_ADMIN_TOKEN                        # seeds the file on the first start
+  token_file: /var/lib/nginxpilot/secrets/admin.token      # holds sha256:<hex>, never the token
+  socket: /run/nginxpilot/admin.sock                       # the default; "" disables it
+```
+
+- **`token_file` holds a hash** (`sha256:<hex>`), so reading it does not reveal the token. A plaintext file is refused at startup — this format replaced the plaintext one with no compatibility; run `nginxpilot token set` to store a hash.
+- **`token_env` seeds it.** With both set and the file missing, the daemon writes the variable's hash to the file (0600, atomically) and uses it. From then on **the file wins**: a variable that no longer matches is ignored with a warning (neither value is logged), and it can be removed, so `docker inspect` shows at most a dead token. `token_env` alone still works, hashed in memory.
+- **Rotate inside the container:** `docker exec -it nginxpilot nginxpilot token set` (or `… token set < file`), then `docker restart nginxpilot`. The token is read once at startup; there is no hot swap. Run as root, `token set` hands the file to the owner of its directory so the daemon can read it.
+- **The CLI uses the socket, not the token.** `status` and `cert …` talk to `admin.socket` (default `/run/nginxpilot/admin.sock`, created 0600 for the daemon user, not under the data volume). The socket serves every route with **no token**: reaching it already means being inside the container as that user or root. Never publish or mount it outside the container. The TCP listener still requires the bearer token.
+
+Routes:
 
 - `GET /healthz` — liveness
-- `GET /status` — per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one.
+- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one.
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`. In managed mode a reload also re-renders + reloads nginx.
 - `POST /nginx/test` — managed-mode dry run: render + `nginx -t` with no swap/reload, returning the per-resource pass/fail set so a control plane can preview before committing (`501` when managed mode is off).
-- `GET /certs` — JSON list of the TLS certificates discovered in the cert dir (certbot live or flat layout), read fresh off disk on each call so renewals show immediately. Each entry carries the index `domain` key, the leaf cert's SAN `names`, the `cert_path`/`key_path`, the key-file `mod_time`, and the leaf's `not_before`/`not_after`/`issuer` (omitted when the cert can't be parsed). Read-only — nginxpilot only consumes certs; it never reads key material (only the privkey *path*). Works in generate-only mode too; an unconfigured/missing cert dir yields an empty list.
+- `GET /certs` — JSON list of the TLS certificates discovered in the cert dir (certbot live or flat layout), read fresh off disk on each call so renewals show immediately. Each entry carries the index `domain` key, the leaf cert's SAN `names`, the `cert_path`/`key_path`, the key-file `mod_time`, and the leaf's `not_before`/`not_after`/`issuer`, `serial` (hex) and `fingerprint_sha256` (hex SHA-256 of the leaf DER; both change on every renewal, so a control plane can spot one without downloading the cert) — all omitted when the cert can't be parsed. Metadata only — it never returns key material (only the privkey *path*). Works in generate-only mode too; an unconfigured/missing cert dir yields an empty list.
+- `GET /certs/bundle/{domain}` — export one certificate **with its private key**, so a control plane can keep a central copy of a cert this daemon issued and install it on other nodes with `PUT /certs/{domain}`. `{domain}` is the exact cert name (the certbot lineage or flat-file key, as `GET /certs` lists it; a leading `*.` is stripped like `renew`). SAN matching is never applied, so a wildcard that merely *covers* a host is not exported under that host's name (`404`). Returns `domain`, `names`, `cert` (leaf PEM), `chain`, `fullchain` (leaf + chain), `key`, `not_before`, `not_after`, `issuer`, `serial` (hex), `fingerprint_sha256` (of the leaf DER), `renew_managed`, `mod_time`. The key must match the cert (a torn renewal is a `500`, never exported); `501` without a cert dir. Sent with `Cache-Control: no-store`, and every export is logged (name and fingerprint, never the key). This is the only route that returns key material — over TCP it requires the bearer token like every other route, and the unauthenticated socket must stay inside the container. CLI: `nginxpilot cert export <domain>`.
+- `POST /certs/{domain}/revoke` — revoke a certbot-issued certificate at the CA that issued it (the `server` in its renewal config, so staging and `acme.server` lineages go back where they came from). Optional body `{"reason": …, "delete": bool}`: `reason` is one of `unspecified` (default), `keycompromise`, `affiliationchanged`, `superseded`, `cessationofoperation`; `delete: true` also removes the lineage (`--delete-after-revoke`), otherwise it stays on disk and **keeps being served, revoked** — so install the replacement first, then revoke the old one (`superseded`) with `delete`. Synchronous (no challenge runs). `400` bad reason, `404` no such cert, `409` a flat uploaded cert (no certbot lineage here — revoke it where it was issued), `501` ACME off, `502` certbot failed. CLI: `nginxpilot cert revoke <domain> [--reason R] [--delete]`.
 ### Config management over REST
 
 A control plane (e.g. Quaykeeper) drives the **entire** config — sites, upstreams and reverse proxies — over the API, so `sites.d/` never has to be a hand-edited or shared-write surface. Each write parses the same YAML fragment a file-drop would contain (`config/parse.go` schema), validates the **candidate merged config** before touching disk (so a bad fragment never lands in `sites.d/`), writes it atomically under a deterministic filename, then reloads; the target directory and extension are derived from the first `include:` glob. A write must declare **exactly one** entity of its kind (and none of the others). Each kind has a deterministic filename so it maps 1:1 to its `DELETE`, and the three filename namespaces never collide:
@@ -664,6 +759,14 @@ docker run -d \
 - The daemon **and nginx** both run as the unprivileged `nginxpilot` user (member of group `nginx`) — the daemon's managed-mode `nginx -t` / `nginx -s reload` need a same-uid master, and low ports come from a `cap_net_bind_service` file capability on the nginx binary (pidfile at `/run/nginxpilot/nginx.pid`). nginx is supervised by the entrypoint (restarted on crash), content swaps need no reload.
 - **Managed mode in the image**: the http include and the top-level `stream {}` block are baked into `nginx.conf`, and the daemon-owned dirs under `/etc/nginx/nginxpilot/` are pre-created. Point your config at them: `nginx.conf_dir: /etc/nginx/nginxpilot/conf.d`, `nginx.stream_conf_dir: /etc/nginx/nginxpilot/stream.d`, `nginx.managed_include_dir: /etc/nginx/nginxpilot/conf.d`. Mount your cert dir and set `tls.cert_dir`.
 - Port 9090 is the admin endpoint — set `admin.listen: 0.0.0.0:9090` in the config and publish the port if you want `/status` from outside.
+- **certbot DNS plugins**: the published image carries `certbot-dns-digitalocean`, `-cloudflare`, `-route53`, `-google` and **`certbot-dns-zonewright`** (DNS-01 against zonewright, from `zonewright/certbot-dns-zonewright/` in this repo, same commit as the image). `certbot plugins` inside the container lists them, and `/status` reports them under `acme.dns_providers`. Building locally, the zonewright plugin comes in as a named build context; without it the image builds without that plugin:
+
+```bash
+docker build \
+  --build-context certbot-dns-zonewright=zonewright/certbot-dns-zonewright \
+  -t nginxpilot nginxpilot                      # from the toolcase repo root
+# other plugins: --build-arg CERTBOT_DNS_PLUGINS="certbot-dns-cloudflare certbot-dns-ovh"
+```
 - Any argument bypasses the supervisor and runs the CLI directly:
 
 ```bash
@@ -684,7 +787,7 @@ nginxpilot is **config-file driven** (`config.yml`), so its env surface is tiny 
 | `NGINXPILOT_CONFIG` | `/etc/nginxpilot/config.yml` | Config path the entrypoint passes to `nginxpilot run`. |
 | _`auth.token_env` value_ | — | Per-source: name of the env var holding a git HTTPS/GitHub token (e.g. set `token_env: GH_TOKEN`, then pass `-e GH_TOKEN=…`). |
 | _`auth.key_env` value_ | — | Per-source: name of the env var holding an SSH private key (alternative to `key_file`). |
-| _`admin.token_env` value_ | — | Name of the env var holding the admin-API bearer token, when the admin endpoint is exposed. |
+| _`admin.token_env` value_ | — | Name of the env var holding the admin-API bearer token. With `admin.token_file` set it only seeds the hashed file on the first start (see [The admin token](#the-admin-token)). |
 | `TZ` | `UTC` | Timezone (image ships `tzdata`); affects release timestamps + logs. |
 
 The `*_env` rows are **indirection**: you choose the variable name in the config, then pass that variable to the container. Everything else — data dir, intervals, sources, TLS, per-host toggles — lives in the YAML, not the environment.

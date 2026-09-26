@@ -8,6 +8,7 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
+	"github.com/kalevski/toolcase/nginxpilot/internal/credstore"
 )
 
 // renewalStartupDelay is the one-shot catch-up pass shortly after startup —
@@ -63,16 +64,98 @@ func (m *Manager) RenewManaged(domain string) bool {
 	return isDir(filepath.Join(cfg.Acme.ConfigDirOrDefault(), "live", domain))
 }
 
-// RenewTimeout bounds one certbot run: DNS-01 waits for propagation, so allow
-// that plus a buffer; the HTTP challenges are quicker. Shared by the admin
-// issue/renew handlers and the renewal scheduler so an operator-tuned
-// propagation_seconds is always honoured.
+// RenewTimeout bounds one renewal run. A renewal replays whichever challenge
+// each cert was issued with, so when DNS-01 is allowed at all, allow for its
+// propagation wait. Shared by the admin renew handlers and the renewal
+// scheduler so an operator-tuned propagation_seconds is always honoured.
 func (m *Manager) RenewTimeout() time.Duration {
 	a := m.Config().Acme
-	if a.ChallengeOrDefault() == config.ChallengeDNS {
-		return time.Duration(a.DNS.PropagationSecondsOrDefault())*time.Second + 120*time.Second
+	if a.AllowsChallenge(config.ChallengeDNS) {
+		return time.Duration(a.DNS.MaxPropagationSeconds())*time.Second + 120*time.Second
 	}
 	return 120 * time.Second
+}
+
+// IssueTimeout bounds one issuance with the given challenge and DNS provider
+// ("" = the defaults): DNS-01 waits for that provider's propagation plus a
+// buffer, HTTP-01 is quicker.
+func (m *Manager) IssueTimeout(challenge, provider string) time.Duration {
+	a := m.Config().Acme
+	if challenge == "" {
+		challenge = a.ChallengeOrDefault()
+	}
+	if challenge == config.ChallengeDNS {
+		if provider == "" {
+			provider = a.DNS.Provider
+		}
+		return time.Duration(a.DNS.PropagationSecondsFor(provider))*time.Second + 120*time.Second
+	}
+	return 120 * time.Second
+}
+
+// AcmeStatus is the acme block of GET /status: what this daemon can issue, so
+// a control plane can pick a challenge and provider per request.
+type AcmeStatus struct {
+	Enabled    bool     `json:"enabled"`
+	Challenge  string   `json:"challenge,omitempty"`
+	Challenges []string `json:"challenges,omitempty"`
+	// DNSProvider is the default DNS plugin (acme.dns.provider).
+	DNSProvider string `json:"dns_provider,omitempty"`
+	// DNSProviders lists the certbot DNS plugins installed on this host; null
+	// until the background probe has finished.
+	DNSProviders      []string `json:"dns_providers"`
+	DNSProvidersError string   `json:"dns_providers_error,omitempty"`
+	RenewBefore       string   `json:"renew_before,omitempty"`
+	// PropagationSeconds is the fallback DNS wait; PropagationSecondsByProvider
+	// the per-plugin overrides (only present when DNS-01 is allowed).
+	PropagationSeconds           int            `json:"propagation_seconds,omitempty"`
+	PropagationSecondsByProvider map[string]int `json:"propagation_seconds_by_provider,omitempty"`
+	// DNSConfigCredentials is set when acme.dns references a credential in the
+	// config (credentials_env / credentials_file): which provider's default
+	// account it serves and where it comes from. Every other provider and every
+	// named account uses the runtime credential store.
+	DNSConfigCredentials *DNSConfigCredentials `json:"dns_config_credentials,omitempty"`
+}
+
+// DNSConfigCredentials describes the config-referenced DNS credential.
+type DNSConfigCredentials struct {
+	Provider string `json:"provider"`
+	Account  string `json:"account"`
+	Source   string `json:"source"` // "env" | "file"
+}
+
+// AcmeStatus reports the effective ACME capabilities.
+func (m *Manager) AcmeStatus() AcmeStatus {
+	client := m.acme.Load()
+	if client == nil {
+		return AcmeStatus{Enabled: false}
+	}
+	a := m.Config().Acme
+	st := AcmeStatus{
+		Enabled:     true,
+		Challenge:   a.ChallengeOrDefault(),
+		Challenges:  a.ChallengesOrDefault(),
+		RenewBefore: a.Renewal.RenewBeforeOrDefault().String(),
+	}
+	if a.AllowsChallenge(config.ChallengeDNS) {
+		st.DNSProvider = a.DNS.Provider
+		st.PropagationSeconds = a.DNS.PropagationSecondsOrDefault()
+		st.PropagationSecondsByProvider = a.DNS.PropagationSecondsByProvider
+		if client.HasConfigCredentials() {
+			source := "file"
+			if a.DNS.CredentialsEnv != "" {
+				source = "env"
+			}
+			st.DNSConfigCredentials = &DNSConfigCredentials{Provider: a.DNS.Provider, Account: credstore.DefaultAccount, Source: source}
+		}
+	}
+	if plugins, known, err := client.DNSPlugins(); known {
+		st.DNSProviders = plugins
+		if err != nil {
+			st.DNSProvidersError = err.Error()
+		}
+	}
+	return st
 }
 
 // renewalInterval reads the effective check interval fresh off the config, so
