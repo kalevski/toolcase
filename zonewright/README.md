@@ -92,6 +92,11 @@ admin:
     cert_file: /etc/zonewright/api.crt
     key_file: /etc/zonewright/api.key
   # allow_insecure_http: true     # …unless explicitly opted out (private network / TLS proxy in front)
+  scoped_tokens:                  # optional limited tokens next to the admin token — see "Scoped tokens"
+    - name: realm-fra             # [a-z0-9-]+, unique; shown in logs and 403 messages
+      token_env: ZW_ACME_FRA      # or token_file: /run/secrets/zw_acme_fra
+      scope: acme                 # the only scope: /lookup + _acme-challenge TXT writes
+      zones: [example.com]        # the zones it may touch — or all_zones: true; neither = none
 bind:
   zone_dir: /var/lib/zonewright/zones                 # default <data_dir>/zones
   conf_file: /var/lib/zonewright/named.zones.conf     # default <data_dir>/named.zones.conf
@@ -178,6 +183,7 @@ JSON everywhere (errors are `{"error": "…"}`); loopback by default; optional `
 | `GET /healthz` | liveness (no auth) |
 | `GET /status` | per-zone state/serial + last apply (reload errors, pending retry) |
 | `POST /reload` | re-read config from disk and apply (same as `SIGHUP`) |
+| `GET /lookup?name=<fqdn>` | the most specific zone that holds a name: `{"zone","name","source","writable"}`, `name` relative to the zone (`@` for the apex); `404` when no zone holds it |
 | `GET /zones` | all zones with records, serial, state, `source` (`replicated`/`local`), `etag` |
 | `POST /zones` | create/replace one zone: a YAML **or** JSON fragment with exactly one zone (`201` created / `200` updated / `200` unchanged) |
 | `GET /zones/{zone}` | one zone, with an `ETag` header |
@@ -188,6 +194,11 @@ JSON everywhere (errors are `{"error": "…"}`); loopback by default; optional `
 | `POST /zones/{zone}/records` | add one record — `409` if an identical one exists |
 | `PUT /zones/{zone}/records/{name}/{type}` | replace one RRset: `{"records":[{"value":"…"},…]}`; `[]` empties it |
 | `DELETE /zones/{zone}/records/{name}/{type}[?value=…]` | delete the RRset, or only the matching value |
+| `GET /tokens` | scoped tokens this server accepts — its config tokens and the replicated API tokens (`source`: `config` / `api`). Never secrets or hashes |
+| `POST /tokens` | create an API token: `{"name","scope":"acme","zones":[…]}` (or `"all_zones": true`; neither = no zone yet) → `201` with its secret in `token` (`zwt_…`), shown **only here** |
+| `PUT /tokens/{name}` | replace an API token's `scope`, `zones` and `all_zones`; the secret stays |
+| `POST /tokens/{name}/rotate` | new secret for an API token (returned once); the old one stops working |
+| `DELETE /tokens/{name}` | revoke an API token on every server |
 | `GET /cluster/status` | this node's id; per URL: which server answered, self/peer, lag, last pull, clock skew, alarms; conflicts; log size |
 | `DELETE /cluster/peers/{id}` | retire the id of a server removed for good (a redeployed server is retired automatically) |
 
@@ -209,6 +220,79 @@ curl -X PUT localhost:9053/zones/example.com/records/@/MX -d '{"records":[{"prio
 ```
 
 A write response looks like `{"status":"created","zone":"example.com","serial":2026092503,"state":"active","reloaded":true,"op":"n-4f1c…:17","etag":"\"…\""}`. Status codes: `400` invalid input, `404` unknown zone/record, `409` duplicate record or a local (read-only) zone, `412` stale `If-Match`, `422` BIND rejected the result (nothing committed), `503` the server is still in its startup fence. If named is unreachable the change is still published on disk and the response carries `reload_error` + `pending_reload: true`; zonewright retries the reload every 30s.
+
+## Scoped tokens
+
+The admin token can do everything, including deleting every zone. When another program only needs to publish ACME DNS-01 challenges — certbot on a web server, nginxpilot on every edge — give it a **scoped token** instead. There are two kinds, with the same powers:
+
+- **API tokens**: created, updated, rotated and revoked over the API with the admin token, and **replicated**, so one works on every server within a second (below).
+- **Config tokens**: listed in `admin.scoped_tokens`, read at startup, and known to that server only. They suit a fixed setup managed as files.
+
+Config tokens:
+
+```yaml
+admin:
+  token_env: ZONEWRIGHT_TOKEN          # required: scoped tokens only exist next to an admin token
+  scoped_tokens:
+    - name: edge-fra
+      token_env: ZW_ACME_EDGE_FRA
+      scope: acme
+      zones: [example.com, example.org]   # or all_zones: true (never both)
+```
+
+**A token reaches exactly the zones it lists.** An empty or missing `zones` means **no** zone, not every zone. Reaching every zone takes an explicit `all_zones: true`, which cannot be combined with `zones`. A bug that sends an empty list therefore locks a token out instead of handing it every domain.
+
+An `acme` token may call exactly these, and gets `403` for everything else:
+
+| Allowed | Limited to |
+|---|---|
+| `GET /lookup?name=` | answers only with zones in its `zones` list |
+| `POST /zones/{zone}/records` | a `TXT` record named `_acme-challenge` or `_acme-challenge.<name>` |
+| `PUT /zones/{zone}/records/{name}/{type}` | the same |
+| `DELETE /zones/{zone}/records/{name}/{type}` | the same (with or without `?value=`) |
+
+It cannot read zones or records, list anything, touch any other record or type, change zone settings, reload, or see the cluster. A request outside its zones is refused before any work is done; a refused record write commits nothing. Each config token must have its own value (the daemon refuses to start if one equals the admin token or another config token), and config tokens, like the admin token, are read at startup — restart to change them, or use API tokens.
+
+What a leaked `acme` token still allows: getting a certificate issued for a name in its zones, since that is exactly what a challenge proves. It cannot redirect traffic or change any other record. Limit `zones` to what that client actually certifies.
+
+### API tokens
+
+```bash
+# create — the secret is in the response once, and never again
+curl -H "Authorization: Bearer $ADMIN" -X POST 'localhost:9053/tokens?wait=replicated' \
+  -d '{"name":"edge-fra","scope":"acme","zones":["example.com"]}'
+# → {"status":"created","name":"edge-fra","scope":"acme","zones":["example.com"],"all_zones":false,"source":"api",
+#    "created_at":"2026-09-26T10:00:00Z","token":"zwt_3f9c…","replicated":true}
+
+curl -H "Authorization: Bearer $ADMIN" -X PUT localhost:9053/tokens/edge-fra -d '{"zones":["example.com","example.org"]}'
+curl -H "Authorization: Bearer $ADMIN" -X POST localhost:9053/tokens/edge-fra/rotate
+curl -H "Authorization: Bearer $ADMIN" -X DELETE 'localhost:9053/tokens/edge-fra?wait=replicated'
+```
+
+- **Only the admin token manages tokens.** A scoped token gets `403` on `/tokens`, including for itself, so a token can never widen its own zones or mint another.
+- **Only a hash is stored.** The secret is 32 random bytes (`zwt_` + 64 hex characters), generated by the server; clients cannot choose it. The replicated log and backups hold only its SHA-256.
+- **Replicated like records**: a token is a last-writer-wins register (REPLICATION.md §4). A change on any server reaches the others within one pull; `?wait=replicated` waits for all of them. A token revoked on one server stops working everywhere once the change arrives. A partitioned server keeps honouring it until the partition heals.
+- `PUT` replaces `scope`, `zones` and `all_zones` but keeps the secret, so a client can be given more or fewer zones without redistributing anything. A `PUT` that lists no zones and no `all_zones` leaves the token able to change nothing. `rotate` changes only the secret.
+- A token can be created with no zones and given them later: a client can hold its credentials before it is allowed to certify anything.
+- Names are `[a-z0-9-]+`, at most 64 characters, and must not clash with a config token on the server that receives the request. A deleted name can be reused.
+- API tokens need an admin token: without one the API is unauthenticated, and `POST /tokens` answers `409`.
+
+## Certificates over DNS-01 (certbot)
+
+[`certbot-dns-zonewright`](certbot-dns-zonewright/) is a certbot authenticator plugin for this API. It finds the zone with `GET /lookup`, adds the challenge with `POST …/records?wait=replicated` — so the record is on **every** server before the CA asks either nameserver — and afterwards deletes exactly the value it added. Apex and wildcard in one certificate (two values on one name) work.
+
+```bash
+pip install ./certbot-dns-zonewright
+cat > zonewright.ini <<'EOF'
+dns_zonewright_url = https://ns1.example.net:9053
+dns_zonewright_token = <an acme-scoped token>
+EOF
+chmod 600 zonewright.ini
+certbot certonly -a dns-zonewright --dns-zonewright-credentials zonewright.ini \
+  -d example.com -d '*.example.com'
+```
+
+The end-to-end test (`certbot-dns-zonewright/test/e2e-pebble.sh`) runs real certbot against this image and Pebble, Let's Encrypt's test CA.
 
 ## Running several servers (replication)
 
@@ -251,6 +335,7 @@ Each server generates its own node id on first start (stored in `zonewright.db`)
 
 The API decides what a domain resolves to, so it is treated as highly privileged:
 
+- **Scoped tokens for narrow clients.** A client that only publishes ACME challenges gets an `acme`-scoped token: `GET /lookup` and `_acme-challenge` TXT writes in the zones it lists (every zone only with an explicit `all_zones`), nothing else ([Scoped tokens](#scoped-tokens)).
 - **No token → loopback only; remote → HTTPS.** zonewright refuses to start if `admin.listen` is non-loopback without a token, or without `admin.tls` (unless `allow_insecure_http` is set deliberately), so the token never crosses a network in clear text.
 - **Peers: TLS + shared key.** Every peer request carries the cluster key (compared in constant time, ≥ 32 bytes); plain-HTTP peers need an explicit opt-in. URLs and node ids only *locate* servers — the key is what makes one a peer. Every change received from a peer is re-validated and must already be in canonical form, so a buggy or hostile peer cannot inject zone-file syntax either. Ops stamped too far in the future are held, not applied.
 - **Browsers are refused.** There is no browser client, so any request carrying `Origin` or `Sec-Fetch-*` headers gets `403`. This blocks cross-site request forgery (a web page POSTing to `127.0.0.1:9053`). Without a token, the `Host` header must also be a loopback name, which defeats DNS rebinding.

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/kalevski/toolcase/zonewright/internal/bindctl"
@@ -246,6 +248,15 @@ func (m *Manager) MergeSnapshot(ctx context.Context, snap *store.Snapshot) error
 			return fmt.Errorf("snapshot rejected: zone name %q", z.Name)
 		}
 	}
+	for _, t := range snap.Tokens {
+		var p store.TokenPayload
+		if err := strictJSON(t.Payload, &p); err != nil {
+			return fmt.Errorf("snapshot rejected: token %s: %w", t.Name, err)
+		}
+		if err := ValidateToken(t.Name, p); err != nil || p.Deleted != t.Deleted || (!t.Deleted && p.Hash != t.Hash) {
+			return fmt.Errorf("snapshot rejected: token %s is not canonical", t.Name)
+		}
+	}
 	touched, err := m.repl.MergeSnapshot(snap)
 	if err != nil {
 		return err
@@ -256,10 +267,79 @@ func (m *Manager) MergeSnapshot(ctx context.Context, snap *store.Snapshot) error
 	return nil
 }
 
+// WriteToken commits one change to an API-created token (create, update,
+// rotate or, with p.Deleted, delete) through the replicated log and nudges
+// the peers. Callers validate p first; ValidateToken is the same check a
+// peer runs on the resulting op.
+func (m *Manager) WriteToken(name string, p store.TokenPayload) ([]store.Op, error) {
+	m.writeMu.Lock()
+	defer m.writeMu.Unlock()
+	m.hooksMu.RLock()
+	ready, onWrite := m.writesReady, m.onWrite
+	m.hooksMu.RUnlock()
+	if ready != nil && !ready() {
+		return nil, Errorf(http.StatusServiceUnavailable, "starting up: waiting for peers before accepting writes (startup fence)")
+	}
+	if err := ValidateToken(name, p); err != nil {
+		return nil, Errorf(http.StatusBadRequest, "%v", err)
+	}
+	ops, err := m.repl.LocalWrite([]store.Draft{{Kind: store.KindToken, Name: name, Payload: p}})
+	if err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+	if onWrite != nil {
+		onWrite(ops)
+	}
+	return ops, nil
+}
+
+// ValidateToken checks a token register value is well-formed and canonical.
+func ValidateToken(name string, p store.TokenPayload) error {
+	if !config.ValidTokenName(name) {
+		return fmt.Errorf("token name %q must match [a-z0-9-]+ (at most 64 characters)", name)
+	}
+	if p.Deleted {
+		if p.Hash != "" || p.Scope != "" || len(p.Zones) > 0 || p.AllZones || p.Created != "" {
+			return errors.New("a deleted token carries no fields")
+		}
+		return nil
+	}
+	if len(p.Hash) != 64 || strings.Trim(p.Hash, "0123456789abcdef") != "" {
+		return errors.New("token hash must be 64 lowercase hex characters")
+	}
+	if p.Scope != config.ScopeACME {
+		return fmt.Errorf("scope %q is not supported (only %q)", p.Scope, config.ScopeACME)
+	}
+	if p.AllZones && len(p.Zones) > 0 {
+		return errors.New("a token has zones or all_zones, not both")
+	}
+	zones, err := config.NormalizeTokenZones(p.Zones)
+	if err != nil {
+		return err
+	}
+	if !slices.Equal(zones, p.Zones) {
+		return errors.New("token zones are not canonical")
+	}
+	if _, err := time.Parse(time.RFC3339, p.Created); err != nil {
+		return fmt.Errorf("token created time: %v", err)
+	}
+	return nil
+}
+
 // ValidateOp checks that an op received from a peer is well-formed AND
 // already canonical: normalizing it must not change it. Rewriting a peer's
 // op instead would make nodes store different content for the same op id.
 func ValidateOp(op *store.Op) error {
+	if op.Kind == store.KindToken {
+		if op.Zone != "" || op.Generation != "" || op.Type != "" {
+			return errors.New("a token op carries no zone, generation or type")
+		}
+		var p store.TokenPayload
+		if err := strictJSON(op.Payload, &p); err != nil {
+			return err
+		}
+		return ValidateToken(op.Name, p)
+	}
 	name, err := config.NormalizeZoneName(op.Zone)
 	if err != nil || name != op.Zone {
 		return fmt.Errorf("zone name %q is not canonical", op.Zone)

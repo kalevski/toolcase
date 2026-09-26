@@ -61,6 +61,11 @@ func cmdRun(args []string) int {
 		log.Error("admin token misconfiguration; refusing to start", "error", err)
 		return 1
 	}
+	scoped, err := resolveScopedTokens(cfg.Admin.ScopedTokens, token)
+	if err != nil {
+		log.Error("scoped token misconfiguration; refusing to start", "error", err)
+		return 1
+	}
 
 	mgr := manager.New(cfg, serials, repl, bindctl.New(log), log)
 
@@ -104,6 +109,7 @@ func cmdRun(args []string) int {
 	}
 
 	adminSrv := admin.New(mgr, token, log, reload)
+	adminSrv.SetScopedTokens(scoped)
 	if cfg.Admin.TLS.Enabled() {
 		adminSrv.SetTLS(cfg.Admin.TLS.CertFile, cfg.Admin.TLS.KeyFile)
 	}
@@ -164,6 +170,32 @@ func resolveAdminToken(tokenEnv, tokenFile string) (string, error) {
 		return "", fmt.Errorf("admin token is empty")
 	}
 	return token, nil
+}
+
+// resolveScopedTokens resolves every admin.scoped_tokens entry. An empty token,
+// or one equal to the admin token or to another scoped token, is an error: a
+// shared value would make the scope meaningless.
+func resolveScopedTokens(refs []config.ScopedToken, adminToken string) ([]admin.ScopedToken, error) {
+	out := make([]admin.ScopedToken, 0, len(refs))
+	seen := map[string]string{}
+	for _, ref := range refs {
+		token, err := config.ResolveSecret(ref.TokenEnv, ref.TokenFile)
+		if err != nil {
+			return nil, fmt.Errorf("scoped token %s: %w", ref.Name, err)
+		}
+		if token == "" {
+			return nil, fmt.Errorf("scoped token %s is empty", ref.Name)
+		}
+		if token == adminToken {
+			return nil, fmt.Errorf("scoped token %s has the same value as the admin token", ref.Name)
+		}
+		if other, dup := seen[token]; dup {
+			return nil, fmt.Errorf("scoped tokens %s and %s have the same value", other, ref.Name)
+		}
+		seen[token] = ref.Name
+		out = append(out, admin.ScopedToken{Name: ref.Name, Token: token, Scope: ref.Scope, Zones: ref.Zones, AllZones: ref.AllZones, Source: "config"})
+	}
+	return out, nil
 }
 
 // sdNotify implements the systemd Type=notify readiness protocol with no

@@ -31,7 +31,70 @@ var (
 	// SOA RNAME verbatim (dots escaped), so nothing that is zone-file syntax —
 	// whitespace, newlines, quotes, parens, ';', '$', '\\' — may pass.
 	emailLocalRe = regexp.MustCompile(`^[A-Za-z0-9_+-]+(\.[A-Za-z0-9_+-]+)*$`)
+	tokenNameRe  = regexp.MustCompile(`^[a-z0-9-]+$`)
 )
+
+// ValidTokenName reports whether name is an acceptable scoped token name.
+func ValidTokenName(name string) bool { return len(name) <= 64 && tokenNameRe.MatchString(name) }
+
+// NormalizeTokenZones normalizes a scoped token's zone list, rejecting an
+// invalid or repeated zone.
+func NormalizeTokenZones(zones []string) ([]string, error) {
+	out := make([]string, 0, len(zones))
+	seen := map[string]bool{}
+	for i, z := range zones {
+		n, err := NormalizeZoneName(z)
+		if err != nil {
+			return nil, fmt.Errorf("zones[%d]: %v", i, err)
+		}
+		if seen[n] {
+			return nil, fmt.Errorf("zone %s is listed twice", n)
+		}
+		seen[n] = true
+		out = append(out, n)
+	}
+	return out, nil
+}
+
+// validateScopedTokens checks admin.scoped_tokens and normalizes their zone
+// lists in place.
+func validateScopedTokens(a *Admin) error {
+	if len(a.ScopedTokens) == 0 {
+		return nil
+	}
+	if a.TokenEnv == "" && a.TokenFile == "" {
+		return fmt.Errorf("admin.scoped_tokens needs admin.token_env or admin.token_file: without an admin token the API is unauthenticated")
+	}
+	names := map[string]bool{}
+	for i := range a.ScopedTokens {
+		t := &a.ScopedTokens[i]
+		where := fmt.Sprintf("admin.scoped_tokens[%d]", i)
+		if !ValidTokenName(t.Name) {
+			return fmt.Errorf("%s: name %q must match [a-z0-9-]+ (at most 64 characters)", where, t.Name)
+		}
+		if names[t.Name] {
+			return fmt.Errorf("%s: name %q is used twice", where, t.Name)
+		}
+		names[t.Name] = true
+		if (t.TokenEnv == "") == (t.TokenFile == "") {
+			return fmt.Errorf("%s (%s): set exactly one of token_env or token_file", where, t.Name)
+		}
+		if t.Scope != ScopeACME {
+			return fmt.Errorf("%s (%s): scope %q is not supported (only %q)", where, t.Name, t.Scope, ScopeACME)
+		}
+		if t.AllZones && len(t.Zones) > 0 {
+			return fmt.Errorf("%s (%s): set zones or all_zones: true, not both", where, t.Name)
+		}
+		zones, err := NormalizeTokenZones(t.Zones)
+		if err != nil {
+			return fmt.Errorf("%s (%s): %v", where, t.Name, err)
+		}
+		if len(t.Zones) > 0 {
+			t.Zones = zones
+		}
+	}
+	return nil
+}
 
 // Validate checks the merged config and normalizes it in place: zone names to
 // lowercase ASCII, record names to their relative form, types to upper case,
@@ -65,6 +128,9 @@ func Validate(cfg *Config) error {
 	}
 	if (cfg.Admin.TLS.CertFile == "") != (cfg.Admin.TLS.KeyFile == "") {
 		return fmt.Errorf("admin.tls needs both cert_file and key_file")
+	}
+	if err := validateScopedTokens(&cfg.Admin); err != nil {
+		return err
 	}
 	if cfg.Cluster != nil {
 		if err := validateCluster(cfg.Cluster); err != nil {

@@ -70,7 +70,11 @@ func newHarness(t *testing.T, token string) *harness {
 	if err != nil {
 		t.Fatal(err)
 	}
-	repl, err := store.Open(filepath.Join(h.dir, "zonewright.db"), nil)
+	// Pinned clock: zone serials start at the day's YYYYMMDD00, and the
+	// assertions below spell out serials for this date.
+	repl, err := store.Open(filepath.Join(h.dir, "zonewright.db"), func() time.Time {
+		return time.Date(2026, 9, 25, 12, 0, 0, 0, time.UTC)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

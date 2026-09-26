@@ -62,6 +62,9 @@ func (s *Server) handleAddRecord(w http.ResponseWriter, r *http.Request) {
 		if err := config.NormalizeRecord(&rec, z.Name); err != nil {
 			return manager.Errorf(http.StatusBadRequest, "invalid record: %v", err)
 		}
+		if err := permitRecord(r, rec.Name, rec.Type); err != nil {
+			return err
+		}
 		for _, cur := range z.Records {
 			if cur.Name == rec.Name && cur.Type == rec.Type && cur.RData() == rec.RData() {
 				return manager.Errorf(http.StatusConflict, "record %s %s %s already exists", rec.Name, rec.Type, rec.RData())
@@ -89,6 +92,9 @@ func (s *Server) handlePutRRset(w http.ResponseWriter, r *http.Request) {
 	s.write(w, r, r.PathValue("zone"), existing(func(z *config.Zone) error {
 		name, typ, err := rrsetKey(r, z.Name)
 		if err != nil {
+			return err
+		}
+		if err := permitRecord(r, name, typ); err != nil {
 			return err
 		}
 		for i := range body.Records {
@@ -132,6 +138,9 @@ func (s *Server) handleDeleteRRset(w http.ResponseWriter, r *http.Request) {
 	s.write(w, r, r.PathValue("zone"), existing(func(z *config.Zone) error {
 		name, typ, err := rrsetKey(r, z.Name)
 		if err != nil {
+			return err
+		}
+		if err := permitRecord(r, name, typ); err != nil {
 			return err
 		}
 		q := r.URL.Query()

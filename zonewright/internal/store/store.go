@@ -7,6 +7,7 @@
 //	zone     (name)                          exists? + generation + serial base
 //	settings (zone, generation)              ttl, soa, nameservers, acls
 //	rrset    (zone, generation, name, type)  records[] or deleted
+//	token    (name)                          API-created scoped token (hash, scope, zones) or deleted
 //
 // Each register keeps the value written by the op with the highest
 // (hlc, origin). That comparison is a pure function of the op, so applying
@@ -39,6 +40,9 @@ const (
 	KindZoneDelete = "zone_delete"
 	KindSettings   = "settings"
 	KindRRset      = "rrset"
+	// KindToken ops carry no zone: Zone and Generation are empty, Name is
+	// the token name. They do not count towards any zone's serial.
+	KindToken = "token"
 )
 
 // NewGeneration, as a Draft's Generation, refers to the zone_create earlier
@@ -155,6 +159,10 @@ CREATE TABLE IF NOT EXISTS rrsets (
   payload BLOB NOT NULL, deleted INTEGER NOT NULL,
   hlc INTEGER NOT NULL, origin TEXT NOT NULL, seq INTEGER NOT NULL,
   PRIMARY KEY (zone, generation, name, type));
+CREATE TABLE IF NOT EXISTS tokens (
+  name TEXT PRIMARY KEY, hash TEXT NOT NULL, payload BLOB NOT NULL, deleted INTEGER NOT NULL,
+  hlc INTEGER NOT NULL, origin TEXT NOT NULL, seq INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS tokens_hash ON tokens (hash);
 CREATE TABLE IF NOT EXISTS counters (
   zone TEXT NOT NULL, generation TEXT NOT NULL, count INTEGER NOT NULL,
   PRIMARY KEY (zone, generation));
@@ -356,8 +364,10 @@ func insertAndApply(tx *sql.Tx, op *Op) (bool, error) {
 	if _, err := tx.Exec(`INSERT INTO vv(origin, seq) VALUES(?, ?) ON CONFLICT(origin) DO UPDATE SET seq = MAX(seq, excluded.seq)`, op.Origin, op.Seq); err != nil {
 		return false, err
 	}
-	if _, err := tx.Exec(`INSERT INTO counters(zone, generation, count) VALUES(?, ?, 1) ON CONFLICT(zone, generation) DO UPDATE SET count = count + 1`, op.Zone, op.Generation); err != nil {
-		return false, err
+	if op.Kind != KindToken {
+		if _, err := tx.Exec(`INSERT INTO counters(zone, generation, count) VALUES(?, ?, 1) ON CONFLICT(zone, generation) DO UPDATE SET count = count + 1`, op.Zone, op.Generation); err != nil {
+			return false, err
+		}
 	}
 	return true, applyRegister(tx, op)
 }
@@ -416,6 +426,8 @@ func applyRegister(tx *sql.Tx, op *Op) error {
 			hlc=excluded.hlc, origin=excluded.origin, seq=excluded.seq`,
 			op.Zone, op.Generation, op.Name, op.Type, []byte(op.Payload), deleted, int64(op.HLC), op.Origin, op.Seq)
 		return err
+	case KindToken:
+		return applyToken(tx, op)
 	default:
 		return fmt.Errorf("op %s: unknown kind %q", op.ID(), op.Kind)
 	}
@@ -476,7 +488,9 @@ func (s *Store) ApplyRemote(ops []Op, maxFuture time.Duration, validate func(*Op
 		vv[op.Origin] = op.Seq
 		if fresh {
 			res.Applied++
-			touched[op.Zone] = true
+			if op.Zone != "" {
+				touched[op.Zone] = true
+			}
 			s.clock.Observe(op.HLC)
 		}
 	}

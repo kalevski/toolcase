@@ -158,6 +158,24 @@ echo "== delete replicates"
 code 1 DELETE '/zones/split.test?wait=replicated' >/dev/null
 check "zone deleted on zw2" "$(dig @127.0.0.1 -p 15362 +norec split.test A | grep -oE 'status: [A-Z]+')" "status: REFUSED"
 
+echo "== API tokens replicate: created on zw1, used on zw2, revoked from zw2"
+tcode() { # tcode <1|2> TOKEN METHOD PATH [BODY]
+    local port=$((19060 + $1))
+    local args=(-s -o /dev/null -w '%{http_code}' -X "$3" -H "Authorization: Bearer $2" "http://127.0.0.1:$port$4")
+    if [ $# -ge 5 ]; then args+=(--data-binary "$5"); fi
+    curl "${args[@]}"
+}
+acme="$(api 1 POST '/tokens?wait=replicated' '{"name":"e2e-acme","zones":["example.test"]}' | sed -n 's/^  "token": "\(zwt_[0-9a-f]*\)",*$/\1/p')"
+check "zw1 returns the new token's secret once" "${acme:0:4}" "zwt_"
+check "zw2 accepts it for a challenge" \
+    "$(tcode 2 "$acme" POST '/zones/example.test/records?wait=replicated' '{"name":"_acme-challenge","type":"TXT","value":"api-tok","ttl":60}')" "201"
+check "zw2 refuses it for an A record" \
+    "$(tcode 2 "$acme" POST /zones/example.test/records '{"name":"evil","type":"A","value":"203.0.113.66"}')" "403"
+check "zw1 serves the challenge written through zw2" "$(q 1 _acme-challenge.example.test TXT | grep -o api-tok)" "api-tok"
+check "the secret is never listed" "$(api 2 GET /tokens | grep -c "$acme")" "0"
+check "revoke on zw2" "$(code 2 DELETE '/tokens/e2e-acme?wait=replicated')" "200"
+check "zw1 refuses the revoked token" "$(tcode 1 "$acme" GET '/lookup?name=example.test')" "401"
+
 echo
 echo "passed: $PASS, failed: $FAIL"
 [ "$FAIL" -eq 0 ]

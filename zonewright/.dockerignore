@@ -3,3 +3,4 @@
 packaging/
 Dockerfile
 .dockerignore
+certbot-dns-zonewright/

@@ -68,7 +68,11 @@ zone        — exists? + generation        (one register per zone)
 settings    — ttl, soa, nameservers,       (one register per zone, per generation)
               allow_transfer, also_notify
 rrset       — records[] or "deleted"       (one register per zone+name+type, per generation)
+token       — {hash, scope, zones} or      (one register per token name; no zone, no generation)
+              "deleted"
 ```
+
+Tokens created over the API (`POST /tokens`) are registers too, keyed by name, holding only the SHA-256 of the secret. Their ops carry no zone, so they never bump a serial and never trigger a BIND apply. They are re-validated like any other op, travel in snapshots, and their tombstones are compacted like RRset tombstones.
 
 Each **register** holds a value plus the identity of the delta that last wrote it: `(hlc, origin)` (§5). The **visible zone** is:
 

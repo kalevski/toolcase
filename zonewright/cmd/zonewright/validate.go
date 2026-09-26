@@ -41,6 +41,12 @@ func cmdValidate(args []string) int {
 			failed = true
 		}
 	}
+	for _, t := range cfg.Admin.ScopedTokens {
+		if err := config.CheckSecretRef(t.TokenEnv, t.TokenFile); err != nil {
+			fmt.Fprintf(os.Stderr, "INVALID: scoped token %s: %v\n", t.Name, err)
+			failed = true
+		}
+	}
 
 	if c := cfg.Cluster; c != nil {
 		if c.KeyEnv != "" {

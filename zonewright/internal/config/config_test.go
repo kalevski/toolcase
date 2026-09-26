@@ -360,3 +360,82 @@ func TestClusterConfig(t *testing.T) {
 		t.Errorf("loopback behind proxy: %v", err)
 	}
 }
+
+func TestScopedTokens(t *testing.T) {
+	good := func() *Config {
+		cfg := baseConfig()
+		cfg.Admin.TokenEnv = "ZW_TOKEN"
+		cfg.Admin.ScopedTokens = []ScopedToken{{Name: "realm-fra", TokenEnv: "ZW_ACME", Scope: ScopeACME, Zones: []string{"Example.COM.", "shop.example.org"}}}
+		return cfg
+	}
+	cfg := good()
+	if err := Validate(cfg); err != nil {
+		t.Fatalf("valid scoped token: %v", err)
+	}
+	if got := cfg.Admin.ScopedTokens[0].Zones; got[0] != "example.com" || got[1] != "shop.example.org" {
+		t.Fatalf("zones not normalized: %v", got)
+	}
+	for _, all := range []bool{true, false} {
+		cfg := good()
+		cfg.Admin.ScopedTokens[0].Zones, cfg.Admin.ScopedTokens[0].AllZones = nil, all
+		if err := Validate(cfg); err != nil {
+			t.Errorf("all_zones=%v without zones should be valid: %v", all, err)
+		}
+	}
+
+	cases := map[string]func(c *Config){
+		"no admin token":      func(c *Config) { c.Admin.TokenEnv = "" },
+		"bad name":            func(c *Config) { c.Admin.ScopedTokens[0].Name = "Realm FRA" },
+		"empty name":          func(c *Config) { c.Admin.ScopedTokens[0].Name = "" },
+		"no secret ref":       func(c *Config) { c.Admin.ScopedTokens[0].TokenEnv = "" },
+		"both secret refs":    func(c *Config) { c.Admin.ScopedTokens[0].TokenFile = "/run/secrets/acme" },
+		"unknown scope":       func(c *Config) { c.Admin.ScopedTokens[0].Scope = "admin" },
+		"missing scope":       func(c *Config) { c.Admin.ScopedTokens[0].Scope = "" },
+		"bad zone":            func(c *Config) { c.Admin.ScopedTokens[0].Zones = []string{"a..b"} },
+		"duplicate zone":      func(c *Config) { c.Admin.ScopedTokens[0].Zones = []string{"example.com", "EXAMPLE.com."} },
+		"zones and all_zones": func(c *Config) { c.Admin.ScopedTokens[0].AllZones = true },
+		"duplicate name": func(c *Config) {
+			c.Admin.ScopedTokens = append(c.Admin.ScopedTokens, ScopedToken{Name: "realm-fra", TokenEnv: "ZW_ACME2", Scope: ScopeACME})
+		},
+	}
+	for name, mutate := range cases {
+		cfg := good()
+		mutate(cfg)
+		if err := Validate(cfg); err == nil {
+			t.Errorf("%s: expected a validation error", name)
+		}
+	}
+}
+
+func TestScopedTokensParse(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yml")
+	body := `
+data_dir: /var/lib/zonewright
+admin:
+  token_env: ZW_TOKEN
+  scoped_tokens:
+    - name: acme-all
+      token_env: ZW_ACME
+      scope: acme
+defaults:
+  nameservers: [ns1.example.net]
+`
+	if err := os.WriteFile(path, []byte(body), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	res, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	st := res.Config.Admin.ScopedTokens
+	if len(st) != 1 || st[0].Name != "acme-all" || st[0].Scope != ScopeACME || len(st[0].Zones) != 0 {
+		t.Fatalf("parsed scoped tokens: %+v", st)
+	}
+	if err := os.WriteFile(path, []byte(strings.Replace(body, "scope: acme", "scope: acme\n      zone: example.com", 1)), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("unknown key zone: should be rejected (strict YAML)")
+	}
+}

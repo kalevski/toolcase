@@ -3,6 +3,7 @@
 //	GET    /healthz                               daemon liveness (no auth)
 //	GET    /status                                per-zone state + last apply
 //	POST   /reload                                re-read config from disk and apply (same as SIGHUP)
+//	GET    /lookup?name=<fqdn>                    the zone that holds a name, and the name relative to it
 //
 //	GET    /zones                                 list zones (replicated + local)
 //	POST   /zones                                 create/replace one zone (YAML or JSON fragment)
@@ -16,6 +17,12 @@
 //	PUT    /zones/{zone}/records/{name}/{type}    replace one RRset (JSON {"records":[…]})
 //	DELETE /zones/{zone}/records/{name}/{type}    delete one RRset, or one record with ?value=
 //
+//	GET    /tokens                                scoped tokens (config + API), never secrets
+//	POST   /tokens                                create a replicated scoped token; returns its secret once
+//	PUT    /tokens/{name}                         replace an API token's scope/zones (secret unchanged)
+//	POST   /tokens/{name}/rotate                  new secret for an API token
+//	DELETE /tokens/{name}                         revoke an API token everywhere
+//
 //	GET    /cluster/status                        replication view (cluster mode)
 //	DELETE /cluster/peers/{id}                    retire a removed server's id
 //
@@ -25,6 +32,11 @@
 // it is committed — a committed change replicates and cannot be rolled back,
 // so the API never commits a zone BIND would not load. Writes accept
 // If-Match (412 on a stale ETag) and ?wait=replicated.
+//
+// Next to the admin token, limited tokens come from admin.scoped_tokens (this
+// server only) or from /tokens (replicated, managed with the admin token).
+// The only scope, "acme", reaches GET /lookup and the three record-write
+// endpoints, for TXT records named _acme-challenge[.<name>] in its zones.
 package admin
 
 import (
@@ -63,6 +75,7 @@ type Server struct {
 	reload  ReloadFunc
 	cluster Cluster
 	tls     [2]string
+	scoped  []ScopedToken
 }
 
 // New builds the admin server. token may be empty only when no auth is
@@ -124,29 +137,39 @@ type endpoint struct {
 	method  string
 	pattern string
 	auth    bool
+	// acme marks the endpoints an "acme"-scoped token may call (its record
+	// writes are further limited to _acme-challenge TXT in the handlers).
+	acme    bool
 	handler func(s *Server) http.HandlerFunc
 }
 
 func endpoints() []endpoint {
 	return []endpoint{
-		{"GET", "/healthz", false, func(s *Server) http.HandlerFunc { return s.handleHealthz }},
-		{"GET", "/status", true, func(s *Server) http.HandlerFunc { return s.handleStatus }},
-		{"POST", "/reload", true, func(s *Server) http.HandlerFunc { return s.handleReload }},
+		{"GET", "/healthz", false, false, func(s *Server) http.HandlerFunc { return s.handleHealthz }},
+		{"GET", "/status", true, false, func(s *Server) http.HandlerFunc { return s.handleStatus }},
+		{"POST", "/reload", true, false, func(s *Server) http.HandlerFunc { return s.handleReload }},
+		{"GET", "/lookup", true, true, func(s *Server) http.HandlerFunc { return s.handleLookup }},
 
-		{"GET", "/zones", true, func(s *Server) http.HandlerFunc { return s.handleListZones }},
-		{"POST", "/zones", true, func(s *Server) http.HandlerFunc { return s.handleCreateZone }},
-		{"GET", "/zones/{zone}", true, func(s *Server) http.HandlerFunc { return s.handleGetZone }},
-		{"PUT", "/zones/{zone}", true, func(s *Server) http.HandlerFunc { return s.handlePutZone }},
-		{"DELETE", "/zones/{zone}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteZone }},
-		{"GET", "/zones/{zone}/file", true, func(s *Server) http.HandlerFunc { return s.handleZoneFile }},
+		{"GET", "/zones", true, false, func(s *Server) http.HandlerFunc { return s.handleListZones }},
+		{"POST", "/zones", true, false, func(s *Server) http.HandlerFunc { return s.handleCreateZone }},
+		{"GET", "/zones/{zone}", true, false, func(s *Server) http.HandlerFunc { return s.handleGetZone }},
+		{"PUT", "/zones/{zone}", true, false, func(s *Server) http.HandlerFunc { return s.handlePutZone }},
+		{"DELETE", "/zones/{zone}", true, false, func(s *Server) http.HandlerFunc { return s.handleDeleteZone }},
+		{"GET", "/zones/{zone}/file", true, false, func(s *Server) http.HandlerFunc { return s.handleZoneFile }},
 
-		{"GET", "/zones/{zone}/records", true, func(s *Server) http.HandlerFunc { return s.handleListRecords }},
-		{"POST", "/zones/{zone}/records", true, func(s *Server) http.HandlerFunc { return s.handleAddRecord }},
-		{"PUT", "/zones/{zone}/records/{name}/{type}", true, func(s *Server) http.HandlerFunc { return s.handlePutRRset }},
-		{"DELETE", "/zones/{zone}/records/{name}/{type}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteRRset }},
+		{"GET", "/zones/{zone}/records", true, false, func(s *Server) http.HandlerFunc { return s.handleListRecords }},
+		{"POST", "/zones/{zone}/records", true, true, func(s *Server) http.HandlerFunc { return s.handleAddRecord }},
+		{"PUT", "/zones/{zone}/records/{name}/{type}", true, true, func(s *Server) http.HandlerFunc { return s.handlePutRRset }},
+		{"DELETE", "/zones/{zone}/records/{name}/{type}", true, true, func(s *Server) http.HandlerFunc { return s.handleDeleteRRset }},
 
-		{"GET", "/cluster/status", true, func(s *Server) http.HandlerFunc { return s.handleClusterStatus }},
-		{"DELETE", "/cluster/peers/{id}", true, func(s *Server) http.HandlerFunc { return s.handleRetirePeer }},
+		{"GET", "/tokens", true, false, func(s *Server) http.HandlerFunc { return s.handleListTokens }},
+		{"POST", "/tokens", true, false, func(s *Server) http.HandlerFunc { return s.handleCreateToken }},
+		{"PUT", "/tokens/{name}", true, false, func(s *Server) http.HandlerFunc { return s.handleUpdateToken }},
+		{"POST", "/tokens/{name}/rotate", true, false, func(s *Server) http.HandlerFunc { return s.handleRotateToken }},
+		{"DELETE", "/tokens/{name}", true, false, func(s *Server) http.HandlerFunc { return s.handleDeleteToken }},
+
+		{"GET", "/cluster/status", true, false, func(s *Server) http.HandlerFunc { return s.handleClusterStatus }},
+		{"DELETE", "/cluster/peers/{id}", true, false, func(s *Server) http.HandlerFunc { return s.handleRetirePeer }},
 	}
 }
 
@@ -156,7 +179,7 @@ func (s *Server) Routes() http.Handler {
 	for _, e := range endpoints() {
 		h := e.handler(s)
 		if e.auth {
-			h = s.auth(h)
+			h = s.auth(e, h)
 		}
 		mux.HandleFunc(e.method+" "+e.pattern, h)
 	}
@@ -198,18 +221,27 @@ func loopbackHost(host string) bool {
 	return err == nil && ip.IsLoopback()
 }
 
-// auth enforces the optional bearer token.
-func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
+// auth enforces the optional bearer token. The admin token may call every
+// endpoint; a scoped token only the endpoints and zones its scope allows.
+func (s *Server) auth(e endpoint, next http.HandlerFunc) http.HandlerFunc {
 	if s.token == "" {
 		return next
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		got := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-		if subtle.ConstantTimeCompare([]byte(got), []byte(s.token)) != 1 {
+		full := subtle.ConstantTimeCompare([]byte(got), []byte(s.token)) == 1
+		scoped := s.matchScoped(got)
+		switch {
+		case full:
+			next(w, r)
+		case scoped != nil:
+			if !admitScoped(w, r, e, scoped) {
+				return
+			}
+			next(w, r.WithContext(context.WithValue(r.Context(), scopedKey{}, scoped)))
+		default:
 			writeError(w, http.StatusUnauthorized, "unauthorized")
-			return
 		}
-		next(w, r)
 	}
 }
 

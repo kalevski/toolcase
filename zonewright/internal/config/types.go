@@ -66,6 +66,30 @@ type Admin struct {
 	// port published behind a TLS proxy.
 	TLS               TLSFiles `yaml:"tls"`
 	AllowInsecureHTTP bool     `yaml:"allow_insecure_http"`
+	// ScopedTokens are extra bearer tokens that may only do what their scope
+	// allows, optionally limited to some zones. They need the admin token to
+	// be set (without it the API has no authentication at all).
+	ScopedTokens []ScopedToken `yaml:"scoped_tokens"`
+}
+
+// ScopeACME allows exactly what an ACME DNS-01 client needs: GET /lookup, and
+// adding, replacing and deleting TXT records named _acme-challenge or
+// _acme-challenge.<label>… — nothing else.
+const ScopeACME = "acme"
+
+// ScopedToken is one limited bearer token.
+type ScopedToken struct {
+	// Name identifies the token in logs and errors ([a-z0-9-]+, unique).
+	Name      string `yaml:"name"`
+	TokenEnv  string `yaml:"token_env"`
+	TokenFile string `yaml:"token_file"`
+	Scope     string `yaml:"scope"`
+	// Zones limits the token to these zones (normalized at validation).
+	// Empty means no zone at all — a token reaches every zone only with
+	// AllZones, never by omission.
+	Zones []string `yaml:"zones"`
+	// AllZones lets the token reach every zone. Exclusive with Zones.
+	AllZones bool `yaml:"all_zones"`
 }
 
 // TLSFiles is a certificate/key pair on disk (PEM).

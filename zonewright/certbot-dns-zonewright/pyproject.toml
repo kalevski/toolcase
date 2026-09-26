@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certbot-dns-zonewright"
+version = "0.1.0"
+description = "Certbot DNS-01 authenticator for zonewright (BIND 9 zone manager)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Daniel Kalevski" }]
+requires-python = ">=3.9"
+dependencies = [
+    "certbot>=2.0",
+    "requests>=2.20",
+]
+classifiers = [
+    "Environment :: Plugins",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Internet :: Name Service (DNS)",
+    "Topic :: Security",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Source = "https://github.com/kalevski/toolcase/tree/main/zonewright/certbot-dns-zonewright"
+
+[project.entry-points."certbot.plugins"]
+dns-zonewright = "certbot_dns_zonewright.dns_zonewright:Authenticator"
+
+[tool.setuptools]
+packages = ["certbot_dns_zonewright"]

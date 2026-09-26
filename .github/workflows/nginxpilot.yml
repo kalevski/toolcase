@@ -3,9 +3,10 @@ name: nginxpilot
 on:
   push:
     branches: [main]
-    paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']
+    # The image bundles certbot-dns-zonewright, so a plugin change rebuilds it.
+    paths: ['nginxpilot/**', 'zonewright/certbot-dns-zonewright/**', '.github/workflows/nginxpilot.yml']
   pull_request:
-    paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']
+    paths: ['nginxpilot/**', 'zonewright/certbot-dns-zonewright/**', '.github/workflows/nginxpilot.yml']
 
 permissions:
   contents: read
@@ -59,10 +60,23 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=short
 
+      # certbot must see the zonewright DNS plugin in the image that ships.
+      - name: Smoke test (certbot-dns-zonewright is installed)
+        uses: docker/build-push-action@v6
+        with:
+          context: nginxpilot
+          build-contexts: certbot-dns-zonewright=zonewright/certbot-dns-zonewright
+          platforms: linux/amd64
+          load: true
+          tags: nginxpilot:smoke
+          cache-from: type=gha,scope=nginxpilot
+      - run: docker run --rm --entrypoint certbot nginxpilot:smoke plugins | grep -q '^\* dns-zonewright$'
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: nginxpilot
+          build-contexts: certbot-dns-zonewright=zonewright/certbot-dns-zonewright
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}

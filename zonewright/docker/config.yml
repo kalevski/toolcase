@@ -9,6 +9,12 @@ admin:
   listen: 0.0.0.0:9053
   token_env: ZONEWRIGHT_TOKEN
   allow_insecure_http: true
+  # Limited tokens, e.g. for certbot-dns-zonewright on a web server:
+  # scoped_tokens:
+  #   - name: edge-fra
+  #     token_env: ZW_ACME_EDGE_FRA
+  #     scope: acme                     # /lookup + _acme-challenge TXT writes only
+  #     zones: [example.com]            # or all_zones: true; neither = no zone
 defaults:
   ttl: 1h
   nameservers:

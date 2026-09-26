@@ -9,6 +9,7 @@ import (
 
 	"github.com/kalevski/toolcase/zonewright/internal/config"
 	"github.com/kalevski/toolcase/zonewright/internal/manager"
+	"github.com/kalevski/toolcase/zonewright/internal/store"
 	"github.com/kalevski/toolcase/zonewright/internal/zonefile"
 )
 
@@ -204,19 +205,30 @@ func (s *Server) writeAs(w http.ResponseWriter, r *http.Request, zone string, cr
 	if out.Status == "created" {
 		code = http.StatusCreated
 	}
-	if r.URL.Query().Get("wait") == "replicated" && len(out.Ops) > 0 {
-		if s.cluster == nil {
-			resp["replicated"] = true // a single node is trivially replicated
-		} else {
-			pending := s.cluster.WaitReplicated(r.Context(), out.Ops, waitTimeout(r))
-			resp["replicated"] = len(pending) == 0
-			if len(pending) > 0 {
-				resp["pending_peers"] = pending
-				code = http.StatusAccepted
-			}
-		}
+	if s.waitReplicated(r, out.Ops, resp) {
+		code = http.StatusAccepted
 	}
 	writeJSON(w, code, resp, s)
+}
+
+// waitReplicated honours ?wait=replicated for ops just committed: it adds
+// "replicated" (and "pending_peers") to resp and reports whether some peer
+// had not confirmed within the timeout (the caller answers 202).
+func (s *Server) waitReplicated(r *http.Request, ops []store.Op, resp map[string]any) bool {
+	if r.URL.Query().Get("wait") != "replicated" || len(ops) == 0 {
+		return false
+	}
+	if s.cluster == nil {
+		resp["replicated"] = true // a single node is trivially replicated
+		return false
+	}
+	pending := s.cluster.WaitReplicated(r.Context(), ops, waitTimeout(r))
+	resp["replicated"] = len(pending) == 0
+	if len(pending) > 0 {
+		resp["pending_peers"] = pending
+		return true
+	}
+	return false
 }
 
 // waitTimeout parses ?timeout= (default 10s, max 60s).

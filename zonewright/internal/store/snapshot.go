@@ -54,6 +54,7 @@ type Snapshot struct {
 	Settings []SettingsRow    `json:"settings"`
 	RRsets   []RRsetRow       `json:"rrsets"`
 	Counters []CounterRow     `json:"counters"`
+	Tokens   []TokenRow       `json:"tokens,omitempty"`
 }
 
 // Snapshot exports the state consistently (one read transaction).
@@ -128,6 +129,9 @@ func (s *Store) Snapshot() (*Snapshot, error) {
 		snap.Counters = append(snap.Counters, c)
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+	if snap.Tokens, err = snapshotTokens(tx); err != nil {
 		return nil, err
 	}
 	return snap, nil
@@ -209,6 +213,12 @@ func (s *Store) MergeSnapshot(snap *Snapshot) ([]string, error) {
 			touched[x.Zone] = true
 		}
 		maxH = max(maxH, x.HLC)
+	}
+	for _, t := range snap.Tokens {
+		if err := mergeTokenRow(tx, t); err != nil {
+			return nil, err
+		}
+		maxH = max(maxH, t.HLC)
 	}
 	for _, c := range snap.Counters {
 		// Local ops the snapshot does not cover yet (seq above its vv for
@@ -324,6 +334,10 @@ func (s *Store) Compact(cutoff hlc.Timestamp, safe map[string]int64) (int64, err
 				return 0, err
 			}
 		}
+	}
+
+	if err := compactTokens(tx, gone); err != nil {
+		return 0, err
 	}
 
 	// Zones: a compacted delete drops the zone entirely; a compacted create
