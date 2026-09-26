@@ -10457,6 +10457,11 @@ admin:
     cert_file: /etc/zonewright/api.crt
     key_file: /etc/zonewright/api.key
   # allow_insecure_http: true     # …unless explicitly opted out
+  scoped_tokens:                  # limited tokens next to the admin token
+    - name: realm-fra
+      token_env: ZW_ACME_FRA      # or token_file
+      scope: acme                 # only /lookup + _acme-challenge TXT writes
+      zones: [example.com]        # or all_zones: true; neither = no zone
 bind:
   check_zone_cmd: [named-checkzone]
   check_conf_cmd: [named-checkconf]
@@ -10487,6 +10492,7 @@ include:
 #       "www.example.com" (no trailing dot) is rejected as ambiguous`,ZAt=`GET    /healthz                               liveness (no auth)
 GET    /status                                per-zone state/serial + last apply
 POST   /reload                                re-read config (same as SIGHUP)
+GET    /lookup?name=<fqdn>                    the zone holding a name + the name relative to it
 GET    /zones                                 all zones: records, serial, state, source, etag
 POST   /zones                                 create/replace one zone (YAML or JSON fragment)
 GET    /zones/{zone}                          one zone + ETag
@@ -10497,6 +10503,10 @@ GET    /zones/{zone}/records?name=&type=      list records
 POST   /zones/{zone}/records                  add one record (409 if identical exists)
 PUT    /zones/{zone}/records/{name}/{type}    replace one RRset ([] empties it)
 DELETE /zones/{zone}/records/{name}/{type}    delete the RRset (?value= for one value)
+GET    /tokens                                scoped tokens (config + API) — never secrets
+POST   /tokens                                create a replicated acme token; secret returned once
+PUT    /tokens/{name}                         change its zones (secret unchanged)
+POST   /tokens/{name}/rotate                  new secret · DELETE /tokens/{name} revokes everywhere
 GET    /cluster/status                        node id, peers, lag, skew, alarms, conflicts
 DELETE /cluster/peers/{id}                    retire a server removed for good
 
@@ -10510,7 +10520,11 @@ curl -X PUT localhost:9053/zones/example.com/records/home/A \\
 # ACME DNS-01: publish on every nameserver before answering the CA, then remove
 curl -X PUT 'localhost:9053/zones/example.com/records/_acme-challenge/TXT?wait=replicated' \\
   -d '{"records":[{"value":"gfj9Xq...Rg85nM","ttl":60}]}'
-curl -X DELETE localhost:9053/zones/example.com/records/_acme-challenge/TXT`,qAt=`# 1. One shared secret, identical everywhere (≥ 32 bytes)
+curl -X DELETE localhost:9053/zones/example.com/records/_acme-challenge/TXT
+
+# …or let certbot do it: pip install ./certbot-dns-zonewright, with an acme-scoped token
+certbot certonly -a dns-zonewright --dns-zonewright-credentials zonewright.ini \\
+  -d example.com -d '*.example.com'`,qAt=`# 1. One shared secret, identical everywhere (≥ 32 bytes)
 openssl rand -hex 32        # → ZONEWRIGHT_CLUSTER_KEY
 
 # 2. The SAME cluster block on every server — the URL list includes itself
@@ -10536,6 +10550,8 @@ serials       → YYYYMMDDnn-based, never backwards, identical once synced
 copied data dir → "clone detected" alarm, sync refused (delete it for a fresh id)
 
 Why not Raft: with two nameservers a majority is both — one outage would freeze writes.`,eSt=`No token → loopback only; remote listen → HTTPS (or explicit allow_insecure_http)
+Scoped    → acme tokens: /lookup + _acme-challenge TXT only, in listed zones (all only if explicit);
+            created/rotated/revoked over the API, replicated, stored as SHA-256 only
 Peers     → TLS + shared cluster key (constant-time compare); every op re-validated
 Browsers  → any request with Origin / Sec-Fetch-* is 403 (CSRF); loopback Host check (rebinding)
 Inputs    → strict grammars; TXT/CAA quoted + escaped; $INCLUDE / $GENERATE can't be injected
