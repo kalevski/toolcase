@@ -27,6 +27,26 @@ type Result struct {
 	ContentHash string
 }
 
+// LimitError is a release refused for exceeding one of source.limits. Its
+// message is the sentence last_error has always carried; the fields let GET
+// /status report the refusal as data (last_error_code "limit_exceeded",
+// last_error_limit, last_error_limit_max), so a control plane need not parse
+// the sentence.
+type LimitError struct {
+	// Limit is the limits key: max_archive_size | max_uncompressed_size |
+	// max_entries | max_compression_ratio.
+	Limit string
+	// Max is the configured bound, in the limit's own unit (bytes, entries,
+	// or the ratio).
+	Max int64
+	Msg string
+}
+
+func (e *LimitError) Error() string { return e.Msg }
+
+// ErrorCodeLimitExceeded is the last_error_code of a LimitError.
+const ErrorCodeLimitExceeded = "limit_exceeded"
+
 // Source checks a remote for changes and, when changed, materializes the
 // ready-to-serve tree into stagingDir.
 type Source interface {

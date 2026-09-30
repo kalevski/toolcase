@@ -589,6 +589,11 @@ type Source struct {
 	// git only
 	Branch string `yaml:"branch" json:"branch,omitempty"`
 	Subdir string `yaml:"subdir" json:"subdir,omitempty"`
+	// Ref pins the site to one commit (a full hex SHA): that commit is built
+	// and the branch head is ignored while it is set. It is not part of
+	// Fingerprint, so setting or clearing a pin is an ordinary deploy, not a
+	// new source (a control plane pins a site while moving it between hosts).
+	Ref string `yaml:"ref" json:"ref,omitempty"`
 
 	// post-fetch gate (both source types)
 	RequireFile []string `yaml:"require_file" json:"require_file,omitempty"`

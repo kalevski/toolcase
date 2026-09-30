@@ -170,7 +170,7 @@ func (s *Syncer) download(body io.Reader) (path string, hash string, size int64,
 		return path, "", 0, closeErr
 	}
 	if size > maxSize {
-		return path, "", 0, fmt.Errorf("limit exceeded: max_archive_size (%s)", s.limits.MaxArchiveSize)
+		return path, "", 0, &source.LimitError{Limit: "max_archive_size", Max: int64(s.limits.MaxArchiveSize), Msg: fmt.Sprintf("limit exceeded: max_archive_size (%s)", s.limits.MaxArchiveSize)}
 	}
 	return path, hex.EncodeToString(hasher.Sum(nil)), size, nil
 }

@@ -41,6 +41,29 @@ type SiteState struct {
 	LastError     string    `json:"last_error,omitempty"`
 	LastErrorTime time.Time `json:"last_error_time,omitzero"`
 	FailureStreak int       `json:"failure_streak"`
+
+	// LastErrorCode classifies LastError when it is a known refusal
+	// ("limit_exceeded"); empty for any other failure. LastErrorLimit and
+	// LastErrorLimitMax name the source.limits key and its bound.
+	LastErrorCode     string `json:"last_error_code,omitempty"`
+	LastErrorLimit    string `json:"last_error_limit,omitempty"`
+	LastErrorLimitMax int64  `json:"last_error_limit_max,omitempty"`
+}
+
+// RecordFailure stores a failed sync's error and its classification.
+func (s *SiteState) RecordFailure(err error, code, limit string, limitMax int64) {
+	s.FailureStreak++
+	s.LastError = err.Error()
+	s.LastErrorTime = time.Now().UTC()
+	s.LastErrorCode, s.LastErrorLimit, s.LastErrorLimitMax = code, limit, limitMax
+}
+
+// ClearFailure resets the error fields after a successful sync.
+func (s *SiteState) ClearFailure() {
+	s.FailureStreak = 0
+	s.LastError = ""
+	s.LastErrorTime = time.Time{}
+	s.LastErrorCode, s.LastErrorLimit, s.LastErrorLimitMax = "", "", 0
 }
 
 // NeverSynced reports whether the site has ever completed a successful sync.

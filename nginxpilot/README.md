@@ -75,6 +75,7 @@ sites:
         key_file: /etc/nginxpilot/keys/example_ed25519   # or key_env: SSH_KEY (key material in an env var)
         # known_hosts: /etc/nginxpilot/known_hosts   # strict; default accept-new (TOFU)
       subdir: dist/               # serve only this subtree
+      # ref: 3f9c…(40 or 64 hex)  # optional pin: build this commit, ignore the branch head
       require_file: [index.html]  # opt-in post-fetch gate
     exclude: ["*.map"]            # extends defaults: .env*, .htaccess, .DS_Store (.git* always stripped)
     routing: spa                  # static (default) | spa | clean-urls
@@ -83,6 +84,10 @@ sites:
 ```
 
 Clones are shallow + single-branch through the system `git` binary; the bare cache under `data_dir/cache/git/` is disposable.
+
+**Pinning a commit.** `ref` (a full commit SHA) builds that commit instead of the branch head, and while it is set the branch is not followed: once the pinned commit is live, a sync is a no-op with no network call. A commit the shallow cache does not hold is fetched by SHA, which the git server must allow (GitHub does; a self-hosted server may need `uploadpack.allowReachableSHA1InWant`). Setting, changing or clearing `ref` is an ordinary deploy, not a new source — it is not part of the source identity, so it never forces a full resync. Clearing it returns the site to the branch head. A control plane uses it to hold two hosts on the same commit while it moves a site between them.
+
+The `limits` block (below, under http-zip) applies to git sources too: `max_uncompressed_size` and `max_entries` bound the extracted tree.
 
 ### static-site routing
 
@@ -176,6 +181,8 @@ sites:
 ```
 
 Downloads use conditional GET (ETag / Last-Modified); unchanged content is a cheap no-op. Extraction rejects zip-slip paths and symlinks outright and enforces all four limits.
+
+A release refused by a limit leaves the live release serving, and `GET /status` reports it as data as well as a sentence: `last_error_code: "limit_exceeded"`, `last_error_limit` (the key, e.g. `max_uncompressed_size`) and `last_error_limit_max` (the bound, in bytes for sizes).
 
 ### Secrets
 
@@ -627,7 +634,7 @@ admin:
 Routes:
 
 - `GET /healthz` — liveness
-- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one. A `features` object lists capabilities of this build a control plane can gate on (`proxy_resolve`).
+- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one. A `disk` object reports the filesystem holding `data_dir` (`total_bytes`, `used_bytes`, `available_bytes`; `used + available` excludes root-reserved blocks, or `error` if it could not be read). A site refused by a source limit carries `last_error_code` / `last_error_limit` / `last_error_limit_max`. A `features` object lists capabilities of this build a control plane can gate on (`proxy_resolve`, `source_ref`, `disk`, `error_codes`).
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`. In managed mode a reload also re-renders + reloads nginx.

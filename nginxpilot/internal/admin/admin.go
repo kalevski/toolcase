@@ -43,6 +43,7 @@ import (
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/admintoken"
+	"github.com/kalevski/toolcase/nginxpilot/internal/diskstat"
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
@@ -303,10 +304,23 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	// is an older nginxpilot that does not report it".
 	payload["php"] = s.mgr.PHPStatus()
 
+	// The filesystem holding data_dir (releases, caches, state): what a control
+	// plane needs to know how many more sites this host can take. A statfs
+	// failure is reported, not fatal to the rest of the status.
+	payload["disk"] = diskStatus(s.mgr.Config().DataDir)
+
 	// Capabilities of this build a control plane gates on before sending a
 	// field an older nginxpilot would reject as unknown (strict decoding).
 	// proxy_resolve: proxies and locations accept resolve (per-request DNS).
-	payload["features"] = map[string]any{"proxy_resolve": true}
+	// source_ref: git sources accept ref (pin one commit).
+	// disk: /status carries disk.
+	// error_codes: sites carry last_error_code / last_error_limit(_max).
+	payload["features"] = map[string]any{
+		"proxy_resolve": true,
+		"source_ref":    true,
+		"disk":          true,
+		"error_codes":   true,
+	}
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
@@ -402,4 +416,17 @@ func (s *Server) handleReload(w http.ResponseWriter, _ *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte("reloaded\n"))
+}
+
+func diskStatus(dataDir string) map[string]any {
+	u, err := diskstat.Of(dataDir)
+	if err != nil {
+		return map[string]any{"path": dataDir, "error": err.Error()}
+	}
+	return map[string]any{
+		"path":            u.Path,
+		"total_bytes":     u.TotalBytes,
+		"used_bytes":      u.UsedBytes,
+		"available_bytes": u.AvailableBytes,
+	}
 }

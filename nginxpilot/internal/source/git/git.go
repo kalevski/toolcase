@@ -29,6 +29,7 @@ type Syncer struct {
 	domain  string
 	url     string
 	branch  string
+	ref     string
 	subdir  string
 	auth    config.Auth
 	limits  config.Limits
@@ -47,6 +48,7 @@ func New(domain string, src config.Source, dataDir string, log *slog.Logger) *Sy
 		domain:  domain,
 		url:     src.URL,
 		branch:  src.Branch,
+		ref:     src.Ref,
 		subdir:  strings.Trim(path.Clean(src.Subdir), "/"),
 		auth:    src.Auth,
 		limits:  src.Limits.Effective(),
@@ -73,7 +75,14 @@ func (s *Syncer) cacheDir() string {
 }
 
 // Sync implements source.Source.
+//
+// With a pinned ref the branch head is not consulted: a pin that is already
+// deployed is a no-op with no network call at all, and a new pin fetches that
+// one commit when the shallow cache does not hold it.
 func (s *Syncer) Sync(ctx context.Context, st *state.SiteState, stagingDir string) (*source.Result, error) {
+	if s.ref != "" && s.ref == st.DeployedRef {
+		return &source.Result{Changed: false, Ref: s.ref}, nil
+	}
 	if _, err := exec.LookPath("git"); err != nil {
 		return nil, fmt.Errorf("git binary not found in PATH")
 	}
@@ -89,11 +98,10 @@ func (s *Syncer) Sync(ctx context.Context, st *state.SiteState, stagingDir strin
 		return nil, err
 	}
 
-	sha, err := s.git(ctx, cache, "rev-parse", "refs/heads/"+s.branch)
+	sha, err := s.resolve(ctx, cache)
 	if err != nil {
-		return nil, fmt.Errorf("rev-parse %s: %w", s.branch, err)
+		return nil, err
 	}
-	sha = strings.TrimSpace(sha)
 
 	if sha == st.DeployedRef {
 		return &source.Result{Changed: false, Ref: sha}, nil
@@ -103,6 +111,36 @@ func (s *Syncer) Sync(ctx context.Context, st *state.SiteState, stagingDir strin
 		return nil, err
 	}
 	return &source.Result{Changed: true, Ref: sha}, nil
+}
+
+// resolve returns the commit to build: the pinned ref, fetched into the cache
+// on demand (the cache is shallow and single-branch, so an older commit is
+// usually absent), or else the branch head.
+func (s *Syncer) resolve(ctx context.Context, cache string) (string, error) {
+	if s.ref == "" {
+		sha, err := s.git(ctx, cache, "rev-parse", "refs/heads/"+s.branch)
+		if err != nil {
+			return "", fmt.Errorf("rev-parse %s: %w", s.branch, err)
+		}
+		return strings.TrimSpace(sha), nil
+	}
+	if s.hasCommit(ctx, cache, s.ref) {
+		return s.ref, nil
+	}
+	// Fetching a bare SHA needs the server to allow it (GitHub does;
+	// a self-hosted server may need uploadpack.allowReachableSHA1InWant).
+	if _, err := s.git(ctx, cache, "fetch", "--depth=1", "--force", "origin", s.ref); err != nil {
+		return "", fmt.Errorf("fetch pinned ref %s: %w", s.ref[:12], err)
+	}
+	if !s.hasCommit(ctx, cache, s.ref) {
+		return "", fmt.Errorf("pinned ref %s is not a commit in %s", s.ref[:12], s.url)
+	}
+	return s.ref, nil
+}
+
+func (s *Syncer) hasCommit(ctx context.Context, cache, sha string) bool {
+	_, err := s.git(ctx, cache, "cat-file", "-e", sha+"^{commit}")
+	return err == nil
 }
 
 // ensureCache clones the bare cache if missing, otherwise fetches. Any
@@ -167,12 +205,15 @@ func (s *Syncer) extract(ctx context.Context, cache, sha, stagingDir string) err
 		return err
 	}
 	extractErr := s.untar(stdout, stagingDir)
-	waitErr := cmd.Wait()
-	if waitErr != nil {
-		return fmt.Errorf("git archive %s: %w: %s", sha[:12], waitErr, strings.TrimSpace(stderr.String()))
-	}
 	if extractErr != nil {
+		// untar stopping early (a limit, a traversal) closes the pipe and
+		// git archive dies of SIGPIPE; that is the consequence, not the cause.
+		_ = stdout.Close()
+		_ = cmd.Wait()
 		return fmt.Errorf("extract git archive: %w", extractErr)
+	}
+	if waitErr := cmd.Wait(); waitErr != nil {
+		return fmt.Errorf("git archive %s: %w: %s", sha[:12], waitErr, strings.TrimSpace(stderr.String()))
 	}
 	return nil
 }
@@ -206,7 +247,7 @@ func (s *Syncer) untar(r io.Reader, dest string) error {
 
 		entries++
 		if entries > maxEntries {
-			return fmt.Errorf("limit exceeded: max_entries (%d)", maxEntries)
+			return &source.LimitError{Limit: "max_entries", Max: int64(maxEntries), Msg: fmt.Sprintf("limit exceeded: max_entries (%d)", maxEntries)}
 		}
 
 		name := path.Clean(strings.TrimPrefix(hdr.Name, "./"))
@@ -252,7 +293,7 @@ func (s *Syncer) untar(r io.Reader, dest string) error {
 				return closeErr
 			}
 			if written > maxUncompressed {
-				return fmt.Errorf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)
+				return &source.LimitError{Limit: "max_uncompressed_size", Max: maxUncompressed, Msg: fmt.Sprintf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)}
 			}
 		case tar.TypeSymlink, tar.TypeLink:
 			s.log.Warn("skipping link entry in git tree", "entry", hdr.Name)

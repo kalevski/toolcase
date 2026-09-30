@@ -8,6 +8,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/kalevski/toolcase/nginxpilot/internal/source"
 )
 
 // extract unpacks the downloaded archive into stagingDir enforcing the hard
@@ -29,7 +31,7 @@ func (s *Syncer) extract(archivePath string, archiveSize int64, stagingDir strin
 		return fmt.Errorf("zip archive contains no entries")
 	}
 	if len(zr.File) > s.limits.MaxEntries {
-		return fmt.Errorf("limit exceeded: max_entries (%d > %d)", len(zr.File), s.limits.MaxEntries)
+		return &source.LimitError{Limit: "max_entries", Max: int64(s.limits.MaxEntries), Msg: fmt.Sprintf("limit exceeded: max_entries (%d > %d)", len(zr.File), s.limits.MaxEntries)}
 	}
 
 	// Pre-flight: validate every path, reject symlinks, total the declared
@@ -49,10 +51,10 @@ func (s *Syncer) extract(archivePath string, archiveSize int64, stagingDir strin
 	}
 	maxUncompressed := uint64(s.limits.MaxUncompressedSize)
 	if declaredTotal > maxUncompressed {
-		return fmt.Errorf("limit exceeded: max_uncompressed_size (%d bytes declared > %s)", declaredTotal, s.limits.MaxUncompressedSize)
+		return &source.LimitError{Limit: "max_uncompressed_size", Max: int64(s.limits.MaxUncompressedSize), Msg: fmt.Sprintf("limit exceeded: max_uncompressed_size (%d bytes declared > %s)", declaredTotal, s.limits.MaxUncompressedSize)}
 	}
 	if archiveSize > 0 && declaredTotal/uint64(archiveSize) > uint64(s.limits.MaxCompressionRatio) {
-		return fmt.Errorf("limit exceeded: max_compression_ratio (%d:1 > %d:1)", declaredTotal/uint64(archiveSize), s.limits.MaxCompressionRatio)
+		return &source.LimitError{Limit: "max_compression_ratio", Max: int64(s.limits.MaxCompressionRatio), Msg: fmt.Sprintf("limit exceeded: max_compression_ratio (%d:1 > %d:1)", declaredTotal/uint64(archiveSize), s.limits.MaxCompressionRatio)}
 	}
 
 	strip := s.resolveStrip(names)
@@ -92,7 +94,7 @@ func (s *Syncer) extract(archivePath string, archiveSize int64, stagingDir strin
 		// This cap on actual output is the last line of defence in case that
 		// ever changes (e.g. a zip64 edge case).
 		if writtenTotal > maxUncompressed {
-			return fmt.Errorf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)
+			return &source.LimitError{Limit: "max_uncompressed_size", Max: int64(s.limits.MaxUncompressedSize), Msg: fmt.Sprintf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)}
 		}
 	}
 	return nil

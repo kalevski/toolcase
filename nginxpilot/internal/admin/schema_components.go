@@ -213,8 +213,18 @@ func componentSchemas() map[string]any {
 				"next_check":     str(),
 			}),
 			"acme": ref("AcmeStatus"),
+			"disk": obj(map[string]any{
+				"path":            str(),
+				"total_bytes":     integer(),
+				"used_bytes":      integer(),
+				"available_bytes": integer(),
+				"error":           str(),
+			}, "path"),
 			"features": obj(map[string]any{
 				"proxy_resolve": boolean(),
+				"source_ref":    boolean(),
+				"disk":          boolean(),
+				"error_codes":   boolean(),
 			}),
 		}),
 		"AcmeStatus": obj(map[string]any{

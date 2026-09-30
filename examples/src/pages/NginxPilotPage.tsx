@@ -39,6 +39,7 @@ sites:
         # key_env: SSH_KEY        # or: env var holding the key material (containers)
         # known_hosts: /etc/nginxpilot/known_hosts   # strict; default accept-new (TOFU)
       subdir: dist/               # serve only this subtree of the repo
+      # ref: 3f9c…                # optional pin: full commit SHA (40/64 hex); branch head ignored
       require_file: [index.html]  # post-fetch gate: reject release if file is absent
     exclude: ["*.map"]            # extends defaults: .env*, .htaccess, .DS_Store (.git* always)
     routing: spa                  # static (default) | spa | clean-urls
@@ -47,7 +48,12 @@ sites:
 
 # github-token: token-only auth for a private GitHub repo over https://
 #   auth: { method: github-token, token_env: GITHUB_TOKEN }
-#   export GITHUB_TOKEN=$(gh auth token)`
+#   export GITHUB_TOKEN=$(gh auth token)
+
+# ref pins one commit: once it is live a sync is a no-op with no network call.
+# A commit the shallow cache lacks is fetched by SHA (self-hosted servers may need
+# uploadpack.allowReachableSHA1InWant). Setting or clearing ref is an ordinary
+# deploy, never a full resync. limits also bound git trees (size, entries).`
 
 const httpZipSourceExample = `sites:
   - domain: blog.example.com
@@ -214,7 +220,10 @@ nginxpilot version`
 
 const adminEndpoints = `GET  /healthz                 liveness
 GET  /status                  per-site: deployed ref, bytes, streak, next sync
+                              + last_error_code / last_error_limit(_max) on a limit refusal
+                              + disk (data_dir filesystem: total/used/available bytes)
                               + nginx resources, php pools, certs_renewal, logs
+                              + features: proxy_resolve, source_ref, disk, error_codes
 POST /sync/<domain>           force an out-of-schedule sync
 GET  /vhost/<domain>          generated nginx config (same as print-vhost)
 POST /reload                  diff-based reload (same as SIGHUP)
@@ -325,7 +334,7 @@ export const NginxPilotPage = () => {
             />
             <CodeSection
                 title="git source"
-                count="ssh-key · https-token · github-token · routing · cache_assets"
+                count="ssh-key · https-token · github-token · commit pin · routing"
                 file="sites.d/example.com.yml"
                 code={gitSourceExample}
             />

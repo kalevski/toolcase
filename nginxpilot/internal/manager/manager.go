@@ -135,10 +135,16 @@ type SiteStatus struct {
 	LastSuccess   *time.Time `json:"last_success,omitempty"`
 	LastError     string     `json:"last_error,omitempty"`
 	LastErrorTime *time.Time `json:"last_error_time,omitempty"`
-	FailureStreak int        `json:"failure_streak"`
-	NeverSynced   bool       `json:"never_synced"`
-	Syncing       bool       `json:"syncing"`
-	NextSync      *time.Time `json:"next_sync,omitempty"`
+	// LastErrorCode is "limit_exceeded" when the last fetch was refused by
+	// source.limits (LastErrorLimit names the key, LastErrorLimitMax its
+	// bound); empty for any other failure. The live release keeps serving.
+	LastErrorCode     string     `json:"last_error_code,omitempty"`
+	LastErrorLimit    string     `json:"last_error_limit,omitempty"`
+	LastErrorLimitMax int64      `json:"last_error_limit_max,omitempty"`
+	FailureStreak     int        `json:"failure_streak"`
+	NeverSynced       bool       `json:"never_synced"`
+	Syncing           bool       `json:"syncing"`
+	NextSync          *time.Time `json:"next_sync,omitempty"`
 }
 
 // New builds a Manager for a validated config.
@@ -441,14 +447,17 @@ func (m *Manager) Status() []SiteStatus {
 			st = &state.SiteState{Domain: site.Domain}
 		}
 		status := SiteStatus{
-			Domain:        site.Domain,
-			SourceType:    site.Source.Type,
-			SourceURL:     site.Source.URL,
-			DeployedRef:   st.DeployedRef,
-			Bytes:         st.DeployedBytes,
-			LastError:     st.LastError,
-			FailureStreak: st.FailureStreak,
-			NeverSynced:   st.NeverSynced(),
+			Domain:            site.Domain,
+			SourceType:        site.Source.Type,
+			SourceURL:         site.Source.URL,
+			DeployedRef:       st.DeployedRef,
+			Bytes:             st.DeployedBytes,
+			LastError:         st.LastError,
+			LastErrorCode:     st.LastErrorCode,
+			LastErrorLimit:    st.LastErrorLimit,
+			LastErrorLimitMax: st.LastErrorLimitMax,
+			FailureStreak:     st.FailureStreak,
+			NeverSynced:       st.NeverSynced(),
 		}
 		if !st.LastSuccess.IsZero() {
 			t := st.LastSuccess

@@ -636,6 +636,9 @@ func validateGitSource(src *Source) error {
 	if src.Branch == "" {
 		return fmt.Errorf("source.branch is required for git sources")
 	}
+	if src.Ref != "" && !isFullCommitSHA(src.Ref) {
+		return fmt.Errorf("source.ref %q must be a full commit SHA (40 or 64 lowercase hex characters)", src.Ref)
+	}
 	if src.StripComponents != nil || src.ChecksumURL != "" || src.AllowInsecure {
 		return fmt.Errorf("strip_components / checksum_url / allow_insecure only apply to http-zip sources")
 	}
@@ -694,8 +697,8 @@ func validateHTTPZipSource(src *Source) error {
 	if src.URL == "" {
 		return fmt.Errorf("source.url is required")
 	}
-	if src.Branch != "" || src.Subdir != "" {
-		return fmt.Errorf("branch / subdir only apply to git sources")
+	if src.Branch != "" || src.Subdir != "" || src.Ref != "" {
+		return fmt.Errorf("branch / subdir / ref only apply to git sources")
 	}
 	if strings.HasPrefix(src.URL, "http://") {
 		if !src.AllowInsecure {
@@ -746,6 +749,21 @@ func checkNoInlineSecrets(a Auth) error {
 		}
 	}
 	return nil
+}
+
+// isFullCommitSHA accepts a full SHA-1 (40) or SHA-256 (64) object name in
+// lowercase hex. An abbreviated SHA is refused: it can become ambiguous as a
+// repository grows, and a pin must name exactly one commit forever.
+func isFullCommitSHA(s string) bool {
+	if len(s) != 40 && len(s) != 64 {
+		return false
+	}
+	for _, c := range s {
+		if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
+			return false
+		}
+	}
+	return true
 }
 
 func exactlyOneRef(name, env, file string) error {

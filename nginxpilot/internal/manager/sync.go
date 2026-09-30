@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -26,6 +27,17 @@ func (sl *siteLoop) setSyncing(v bool) {
 	sl.mu.Lock()
 	sl.syncing = v
 	sl.mu.Unlock()
+}
+
+// recordFailure stores err on st, classifying a source limit refusal so GET
+// /status can report it as data rather than only as a sentence.
+func recordFailure(st *state.SiteState, err error) {
+	var limit *source.LimitError
+	if errors.As(err, &limit) {
+		st.RecordFailure(err, source.ErrorCodeLimitExceeded, limit.Limit, limit.Max)
+		return
+	}
+	st.RecordFailure(err, "", "", 0)
 }
 
 // buildSource instantiates the right syncer for a site.
@@ -69,18 +81,14 @@ func SyncSite(ctx context.Context, site config.Site, defaults config.Defaults, d
 	keep := site.KeepReleases(defaults)
 	err = doSync(ctx, site, deploy.KindSites, nil, dataDir, keep, st, dep, log)
 	if err != nil {
-		st.FailureStreak++
-		st.LastError = err.Error()
-		st.LastErrorTime = time.Now().UTC()
+		recordFailure(st, err)
 		if saveErr := store.Save(st); saveErr != nil {
 			log.Error("state save failed", "domain", site.Domain, "error", saveErr)
 		}
 		return st, err
 	}
 
-	st.FailureStreak = 0
-	st.LastError = ""
-	st.LastErrorTime = time.Time{}
+	st.ClearFailure()
 	if saveErr := store.Save(st); saveErr != nil {
 		log.Error("state save failed", "domain", site.Domain, "error", saveErr)
 	}
@@ -109,18 +117,14 @@ func SyncApp(ctx context.Context, app config.App, defaults config.Defaults, data
 	keep := app.KeepReleases(defaults)
 	err = doSync(ctx, site, deploy.KindApps, app.PHP.Persistent, dataDir, keep, st, dep, log)
 	if err != nil {
-		st.FailureStreak++
-		st.LastError = err.Error()
-		st.LastErrorTime = time.Now().UTC()
+		recordFailure(st, err)
 		if saveErr := store.Save(st); saveErr != nil {
 			log.Error("state save failed", "domain", site.Domain, "error", saveErr)
 		}
 		return st, err
 	}
 
-	st.FailureStreak = 0
-	st.LastError = ""
-	st.LastErrorTime = time.Time{}
+	st.ClearFailure()
 	if saveErr := store.Save(st); saveErr != nil {
 		log.Error("state save failed", "domain", site.Domain, "error", saveErr)
 	}
