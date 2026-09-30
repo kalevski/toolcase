@@ -16,8 +16,8 @@ export interface ModuleAccessRole {
     builtin?: boolean
     /** Full permission keys granted to this role, e.g. `"project.create"`. */
     permissions: string[]
-    /** Quota values keyed by `ModuleAccessLimitableResource.key`. */
-    limits?: Record<string, number>
+    /** Quota values keyed by `ModuleAccessLimitableResource.key`; `null` is unlimited. */
+    limits?: Record<string, number | null>
 }
 
 export interface ModuleAccessLimitableResource {
@@ -30,7 +30,8 @@ export interface ModuleAccessRoleDraft {
     id: string
     name: string
     permissions: string[]
-    limits: Record<string, number>
+    /** `null` is unlimited: an empty input reads back as null, never 0. */
+    limits: Record<string, number | null>
 }
 
 /**
@@ -194,13 +195,18 @@ export class ModuleAccess extends HTMLElement {
         )
         const name = nameInput?.value.trim() ?? this._role.name
 
-        const limits: Record<string, number> = {}
+        const limits: Record<string, number | null> = {}
         this.querySelectorAll<HTMLInputElement>(
             '.module-access__limits input[data-limit-key]',
         ).forEach((el) => {
             const key = el.dataset.limitKey!
-            const n = Number(el.value)
-            limits[key] = Number.isFinite(n) ? n : 0
+            const raw = el.value.trim()
+            if (raw === '') {
+                limits[key] = null
+                return
+            }
+            const n = Number(raw)
+            limits[key] = Number.isFinite(n) ? n : null
         })
 
         const permissions: string[] = []
@@ -356,7 +362,7 @@ export class ModuleAccess extends HTMLElement {
                           (res) =>
                               `<label class="module-access__limit">` +
                               `<span class="module-access__limit-label">${esc(res.label)}</span>` +
-                              `<input type="number" min="0" class="form-control form-control-sm" data-limit-key="${esc(res.key)}" value="${esc(String(limits[res.key] ?? 0))}">` +
+                              `<input type="number" min="0" placeholder="∞" class="form-control form-control-sm" data-limit-key="${esc(res.key)}" value="${esc(limits[res.key] === null || limits[res.key] === undefined ? '' : String(limits[res.key]))}">` +
                               `</label>`,
                       )
                       .join('') +
