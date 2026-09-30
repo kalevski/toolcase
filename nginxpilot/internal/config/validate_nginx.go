@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"net/netip"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
@@ -41,6 +43,9 @@ func validateNginx(cfg *Config) error {
 		return fmt.Errorf("nginx.reconcile.interval %s: minimum is %s", n.Reconcile.Interval, MinReconcileInterval)
 	}
 	if err := validateRealIP(n.RealIP); err != nil {
+		return err
+	}
+	if err := validateResolver(n.Resolver); err != nil {
 		return err
 	}
 	if !n.Manage {
@@ -90,6 +95,35 @@ func validateRealIP(r RealIP) error {
 		return fmt.Errorf("nginx.real_ip.refresh_interval must not be negative")
 	}
 	return nil
+}
+
+// validateResolver checks the request-time resolver block regardless of
+// whether any proxy sets resolve, so a typo is caught before one does. Every
+// address lands verbatim in a rendered `resolver` directive, so it must parse
+// as an IP or IP:port — never a hostname (nginx would have to resolve its own
+// resolver) and never anything carrying nginx metacharacters.
+func validateResolver(r Resolver) error {
+	for _, a := range r.Addresses {
+		if !isResolverAddr(a) {
+			return fmt.Errorf("nginx.resolver.addresses: %q must be an IP, optionally with :port (IPv6 as [addr]:port)", a)
+		}
+	}
+	return nil
+}
+
+// isResolverAddr accepts "ip", "ip:port", "[v6]" and "[v6]:port".
+func isResolverAddr(a string) bool {
+	if _, err := netip.ParseAddr(a); err == nil {
+		return !strings.Contains(a, "%")
+	}
+	if inner, ok := strings.CutPrefix(a, "["); ok {
+		if v6, ok := strings.CutSuffix(inner, "]"); ok {
+			ip, err := netip.ParseAddr(v6)
+			return err == nil && ip.Is6() && !strings.Contains(v6, "%")
+		}
+	}
+	ap, err := netip.ParseAddrPort(a)
+	return err == nil && ap.Port() != 0 && !strings.Contains(a, "%")
 }
 
 // validateTls checks the TLS cert-dir block. cert_dir and cert_dir_env are

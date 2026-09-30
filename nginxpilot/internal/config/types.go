@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
 )
 
 // Source types.
@@ -175,6 +177,16 @@ type Proxy struct {
 	// Cache configures an http proxy cache (proxy_cache_path + proxy_cache).
 	Cache Cache `yaml:"cache" json:"cache,omitempty"`
 
+	// Resolve makes nginx resolve an inline pass hostname per request (through
+	// nginx.resolver) instead of once at config load, so a backend that keeps
+	// its name but changes address — a recreated container — is followed
+	// without a reload. It renders `set $np_pass_<n> <pass>; proxy_pass
+	// $np_pass_<n>;`, which nginx only resolves at request time. Requires an
+	// inline pass with no URI path (validated); an IP-literal pass renders the
+	// plain proxy_pass, since there is nothing to resolve. Locations inherit it
+	// unless they set their own.
+	Resolve bool `yaml:"resolve" json:"resolve,omitempty"`
+
 	// File records which config file declared this proxy (provenance). Never
 	// serialized over the admin API.
 	File string `yaml:"-" json:"-"`
@@ -190,6 +202,8 @@ type ProxyLocation struct {
 	// Websocket adds the Upgrade/Connection headers + HTTP/1.1 for WebSocket
 	// and other connection-upgrade traffic.
 	Websocket bool `yaml:"websocket" json:"websocket,omitempty"`
+	// Resolve overrides the proxy's resolve for this location (nil = inherit).
+	Resolve *bool `yaml:"resolve" json:"resolve,omitempty"`
 	// Advanced is a raw passthrough inside this location block (escape hatch),
 	// mirroring WebOptions.Advanced at server level. It rides the same
 	// `nginx -t` gate, so a bad snippet only disables this one resource.
@@ -207,6 +221,61 @@ func (p Proxy) ListenPort() int {
 		return p.Listen
 	}
 	return DefaultProxyListen
+}
+
+// EffectiveLocations returns the proxy's locations, defaulting to a single "/"
+// location using the proxy default when none are declared.
+func (p Proxy) EffectiveLocations() []ProxyLocation {
+	if len(p.Locations) == 0 {
+		return []ProxyLocation{{Path: "/"}}
+	}
+	return p.Locations
+}
+
+// LocationTarget returns the effective (upstream, pass) pair for a location:
+// its own when it sets either, else the proxy default.
+func (p Proxy) LocationTarget(loc ProxyLocation) (upstream, pass string) {
+	if loc.Upstream == "" && loc.Pass == "" {
+		return p.Upstream, p.Pass
+	}
+	return loc.Upstream, loc.Pass
+}
+
+// LocationResolve reports the effective resolve flag for a location: its own
+// when set, else the proxy's.
+func (p Proxy) LocationResolve(loc ProxyLocation) bool {
+	if loc.Resolve != nil {
+		return *loc.Resolve
+	}
+	return p.Resolve
+}
+
+// ResolvesPerRequest reports whether a location renders the variable
+// proxy_pass form: resolve is effective and its inline pass names a hostname.
+// An IP literal (or a pass that fails Tier 1, which Validate rejects anyway)
+// has nothing to resolve, so it keeps the plain proxy_pass — and stays a
+// load-time backend for the pre-flight checks and the address watch.
+func (p Proxy) ResolvesPerRequest(loc ProxyLocation) bool {
+	if !p.LocationResolve(loc) {
+		return false
+	}
+	up, pass := p.LocationTarget(loc)
+	if up != "" || pass == "" {
+		return false
+	}
+	t, err := targetcheck.ParsePass(pass)
+	return err == nil && !t.IsIP && !t.IsUnix
+}
+
+// UsesResolver reports whether any effective location resolves per request —
+// the condition for emitting the resolver directives in the server block.
+func (p Proxy) UsesResolver() bool {
+	for _, loc := range p.EffectiveLocations() {
+		if p.ResolvesPerRequest(loc) {
+			return true
+		}
+	}
+	return false
 }
 
 // Redirect schemes (redirects[].scheme). Auto emits $scheme so the redirect

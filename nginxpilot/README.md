@@ -213,9 +213,31 @@ proxies:
       - path: /ws
         upstream: api_pool
         websocket: true            # adds the Upgrade/Connection upgrade headers + HTTP/1.1
+
+  - domain: app.example.com
+    pass: http://wmk-abc123:3000   # a container name on a Docker network
+    resolve: true                  # resolve the hostname per request, not once at load
+    locations:
+      - path: /                    # inherits resolve
+      - path: /legacy
+        pass: http://legacy:8080
+        resolve: false             # per-location override (unset = inherit the proxy's)
 ```
 
 Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint unless you opt into [managed mode](#managed-mode).
+
+`resolve: true` renders `set $np_pass_<n> <pass>; proxy_pass $np_pass_<n>;` (`<n>` is the location's index) plus one `resolver` / `resolver_timeout` pair in the server block. nginx resolves a hostname in a plain `proxy_pass` **once, at load** — a recreated container with a new IP is blackholed until the next reload (the [address watch](#reconciliation-loop) repairs that on its next tick) — but a `proxy_pass` holding a variable is resolved **per request** through the resolver, cached for `valid`. Consequences: a backend that does not exist yet answers `502` instead of failing `nginx -t`, so resolve targets are exempt from the pre-flight DNS quarantine and the address watch (and an API-write DNS failure on one is only a warning). Rules, enforced by validation: resolve needs an inline `pass`, not a named `upstream` (`resolve_needs_pass`); and the pass must be `scheme://host[:port]` with **no URI path**, not even a trailing `/` (`resolve_pass_path`) — with a variable nginx sends that path verbatim instead of replacing the matched location prefix. An IP-literal pass renders the plain `proxy_pass` even with resolve on (nothing to resolve). The DNS server is configured once:
+
+```yaml
+nginx:
+  resolver:
+    addresses: ["127.0.0.11"]  # default — Docker's embedded DNS; IPs only, optional :port ([v6]:port)
+    valid: 10s                 # default 10s — how long nginx caches an answer
+    ipv6: false                # default false (ipv6=off) — true also looks up AAAA
+    timeout: 5s                # default 5s — resolver_timeout
+```
+
+`GET /status` reports `"features": {"proxy_resolve": true}` so a control plane can tell a daemon that accepts `resolve` from an older one that would reject it as an unknown key.
 
 Every location also accepts an `advanced: |` raw passthrough (the location-level twin of the server-level `advanced`), and backend targets are strictly validated — a `pass`/`address` may only be a well-formed `scheme://host[:port][/path]`, `host[:port]` or `unix:/path`; nginx metacharacters (`;`, `{`, `}`, `$`, whitespace) are rejected at validation time.
 
@@ -505,7 +527,7 @@ nginx:
 - A live resource that starts failing the dry-run (e.g. its backend's DNS record was deleted — nginx caches load-time resolution, so traffic still flows) is marked **`at_risk`** in `GET /status` with a `since` timestamp. **Policy `warn` (default) never touches traffic.**
 - **`on_failure: disable` turns latent failures into immediate route removal**: after 2 consecutive failing ticks the loop triggers an apply whose quarantine pass disables exactly the failing resource.
 - **Auto-recovery is always on**: a quarantined resource that passes 2 consecutive ticks is re-applied (strictly safe — it only ever adds a resource back after the staged `nginx -t` proves the config valid). Flap damping in both directions prevents reload ping-pong; steady state costs zero reloads.
-- **`watch_addresses` (default true) catches the backend that moved rather than vanished.** nginx resolves the hostname in a `proxy_pass` or an `upstream` `server` **once, when it loads the config**, and then keeps that address for the life of that config. A backend that keeps its name but changes address — a recreated container is the everyday case — is therefore blackholed: it resolves perfectly from everywhere, `nginx -t` passes, no resource looks unhealthy, and every request still goes to the address that is gone. The loop re-resolves each backend hostname every tick, compares against what it resolved to at the last apply (the moment nginx read the same names), and applies when one moved, which makes nginx look again. A host that stops resolving is *not* drift — that is the `at_risk` case above, and a reload would not help it — and answers are compared as a sorted set, so a rotating round-robin reply is not drift either. Set `watch_addresses: false` where backend addresses are pinned and the lookups are unwanted — and note that `target_checks.dns: off` turns this off too, since both use the same resolver.
+- **`watch_addresses` (default true) catches the backend that moved rather than vanished.** nginx resolves the hostname in a `proxy_pass` or an `upstream` `server` **once, when it loads the config**, and then keeps that address for the life of that config. A backend that keeps its name but changes address — a recreated container is the everyday case — is therefore blackholed: it resolves perfectly from everywhere, `nginx -t` passes, no resource looks unhealthy, and every request still goes to the address that is gone. The loop re-resolves each backend hostname every tick, compares against what it resolved to at the last apply (the moment nginx read the same names), and applies when one moved, which makes nginx look again. A host that stops resolving is *not* drift — that is the `at_risk` case above, and a reload would not help it — and answers are compared as a sorted set, so a rotating round-robin reply is not drift either. Set `watch_addresses: false` where backend addresses are pinned and the lookups are unwanted — and note that `target_checks.dns: off` turns this off too, since both use the same resolver. Proxies with [`resolve: true`](#reverse-proxies-and-upstreams) opt out per location: nginx follows those names itself, per request, so they are never watched.
 
 ### Per-host toggles
 
@@ -605,7 +627,7 @@ admin:
 Routes:
 
 - `GET /healthz` — liveness
-- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one.
+- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one. A `features` object lists capabilities of this build a control plane can gate on (`proxy_resolve`).
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`. In managed mode a reload also re-renders + reloads nginx.

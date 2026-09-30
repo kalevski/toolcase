@@ -2,9 +2,11 @@ package nginxconf
 
 import (
 	"fmt"
+	"net/netip"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 )
@@ -113,6 +115,9 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 	if p.ClientMaxBodySize > 0 {
 		fmt.Fprintf(&b, "    client_max_body_size %s;\n", p.ClientMaxBodySize)
 	}
+	if p.UsesResolver() {
+		writeResolver(&b, cfg.Nginx.Resolver)
+	}
 	writeServerToggles(&b, p.WebOptions, opts, tls)
 	writeAccessControl(&b, cfg, p.AccessList)
 	if acmeRoot != "" {
@@ -120,8 +125,8 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 	}
 
 	consumeAuth := consumesAuthHeader(cfg, p.AccessList)
-	for _, loc := range effectiveLocations(p) {
-		writeLocation(&b, p, loc, consumeAuth)
+	for i, loc := range effectiveLocations(p) {
+		writeLocation(&b, p, i, loc, consumeAuth)
 	}
 
 	b.WriteString("}\n")
@@ -357,10 +362,20 @@ func hstsValue(h config.HSTS) string {
 // the per-server proxy timeouts. consumeAuth blanks the client's Authorization
 // header before proxy_pass — set when the proxy's access list authenticates at
 // the edge with pass_auth off.
-func writeLocation(b *strings.Builder, p *config.Proxy, loc config.ProxyLocation, consumeAuth bool) {
+//
+// A location that resolves per request (config.Proxy.ResolvesPerRequest)
+// stages its pass in a variable, $np_pass_<index>: nginx resolves a proxy_pass
+// hostname once at load, but a proxy_pass holding a variable is resolved at
+// request time through the server's resolver, cached for resolver valid=.
+func writeLocation(b *strings.Builder, p *config.Proxy, index int, loc config.ProxyLocation, consumeAuth bool) {
 	target := proxyPassTarget(p, loc)
 	fmt.Fprintf(b, "\n    location %s {\n", loc.Path)
-	fmt.Fprintf(b, "        proxy_pass %s;\n", target)
+	if p.ResolvesPerRequest(loc) {
+		fmt.Fprintf(b, "        set $np_pass_%d %s;\n", index, target)
+		fmt.Fprintf(b, "        proxy_pass $np_pass_%d;\n", index)
+	} else {
+		fmt.Fprintf(b, "        proxy_pass %s;\n", target)
+	}
 	b.WriteString("        proxy_http_version 1.1;\n")
 	b.WriteString("        proxy_set_header Host $host;\n")
 	b.WriteString("        proxy_set_header X-Real-IP $remote_addr;\n")
@@ -397,10 +412,7 @@ func writeLocation(b *strings.Builder, p *config.Proxy, loc config.ProxyLocation
 // upstream becomes http://<name>, an inline pass is used verbatim. Location
 // settings override the proxy default.
 func proxyPassTarget(p *config.Proxy, loc config.ProxyLocation) string {
-	up, pass := loc.Upstream, loc.Pass
-	if up == "" && pass == "" {
-		up, pass = p.Upstream, p.Pass
-	}
+	up, pass := p.LocationTarget(loc)
 	if up != "" {
 		return "http://" + up
 	}
@@ -410,10 +422,35 @@ func proxyPassTarget(p *config.Proxy, loc config.ProxyLocation) string {
 // effectiveLocations returns the proxy's locations, defaulting to a single "/"
 // location using the proxy default when none are declared.
 func effectiveLocations(p *config.Proxy) []config.ProxyLocation {
-	if len(p.Locations) == 0 {
-		return []config.ProxyLocation{{Path: "/"}}
+	return p.EffectiveLocations()
+}
+
+// writeResolver emits the request-time DNS directives for a proxy with at least
+// one per-request location. They are server-level so every such location shares
+// one resolver; IPv6 addresses are bracketed, as nginx requires.
+func writeResolver(b *strings.Builder, r config.Resolver) {
+	addrs := make([]string, 0, len(r.AddressesOrDefault()))
+	for _, a := range r.AddressesOrDefault() {
+		if ip, err := netip.ParseAddr(a); err == nil && ip.Is6() {
+			a = "[" + a + "]"
+		}
+		addrs = append(addrs, a)
 	}
-	return p.Locations
+	ipv6 := "off"
+	if r.IPv6Enabled() {
+		ipv6 = "on"
+	}
+	fmt.Fprintf(b, "    resolver %s valid=%s ipv6=%s;\n", strings.Join(addrs, " "), nginxTime(r.ValidOrDefault()), ipv6)
+	fmt.Fprintf(b, "    resolver_timeout %s;\n", nginxTime(r.TimeoutOrDefault()))
+}
+
+// nginxTime renders a duration in nginx's time syntax: whole seconds as "10s",
+// anything finer as milliseconds ("1500ms") — never Go's "1m0s" or "1.5s".
+func nginxTime(d time.Duration) string {
+	if d%time.Second == 0 {
+		return strconv.FormatInt(int64(d/time.Second), 10) + "s"
+	}
+	return strconv.FormatInt(int64(d/time.Millisecond), 10) + "ms"
 }
 
 // referencedUpstreams returns the distinct named upstreams a proxy uses, in

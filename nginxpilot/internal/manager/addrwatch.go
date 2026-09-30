@@ -23,9 +23,14 @@ type addrSet map[string][]string
 // proxy passes (the proxy default and each location's override), upstream
 // server addresses, stream passes and stream-upstream server addresses.
 // Disabled proxies, named upstream references (the upstream's own servers are
-// walked instead) and Tier-1 rejects are skipped. It is the one traversal, so
-// the pre-flight annotator (annotate.go) and the address watch below can never
-// disagree about what counts as a backend.
+// walked instead), Tier-1 rejects and resolve targets are skipped. It is the
+// one traversal, so the pre-flight annotator (annotate.go) and the address
+// watch below can never disagree about what counts as a backend.
+//
+// A resolve target (config.Proxy.ResolvesPerRequest) is not a load-time
+// backend: nginx looks it up per request, so a name that does not resolve yet
+// is no reason to quarantine the proxy — nginx -t never resolves it and
+// requests simply 502 until it does — and a name that moved needs no reload.
 func walkBackends(cfg *config.Config, fn func(kind, key string, t targetcheck.Target)) {
 	pass := func(kind, key, raw string) {
 		if raw == "" {
@@ -49,8 +54,13 @@ func walkBackends(cfg *config.Config, fn func(kind, key string, t targetcheck.Ta
 		if !p.IsEnabled() {
 			continue
 		}
-		pass(nginxctl.KindProxy, p.Domain, p.Pass)
+		if !defaultPassPerRequest(p) {
+			pass(nginxctl.KindProxy, p.Domain, p.Pass)
+		}
 		for _, loc := range p.Locations {
+			if loc.Pass != "" && p.ResolvesPerRequest(loc) {
+				continue
+			}
 			pass(nginxctl.KindProxy, p.Domain, loc.Pass)
 		}
 	}
@@ -70,6 +80,31 @@ func walkBackends(cfg *config.Config, fn func(kind, key string, t targetcheck.Ta
 			addr(nginxctl.KindStreamUpstream, u.Name, s.Address)
 		}
 	}
+}
+
+// defaultPassPerRequest reports whether the proxy-level pass is resolved per
+// request everywhere it is used: every effective location that inherits it
+// resolves per request. When no location inherits it (each sets its own) the
+// proxy's own resolve decides, so an unused default is still watched unless
+// the proxy opted in.
+func defaultPassPerRequest(p *config.Proxy) bool {
+	if p.Pass == "" {
+		return false
+	}
+	inherited := false
+	for _, loc := range p.EffectiveLocations() {
+		if loc.Upstream != "" || loc.Pass != "" {
+			continue
+		}
+		inherited = true
+		if !p.ResolvesPerRequest(loc) {
+			return false
+		}
+	}
+	if !inherited {
+		return p.ResolvesPerRequest(config.ProxyLocation{Path: "/"})
+	}
+	return true
 }
 
 // backendHosts returns the distinct resolvable hostnames the config points at.

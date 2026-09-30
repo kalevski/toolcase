@@ -98,6 +98,7 @@ func componentSchemas() map[string]any {
 			"upstream":  str(),
 			"pass":      str(),
 			"websocket": boolean(),
+			"resolve":   boolean(),
 			"advanced":  str(),
 		}, "path"),
 		"Proxy": obj(withWebOptions(map[string]any{
@@ -113,6 +114,7 @@ func componentSchemas() map[string]any {
 			"client_max_body_size": str(),
 			"access_list":          str(),
 			"websocket":            boolean(),
+			"resolve":              boolean(),
 			"cache":                map[string]any{"type": "object"},
 		}), "domain"),
 		"ProxyList": obj(map[string]any{"proxies": arr(ref("Proxy"))}),
@@ -211,6 +213,9 @@ func componentSchemas() map[string]any {
 				"next_check":     str(),
 			}),
 			"acme": ref("AcmeStatus"),
+			"features": obj(map[string]any{
+				"proxy_resolve": boolean(),
+			}),
 		}),
 		"AcmeStatus": obj(map[string]any{
 			"enabled":             boolean(),

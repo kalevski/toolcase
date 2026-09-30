@@ -76,6 +76,23 @@ func checkFragmentTargets(r *http.Request, cfg *config.Config, frag *config.Frag
 			targets = append(targets, t)
 		}
 	}
+	// A resolve target is looked up by nginx per request, so a name that does
+	// not resolve yet (the container is not up) cannot break the reload: its
+	// DNS failure is a warning, never a 400. A pass that is also used at load
+	// time elsewhere in the fragment keeps the strict check.
+	perRequest, loadTime := map[targetcheck.Target]bool{}, map[targetcheck.Target]bool{}
+	notePass := func(p *config.Proxy, loc config.ProxyLocation) {
+		_, pass := p.LocationTarget(loc)
+		t, perr := targetcheck.ParsePass(pass)
+		if pass == "" || perr != nil {
+			return
+		}
+		if p.ResolvesPerRequest(loc) {
+			perRequest[t] = true
+		} else {
+			loadTime[t] = true
+		}
+	}
 	addAddr := func(addr string) {
 		if addr == "" {
 			return
@@ -85,10 +102,17 @@ func checkFragmentTargets(r *http.Request, cfg *config.Config, frag *config.Frag
 		}
 	}
 	for i := range frag.Proxies {
-		addPass(frag.Proxies[i].Pass)
-		for _, loc := range frag.Proxies[i].Locations {
+		p := &frag.Proxies[i]
+		addPass(p.Pass)
+		for _, loc := range p.Locations {
 			addPass(loc.Pass)
 		}
+		for _, loc := range p.EffectiveLocations() {
+			notePass(p, loc)
+		}
+	}
+	for t := range loadTime {
+		delete(perRequest, t)
 	}
 	for i := range frag.Upstreams {
 		for _, s := range frag.Upstreams[i].Servers {
@@ -107,7 +131,7 @@ func checkFragmentTargets(r *http.Request, cfg *config.Config, frag *config.Frag
 	for _, t := range targets {
 		if dnsSeverity != config.TargetDNSOff {
 			if derr := checker.CheckDNS(ctx, t); derr != nil {
-				if dnsSeverity == config.TargetDNSError {
+				if dnsSeverity == config.TargetDNSError && !perRequest[t] {
 					return warnings, fmt.Errorf("pass %v (add ?skip_target_checks=true to override)", derr)
 				}
 				warnings = append(warnings, derr.Error())

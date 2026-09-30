@@ -404,6 +404,39 @@ func validateProxyTargets(p *Proxy, upstreams map[string]bool) error {
 	if len(p.Locations) == 0 && p.Upstream == "" && p.Pass == "" {
 		return fmt.Errorf("a proxy needs upstream/pass (or at least one location that sets one)")
 	}
+	for _, loc := range p.EffectiveLocations() {
+		if err := checkResolve(p, loc); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// checkResolve enforces the resolve rules on one effective location. The
+// machine-readable code in parentheses lets a control plane map the error.
+//
+//   - resolve_needs_pass: the per-request form is `set $var <pass>`, which only
+//     an inline pass can fill — a named upstream is resolved by its own
+//     upstream{} block, so resolve would silently do nothing.
+//   - resolve_pass_path: with a variable in proxy_pass nginx sends the URI in
+//     the variable verbatim instead of replacing the matched location prefix,
+//     so any path — even a bare "/" — would change what the backend receives.
+//     The pass must be scheme://host[:port] only.
+func checkResolve(p *Proxy, loc ProxyLocation) error {
+	if !p.LocationResolve(loc) {
+		return nil
+	}
+	up, pass := p.LocationTarget(loc)
+	if up != "" {
+		return fmt.Errorf("location %q: resolve needs an inline pass, not upstream %q (resolve_needs_pass)", loc.Path, up)
+	}
+	t, err := targetcheck.ParsePass(pass)
+	if err != nil {
+		return nil
+	}
+	if t.Path != "" {
+		return fmt.Errorf("location %q: resolve needs a pass without a URI path — %q must be scheme://host[:port] only (resolve_pass_path)", loc.Path, pass)
+	}
 	return nil
 }
 

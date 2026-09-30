@@ -102,6 +102,61 @@ type Nginx struct {
 	// the crash-proof apply pass — so a collision degrades, never crashes, but
 	// the opt-in avoids the surprise/quarantine noise on upgrade).
 	DefaultCatchAll bool `yaml:"default_catch_all"`
+
+	// Resolver is the DNS server nginx asks at request time for proxies that
+	// set resolve: true (rendered as resolver/resolver_timeout in their server
+	// blocks). Unused otherwise.
+	Resolver Resolver `yaml:"resolver"`
+}
+
+// Resolver defaults. 127.0.0.11 is Docker's embedded DNS server, which answers
+// for container names on user-defined and overlay networks — the case resolve
+// exists for.
+const (
+	DefaultResolverAddress = "127.0.0.11"
+	DefaultResolverValid   = 10 * time.Second
+	DefaultResolverTimeout = 5 * time.Second
+)
+
+// Resolver configures nginx's request-time DNS resolution (the resolver and
+// resolver_timeout directives). Accessors are default-aware, like
+// TargetChecks, because resolve renders in generate-only mode too.
+type Resolver struct {
+	// Addresses are the DNS servers: IPs, optionally with :port ([v6]:port).
+	Addresses []string `yaml:"addresses"`
+	// Valid overrides the answer TTL nginx caches (default 10s).
+	Valid Duration `yaml:"valid"`
+	// IPv6 lets nginx look up AAAA records too (default false: ipv6=off).
+	IPv6 *bool `yaml:"ipv6"`
+	// Timeout bounds one resolution (default 5s).
+	Timeout Duration `yaml:"timeout"`
+}
+
+// AddressesOrDefault returns the effective DNS servers (127.0.0.11 when unset).
+func (r Resolver) AddressesOrDefault() []string {
+	if len(r.Addresses) == 0 {
+		return []string{DefaultResolverAddress}
+	}
+	return r.Addresses
+}
+
+// ValidOrDefault returns the effective answer TTL (10s when unset).
+func (r Resolver) ValidOrDefault() time.Duration {
+	if r.Valid > 0 {
+		return time.Duration(r.Valid)
+	}
+	return DefaultResolverValid
+}
+
+// IPv6Enabled reports the effective ipv6 (default false).
+func (r Resolver) IPv6Enabled() bool { return r.IPv6 != nil && *r.IPv6 }
+
+// TimeoutOrDefault returns the effective resolver_timeout (5s when unset).
+func (r Resolver) TimeoutOrDefault() time.Duration {
+	if r.Timeout > 0 {
+		return time.Duration(r.Timeout)
+	}
+	return DefaultResolverTimeout
 }
 
 // Real-IP range providers (nginx.real_ip.providers).

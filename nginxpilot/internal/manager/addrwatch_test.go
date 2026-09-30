@@ -137,3 +137,37 @@ func TestAddressSnapshotIgnoresOrdering(t *testing.T) {
 		t.Fatal("a round-robin answer in a different order is the same answer")
 	}
 }
+
+// A resolve location is looked up by nginx per request, so it is neither a
+// load-time backend to watch for drift nor one whose DNS failure should
+// quarantine the proxy. The IP-literal and opted-out passes stay walked.
+func TestWalkBackendsSkipsResolveTargets(t *testing.T) {
+	off := false
+	cfg := &config.Config{
+		Proxies: []config.Proxy{
+			{Domain: "wmk.example.com", Pass: "http://wmk-abc123:3000", Resolve: true},
+			{Domain: "mixed.example.com", Pass: "http://web:80", Resolve: true, Locations: []config.ProxyLocation{
+				{Path: "/"},
+				{Path: "/api", Pass: "http://api:8080"},
+				{Path: "/legacy", Pass: "http://legacy:80", Resolve: &off},
+			}},
+			{Domain: "half.example.com", Pass: "http://shared:80", Resolve: true, Locations: []config.ProxyLocation{
+				{Path: "/"},
+				{Path: "/old", Resolve: &off},
+			}},
+			{Domain: "ip.example.com", Pass: "http://10.0.0.4:3000", Resolve: true},
+		},
+	}
+	got := backendHosts(cfg)
+	sort.Strings(got)
+	want := []string{"legacy", "shared"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("backendHosts() = %v, want %v (resolve targets must drop out; a default any location still loads at load time must stay)", got, want)
+	}
+
+	a := checkerAnnotator{checker: &targetcheck.Checker{Resolver: &fakeResolver{hosts: map[string][]string{}}}}
+	notes := a.Annotate(context.Background(), &config.Config{Proxies: cfg.Proxies[:1]})
+	if len(notes) != 0 {
+		t.Fatalf("a resolve target that does not resolve yet must not be annotated for quarantine: %v", notes)
+	}
+}

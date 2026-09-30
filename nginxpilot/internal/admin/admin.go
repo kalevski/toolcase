@@ -303,6 +303,11 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	// is an older nginxpilot that does not report it".
 	payload["php"] = s.mgr.PHPStatus()
 
+	// Capabilities of this build a control plane gates on before sending a
+	// field an older nginxpilot would reject as unknown (strict decoding).
+	// proxy_resolve: proxies and locations accept resolve (per-request DNS).
+	payload["features"] = map[string]any{"proxy_resolve": true}
+
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(payload); err != nil {

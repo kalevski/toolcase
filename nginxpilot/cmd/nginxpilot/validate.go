@@ -168,10 +168,21 @@ func runTargetChecks(cfg *config.Config) error {
 			check(owner, t, addr)
 		}
 	}
+	// A resolve location's pass is looked up per request, not at load, so it
+	// is listed (owner suffixed "resolve") but never counts as a failure.
 	for _, p := range cfg.Proxies {
-		addPass("proxy "+p.Domain, p.Pass)
-		for _, loc := range p.Locations {
-			addPass("proxy "+p.Domain, loc.Pass)
+		listed := map[string]bool{}
+		for _, loc := range p.EffectiveLocations() {
+			owner := "proxy " + p.Domain
+			if p.ResolvesPerRequest(loc) {
+				owner += " (resolve)"
+			}
+			_, pass := p.LocationTarget(loc)
+			if listed[owner+"\x00"+pass] {
+				continue
+			}
+			listed[owner+"\x00"+pass] = true
+			addPass(owner, pass)
 		}
 	}
 	for _, u := range cfg.Upstreams {
@@ -193,7 +204,7 @@ func runTargetChecks(cfg *config.Config) error {
 		len(rows), tc.DNSSeverity(), tc.ReachabilityEnabled())
 	for _, r := range rows {
 		fmt.Printf("  %-40s %-30s dns=%s reach=%s\n", r.owner, r.target, r.dns, r.reach)
-		if r.dnsFailed {
+		if r.dnsFailed && !strings.HasSuffix(r.owner, " (resolve)") {
 			failures++
 		}
 	}
