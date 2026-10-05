@@ -4,7 +4,8 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
     test: {
         include: ['**/*.test.ts'],
-        exclude: ['**/node_modules/**', '**/dist/**', '**/lib/**'],
+        // webmail/web tests use node:test (run via its own `npm test`), not vitest.
+        exclude: ['**/node_modules/**', '**/dist/**', '**/lib/**', 'webmail/web/**'],
         environment: 'node',
     },
 })
