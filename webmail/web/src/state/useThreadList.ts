@@ -54,7 +54,6 @@ export function useThreadList(jmap: JmapClient, filter: EmailFilter | null, tick
                 }
             }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [jmap, key],
     )
 

@@ -44,7 +44,6 @@ export function App() {
 
     useEffect(() => {
         if (route.kind === 'loading') void loadSession()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {

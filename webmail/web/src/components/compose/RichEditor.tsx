@@ -31,7 +31,6 @@ export function RichEditor({ initialHtml, onChange, label }: Props) {
     useEffect(() => {
         if (ref.current) ref.current.innerHTML = initialHtml
         // initial content only; the editor is uncontrolled afterwards
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const emit = () => {

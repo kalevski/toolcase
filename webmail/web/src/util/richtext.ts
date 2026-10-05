@@ -121,7 +121,7 @@ export function serialiseEditor(root: HTMLElement): { html: string; text: string
     const html = Array.from(root.childNodes).map(serialiseHtml).join('')
     const out: string[] = []
     root.childNodes.forEach((c) => serialiseText(c, { quote: 0, list: [] }, out))
-    const text = out.join('').replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '')
+    const text = out.join('').replace(/\u00a0/g, ' ').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '')
     return { html, text }
 }
 

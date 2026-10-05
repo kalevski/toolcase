@@ -50,7 +50,6 @@ export function ThreadView({ threadId, currentMailbox, onBack, onAction, onMove,
         return () => {
             cancelled = true
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [jmap, threadId, changeTick])
 
     useEffect(() => {

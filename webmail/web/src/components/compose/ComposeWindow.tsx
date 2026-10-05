@@ -51,7 +51,6 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
             cancelled = true
         }
         // init is fixed for the life of this window
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const update = (patch: Partial<ComposeState>) => {
