@@ -1,0 +1,53 @@
+# One binvault node plus a sample pipeline service (docker/sample-service) and a
+# one-shot `setup` container that configures a bucket, two pipelines and a
+# token through the admin API.
+#
+#   export BINVAULT_ADMIN_TOKEN=$(openssl rand -hex 32)
+#   export BINVAULT_MASTER_KEY=$(openssl rand -base64 32)   # keep it: it seals token secrets
+#   docker compose -f binvault/docker/compose.yml up --build
+#
+# Then upload through the S3 port (see setup's output for the credentials):
+#   AWS_ACCESS_KEY_ID=… AWS_SECRET_ACCESS_KEY=… aws --endpoint-url http://localhost:9000 s3 cp ./a.txt s3://demo/uploads/a.txt
+# A file containing the text EICAR-TEST-MARKER is rejected by the before pipeline
+# with 422 PipelineRejected; accepted files get a `sha256` tag from the after pipeline.
+services:
+  binvault:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      BINVAULT_ADMIN_TOKEN: ${BINVAULT_ADMIN_TOKEN:?set BINVAULT_ADMIN_TOKEN}
+      BINVAULT_MASTER_KEY: ${BINVAULT_MASTER_KEY:?set BINVAULT_MASTER_KEY}
+      # how the sample service reaches this node
+      BINVAULT_ENDPOINT_URL: http://binvault:9000
+    ports:
+      - "9000:9000"              # S3 API
+      - "127.0.0.1:9001:9001"    # admin API and metrics: host loopback only
+    volumes:
+      - binvault-data:/var/lib/binvault
+    read_only: true
+    cap_drop: [ALL]
+    # SIGTERM drains for up to BINVAULT_SHUTDOWN_TIMEOUT (60s by default); compose's own
+    # default of 10s would kill a node with transfers in flight
+    stop_grace_period: 70s
+
+  sample-service:
+    build:
+      context: ..
+      dockerfile: docker/sample-service/Dockerfile
+    environment:
+      SIGNING_SECRET: ${SAMPLE_SIGNING_SECRET:-change-me-to-at-least-32-characters-long}
+
+  setup:
+    image: curlimages/curl:8.10.1
+    depends_on: [binvault, sample-service]
+    environment:
+      ADMIN: ${BINVAULT_ADMIN_TOKEN}
+      SIGNING_SECRET: ${SAMPLE_SIGNING_SECRET:-change-me-to-at-least-32-characters-long}
+    volumes:
+      - ./setup.sh:/setup.sh:ro
+    entrypoint: ["/bin/sh", "/setup.sh"]
+    restart: "no"
+
+volumes:
+  binvault-data:

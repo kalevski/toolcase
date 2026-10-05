@@ -1,0 +1,55 @@
+[Unit]
+Description=webmail - web mail client (JMAP gateway)
+Documentation=https://github.com/kalevski/toolcase/tree/main/webmail
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Settings and secrets live in the environment file (mode 0600):
+#   WEBMAIL_PUBLIC_URL=https://webmail.example.com
+#   WEBMAIL_JMAP_URL=http://127.0.0.1:8090
+#   WEBMAIL_PLATFORM_URL=https://api.example.com
+#   WEBMAIL_PLATFORM_TOKEN=...      (service key with mail.webmail.agent)
+#   WEBMAIL_SESSION_KEY=...         (base64 of 32 random bytes - back it up!)
+EnvironmentFile=/etc/webmail/env
+Environment=WEBMAIL_DATA_DIR=/var/lib/webmail
+ExecStartPre=/usr/local/bin/webmail validate
+ExecStart=/usr/local/bin/webmail run
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+
+User=webmail
+Group=webmail
+StateDirectory=webmail
+UMask=0027
+
+# Hardening - the process writes only inside its data dir.
+ProtectSystem=strict
+ReadWritePaths=/var/lib/webmail
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# Ports 8080/8081 are unprivileged: no capabilities are needed.
+
+[Install]
+WantedBy=multi-user.target

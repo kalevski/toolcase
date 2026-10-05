@@ -1,0 +1,140 @@
+{
+ "_comment": "Keys every client suite round-trips (put, get, head, list, copy, delete). 'gen' entries are char*count. too_long must be refused with KeyTooLongError (400).",
+ "keys": [
+  {
+   "id": "plain",
+   "note": "ordinary key with a slash",
+   "key": "plain/object.txt"
+  },
+  {
+   "id": "space",
+   "note": "spaces in both segments",
+   "key": "dir with space/file name.txt"
+  },
+  {
+   "id": "plus",
+   "note": "plus signs are literal in a path",
+   "key": "a+b/c+d+.txt"
+  },
+  {
+   "id": "percent",
+   "note": "percent signs",
+   "key": "100%/done%.txt"
+  },
+  {
+   "id": "percent-hex-lookalike",
+   "note": "looks like percent escapes, must stay literal",
+   "key": "lit%2Fslash%20and%2B"
+  },
+  {
+   "id": "cyrillic",
+   "note": "Cyrillic",
+   "key": "ключ/файл.txt"
+  },
+  {
+   "id": "cjk",
+   "note": "CJK + space",
+   "key": "日本語/テスト 表.txt"
+  },
+  {
+   "id": "emoji",
+   "note": "4-byte UTF-8",
+   "key": "emoji-😀/🎉.bin"
+  },
+  {
+   "id": "combining",
+   "note": "NFD sequence: must not be normalised to NFC",
+   "key": "é-nfd"
+  },
+  {
+   "id": "nfc",
+   "note": "NFC sequence: a different key than the NFD one",
+   "key": "é-nfc"
+  },
+  {
+   "id": "leading-slash",
+   "note": "key starting with a slash",
+   "key": "/leading/slash.txt"
+  },
+  {
+   "id": "double-slash",
+   "note": "empty path segments",
+   "key": "a//b///c.txt"
+  },
+  {
+   "id": "dot-segment",
+   "note": "single dot segment is literal",
+   "key": "dir/./x.txt"
+  },
+  {
+   "id": "dotdot-segment",
+   "note": "dot-dot segment is literal",
+   "key": "dir/../x.txt"
+  },
+  {
+   "id": "trailing-slash",
+   "note": "zero-byte folder marker",
+   "key": "folder/"
+  },
+  {
+   "id": "sub-delims",
+   "note": "RFC 3986 sub-delims in the path",
+   "key": "a!b*c'd(e)f;g,h$i@j.txt"
+  },
+  {
+   "id": "tilde-etc",
+   "note": "unreserved characters",
+   "key": "tilde~under_score-dash.txt"
+  },
+  {
+   "id": "query-chars",
+   "note": "characters that are special in URLs",
+   "key": "what?is#this&that=1.txt"
+  },
+  {
+   "id": "backslash",
+   "note": "backslash is an ordinary key character",
+   "key": "back\\slash.txt"
+  },
+  {
+   "id": "colon-pipe",
+   "note": "more punctuation",
+   "key": "c:d|e<f>g\"h.txt"
+  },
+  {
+   "id": "braces",
+   "note": "braces, brackets, caret, backtick",
+   "key": "{brace}[bracket]^caret`tick.txt"
+  },
+  {
+   "id": "tab-in-key",
+   "note": "control character TAB",
+   "key": "tab\there.txt"
+  },
+  {
+   "id": "upper-lower",
+   "note": "ordering reference",
+   "key": "Zebra/apple.txt"
+  },
+  {
+   "id": "len-1024",
+   "note": "longest legal key (1024 bytes)",
+   "gen": {
+    "char": "k",
+    "count": 1024
+   }
+  },
+  {
+   "id": "len-1024-multibyte",
+   "note": "1024 bytes made of 2-byte characters",
+   "gen": {
+    "char": "é",
+    "count": 512
+   }
+  }
+ ],
+ "too_long": {
+  "char": "k",
+  "count": 1025
+ }
+}

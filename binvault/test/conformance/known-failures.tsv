@@ -1,0 +1,7 @@
+# Known failures: a FAIL matching a line here is reported as XFAIL (tracked, does not fail the run);
+# a PASS matching it is reported as XPASS (delete the line). Fields separated by TABs:
+#   suite <TAB> case-glob <TAB> id <TAB> one-line reason
+# The id refers to the numbered finding in the conformance report. Keep entries narrow: a glob that
+# swallows unrelated cases would hide regressions. The glob is fnmatch: write a literal '[' as '[[]'.
+boto3	attributes/multipart_object_parts	BV-10	GetObjectAttributes ObjectParts/Part entries carry no per-part checksum although ListParts has them: documented limitation (spec 5.4.7), the object record keeps part sizes only and the part rows go at Complete
+boto3	sigv4_raw/invalid_percent_escape_in_the_path_is_invalid_uri	BV-14	a request target with an invalid percent escape is answered by net/http itself: plain-text 400 instead of the S3 XML InvalidURI: documented limitation (spec 5.11), it never reaches binvault

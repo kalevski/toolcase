@@ -1,0 +1,127 @@
+name: binvault
+
+on:
+  push:
+    branches: [main]
+    paths: ['binvault/**', '.github/workflows/binvault.yml']
+  pull_request:
+    paths: ['binvault/**', '.github/workflows/binvault.yml']
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/binvault
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: binvault
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          # the newest 1.26.z, not the go.mod minimum (1.25): govulncheck below
+          # flags standard-library CVEs of older patch releases and itself
+          # needs Go >= 1.26 to build
+          go-version: '1.26'
+          check-latest: true
+          cache-dependency-path: binvault/go.sum
+
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test
+        run: go test -race ./...
+
+      - name: go build
+        run: CGO_ENABLED=0 go build ./...
+
+      - name: govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  conformance:
+    # Real S3 clients (boto3, aws-sdk-go-v2 and -js-v3, AWS CLI v2, rclone, MinIO mc,
+    # s3cmd) against a live node: test/conformance/run.sh. Known gaps are listed in
+    # test/conformance/known-failures.tsv; an unlisted failure fails the job.
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          check-latest: true
+          cache-dependency-path: binvault/go.sum
+      - name: Conformance suites
+        run: binvault/test/conformance/run.sh --quiet
+
+  cluster:
+    # Three nodes in Docker with TLS on the peer link: forwarding, catalog
+    # convergence, partition and heal, bucket moves and drain (test/e2e-cluster.sh).
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cluster end-to-end test
+        run: binvault/test/e2e-cluster.sh
+
+  smoke:
+    # Boots the container read-only with all capabilities dropped, then drives
+    # it with a real S3 client (test/smoke.sh).
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Container smoke test
+        run: binvault/test/smoke.sh
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build, smoke, conformance, cluster]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: binvault
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ github.sha }}
+            COMMIT=${{ github.sha }}
+          cache-from: type=gha,scope=binvault
+          cache-to: type=gha,scope=binvault,mode=max

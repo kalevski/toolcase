@@ -1,0 +1,631 @@
+/*
+ * The dashboard's look on the mail app: a tinted ground with white paper panels, 1px rules, rounded corners,
+ * display type for titles and mono for metadata. Tokens come from the blueprint theme (--bp-*) and fall back to the
+ * generic --tc-* tokens, so the dark theme and a domain's own accent keep working.
+ */
+
+:root {
+    --wm-bg: var(--bp-bg, var(--tc-bg, var(--tc-surface)));
+    --wm-paper: var(--bp-paper, var(--tc-surface));
+    --wm-paper-tint: var(--bp-paper-tint, var(--tc-surface-muted));
+    --wm-line: var(--bp-border, var(--tc-border));
+    --wm-line-faint: var(--bp-border-faint, var(--tc-border));
+    --wm-rule: var(--bp-border-rule, var(--tc-border));
+    --wm-ink: var(--bp-text, var(--tc-text));
+    --wm-ink-muted: var(--bp-text-muted, var(--tc-text-muted));
+    --wm-emphasis: var(--bp-emphasis, var(--tc-text));
+    --wm-display: var(--bp-display, var(--tc-font-sans));
+    --wm-mono: var(--bp-mono, var(--tc-font-mono));
+    --wm-r-md: var(--bp-r-md, 10px);
+    --wm-r-lg: var(--bp-r-lg, 14px);
+    --wm-r-xl: var(--bp-r-xl, 18px);
+    --wm-soft: color-mix(in srgb, var(--tc-app-accent) 9%, var(--wm-paper));
+    --wm-gap: 18px;
+}
+
+html,
+body,
+#app {
+    background: var(--wm-bg);
+}
+
+body {
+    font-family: var(--bp-body, system-ui, sans-serif);
+}
+
+/* ── Chrome ─────────────────────────────────────────────────────────────── */
+
+.wm-app {
+    background: var(--wm-bg);
+}
+
+.wm-topbar {
+    background: var(--wm-paper);
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-brand {
+    font-family: var(--wm-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+.wm-brand__dot {
+    border-radius: 3px;
+    width: 10px;
+    height: 10px;
+}
+
+.wm-search__input,
+.wm-search .tc-form-input,
+.wm-search input {
+    border-radius: var(--wm-r-md);
+}
+
+.wm-sidebar {
+    background: transparent;
+    border-right: 0;
+}
+
+.wm-folders__link {
+    border: 1px solid transparent;
+    border-radius: var(--wm-r-md);
+    font-weight: 500;
+}
+
+.wm-folders__link:hover {
+    background: var(--wm-paper);
+}
+
+.wm-folders__link.is-active {
+    background: var(--wm-paper);
+    border-color: var(--wm-line);
+    border-left-color: var(--wm-line);
+    box-shadow: inset 3px 0 0 var(--tc-app-accent);
+    color: var(--wm-emphasis);
+    font-weight: 700;
+}
+
+.wm-folders__link.is-active tc-icon,
+.wm-folders__link.is-active svg {
+    color: var(--tc-app-accent);
+}
+
+.wm-quota {
+    font-family: var(--wm-mono);
+    font-size: 11.5px;
+}
+
+/* ── Panels ─────────────────────────────────────────────────────────────── */
+
+.wm-list-pane,
+.wm-read-pane {
+    background: var(--wm-paper);
+}
+
+@media (min-width: 768px) {
+    .wm-main {
+        padding: 14px var(--wm-gap) var(--wm-gap) 0;
+        gap: var(--wm-gap);
+    }
+
+    .wm-list-pane,
+    .wm-read-pane {
+        border: 1px solid var(--wm-line);
+        border-radius: var(--wm-r-xl);
+    }
+
+    .wm-main--settings {
+        padding: 14px var(--wm-gap) var(--wm-gap) 0;
+    }
+}
+
+@media (min-width: 992px) {
+    .wm-layout-right .wm-list-pane {
+        border-right: 1px solid var(--wm-line);
+    }
+}
+
+.wm-list-head {
+    padding: 14px 16px 8px;
+}
+
+.wm-list-head__title {
+    font-family: var(--wm-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+.wm-filters {
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-md);
+    overflow: hidden;
+    background: var(--wm-paper-tint);
+}
+
+.wm-filter {
+    background: transparent;
+    font-weight: 500;
+}
+
+.wm-filter + .wm-filter {
+    border-left-color: var(--wm-line);
+}
+
+.wm-filter.is-active {
+    background: var(--wm-paper);
+    color: var(--wm-emphasis);
+    font-weight: 700;
+    box-shadow: inset 0 -2px 0 var(--tc-app-accent);
+}
+
+.wm-bulk {
+    background: var(--wm-paper-tint);
+    border-bottom-color: var(--wm-line);
+}
+
+/* ── Messages in the list ───────────────────────────────────────────────── */
+
+.wm-row {
+    border-bottom: 1px dashed var(--wm-rule);
+}
+
+.wm-row:last-child {
+    border-bottom: 0;
+}
+
+.wm-row__inner {
+    background: var(--wm-paper);
+}
+
+.wm-row.is-open .wm-row__inner,
+.wm-row.is-selected .wm-row__inner {
+    background: var(--wm-soft);
+}
+
+.wm-row__from {
+    font-family: var(--wm-display);
+    letter-spacing: -0.005em;
+}
+
+.wm-row__date {
+    font-family: var(--wm-mono);
+    font-size: 11.5px;
+    color: var(--wm-ink-muted);
+}
+
+.wm-row__preview {
+    color: var(--wm-ink-muted);
+}
+
+.wm-row.is-unread .wm-row__inner {
+    box-shadow: inset 3px 0 0 var(--tc-app-accent);
+}
+
+/* ── Reading ────────────────────────────────────────────────────────────── */
+
+.wm-thread__subject {
+    font-family: var(--wm-display);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--wm-emphasis);
+}
+
+.wm-msg {
+    background: var(--wm-paper);
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    overflow: hidden;
+}
+
+.wm-msg__head {
+    background: var(--wm-paper-tint);
+}
+
+.wm-msg__meta,
+.wm-msg__date,
+.wm-msg__details {
+    font-family: var(--wm-mono);
+    font-size: 11.5px;
+}
+
+.wm-banner {
+    border-radius: var(--wm-r-md);
+}
+
+.wm-chip {
+    border-radius: 999px;
+}
+
+.wm-toast {
+    border-radius: var(--wm-r-md);
+}
+
+/* ── Sign in ────────────────────────────────────────────────────────────── */
+
+.wm-login {
+    --wm-deep: #14132a;
+    --wm-deep-2: #1d1b3a;
+    --wm-stage-rule: rgba(255, 255, 255, 0.13);
+    --wm-stage-ink: #d7d5ea;
+    --wm-stage-ink-2: #8481ae;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+    background: var(--wm-paper);
+}
+
+@media (min-width: 992px) {
+    .wm-login {
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    }
+}
+
+.wm-eyebrow {
+    margin: 0 0 0.6rem;
+    font: 600 11px var(--wm-mono);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #8fa6ff;
+}
+
+.wm-stage {
+    display: flex;
+    flex-direction: column;
+    padding: 1.6rem 16px 2.25rem;
+    background:
+        radial-gradient(90% 60% at 12% 0%, color-mix(in srgb, var(--tc-app-accent) 26%, transparent), transparent 60%),
+        linear-gradient(170deg, var(--wm-deep-2), var(--wm-deep));
+    color: var(--wm-stage-ink);
+}
+
+@media (min-width: 992px) {
+    .wm-stage {
+        padding: 1.6rem 2.25rem 2.25rem;
+    }
+}
+
+.wm-stage__head {
+    display: flex;
+    align-items: center;
+    padding-bottom: 1.15rem;
+    border-bottom: 1px solid var(--wm-stage-rule);
+}
+
+.wm-stage__head .wm-brand {
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 1.05rem;
+}
+
+.wm-stage__body {
+    padding-top: 2.25rem;
+    max-width: 40rem;
+}
+
+@media (min-width: 992px) {
+    .wm-stage__body {
+        padding-top: clamp(2.25rem, 12vh, 7rem);
+    }
+}
+
+.wm-login .wm-stage__title {
+    margin: 0;
+    font-family: var(--wm-display);
+    font-size: clamp(1.6rem, 1rem + 2.2vw, 2.3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-wrap: pretty;
+}
+
+.wm-stage__lead {
+    margin: 0.85rem 0 0;
+    max-width: 34rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--wm-stage-ink-2);
+    text-wrap: pretty;
+}
+
+.wm-board {
+    margin-top: 1.6rem;
+    border: 1px solid var(--wm-stage-rule);
+    border-radius: var(--wm-r-lg);
+    background: rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+}
+
+.wm-board__head {
+    display: none;
+    gap: 0.85rem;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--wm-stage-rule);
+    font: 600 9.5px var(--wm-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--wm-stage-ink-2);
+}
+
+@media (min-width: 768px) {
+    .wm-board__head {
+        display: grid;
+        grid-template-columns: minmax(0, 1.85fr) 6rem 4rem;
+    }
+}
+
+.wm-board__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wm-board__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 0.85rem;
+    padding: 11px 14px;
+    border-bottom: 1px dashed var(--wm-stage-rule);
+    border-left: 3px solid var(--wm-row, transparent);
+}
+
+.wm-board__row:last-child {
+    border-bottom: 0;
+}
+
+@media (min-width: 768px) {
+    .wm-board__row {
+        grid-template-columns: minmax(0, 1.85fr) 6rem 4rem;
+        align-items: baseline;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .wm-board__row {
+        animation: wm-board-in 420ms ease both;
+        animation-delay: var(--wm-delay, 0ms);
+    }
+}
+
+@keyframes wm-board-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+.wm-board__row--go {
+    --wm-row: #19c37d;
+}
+
+.wm-board__row--warn {
+    --wm-row: #f0a020;
+}
+
+.wm-board__row--muted {
+    --wm-row: var(--wm-stage-ink-2);
+}
+
+.wm-board__from {
+    font: 500 12.5px var(--wm-mono);
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+.wm-board__state {
+    grid-column: 1;
+    font: 600 10px var(--wm-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--wm-row, var(--wm-stage-ink));
+}
+
+.wm-board__when {
+    font: 400 11.5px var(--wm-mono);
+    color: var(--wm-stage-ink-2);
+    text-align: right;
+}
+
+.wm-board__subject {
+    grid-column: 1 / -1;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--wm-stage-ink-2);
+}
+
+@media (min-width: 768px) {
+    .wm-board__state {
+        grid-column: auto;
+    }
+
+    .wm-board__when {
+        grid-column: auto;
+        grid-row: 1;
+        grid-column: 3;
+    }
+
+    .wm-board__subject {
+        grid-column: 1 / -1;
+    }
+}
+
+.wm-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 16px;
+    background: var(--wm-paper);
+}
+
+@media (min-width: 992px) {
+    .wm-card {
+        order: 2;
+        padding: 3rem 2.25rem;
+    }
+}
+
+.wm-card__body {
+    width: 100%;
+    max-width: 28rem;
+    margin: 0 auto;
+}
+
+.wm-login .wm-card__title {
+    margin: 0;
+    font-family: var(--wm-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--wm-emphasis);
+}
+
+@media (min-width: 992px) {
+    .wm-stage {
+        order: 1;
+    }
+}
+
+/* ── Compose, settings, labels ──────────────────────────────────────────── */
+
+:root {
+    --wm-font-display: var(--bp-display, var(--tc-font-sans));
+}
+
+.wm-compose {
+    background: var(--wm-paper);
+    border-color: var(--wm-line);
+    box-shadow: 0 -24px 60px -20px rgba(26, 24, 48, 0.35);
+}
+
+@media (min-width: 768px) {
+    .wm-compose {
+        border-radius: var(--wm-r-xl) var(--wm-r-xl) 0 0;
+        overflow: hidden;
+    }
+}
+
+.wm-compose__head {
+    background: var(--wm-paper-tint);
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-compose__title {
+    font-family: var(--wm-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+.wm-compose__foot {
+    border-top: 1px solid var(--wm-line);
+    background: var(--wm-paper-tint);
+}
+
+.wm-addr__label {
+    font: 500 12px var(--wm-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--wm-ink-muted);
+}
+
+.wm-addr__box {
+    border-radius: var(--wm-r-md);
+}
+
+.wm-app .wm-main.wm-main--settings {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+}
+
+.wm-main--settings .wm-settings {
+    background: var(--wm-paper);
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.wm-settings__title {
+    font-family: var(--wm-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+/* ── Folder section ─────────────────────────────────────────────────────── */
+
+.wm-folders {
+    gap: 0.25rem;
+}
+
+.wm-folders__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    padding: 0.75rem 0.25rem 0.25rem 0.625rem;
+    border-top: 1px dashed var(--wm-rule);
+}
+
+.wm-folders__heading {
+    font: 600 11px var(--wm-mono);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--wm-ink-muted);
+}
+
+.wm-folders__empty {
+    margin: 0;
+    padding: 0.25rem 0.625rem;
+    font: 400 11.5px/1.5 var(--wm-mono);
+    color: var(--wm-ink-muted);
+}
+
+/* ── Sheets ─────────────────────────────────────────────────────────────── */
+
+.wm-dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 16px 16px;
+}
+
+.wm-dialog-footer {
+    padding-top: 0.25rem;
+}
+
+/* On a wide screen a sheet is a centred card, as it is in the dashboard shell. */
+@media (min-width: 992px) {
+    tc-bottom-sheet {
+        --bs-bottom-sheet-radius: var(--wm-r-xl);
+        --bs-bottom-sheet-shadow: 0 24px 64px -16px rgba(26, 24, 48, 0.3);
+        --bs-bottom-sheet-pad-bottom: 18px;
+        inset: 0;
+        margin: auto;
+        width: min(560px, 100% - 96px);
+        height: fit-content;
+        max-height: calc(100% - 96px);
+    }
+
+    tc-bottom-sheet::before {
+        display: none;
+    }
+
+    tc-bottom-sheet[data-sheet-snapped] {
+        height: fit-content;
+        max-height: calc(100% - 96px);
+    }
+}
+
+tc-select .form-label,
+tc-textarea .form-label {
+    font: 500 12px/1.4 var(--wm-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--wm-ink-muted);
+}

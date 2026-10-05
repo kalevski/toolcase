@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <TagSet>
+    <Tag>
+      <Key>scan</Key>
+      <Value>clean</Value>
+    </Tag>
+    <Tag>
+      <Key>team</Key>
+      <Value>r&amp;d</Value>
+    </Tag>
+  </TagSet>
+</Tagging>

@@ -1,0 +1,89 @@
+# A three-node binvault cluster on one Docker host (spec §8.10). Every node gets
+# the same secrets and the same peer URL list; each bucket lives on one home node
+# and any node forwards requests to it. The peer link runs on its own network
+# ("peer"), so cutting that network partitions the nodes while the host can still
+# reach every node's published ports (test/e2e-cluster.sh does exactly that). It
+# is plain HTTP here, on a private compose network; production uses TLS
+# (BINVAULT_CLUSTER_TLS_CERT_FILE / _KEY_FILE and https:// URLs, as the e2e script
+# configures with a small override file).
+#
+#   export BINVAULT_ADMIN_TOKEN=$(openssl rand -hex 32)
+#   export BINVAULT_MASTER_KEY=$(openssl rand -base64 32)    # keep it
+#   export BINVAULT_CLUSTER_KEY=$(openssl rand -hex 32)      # keep it
+#   docker compose -f binvault/docker/cluster.compose.yml up --build -d
+#
+#   ADM=http://127.0.0.1:9011/_admin/v1       # node a's admin API (any node accepts any admin call)
+#   curl -sX POST "$ADM/buckets?wait=replicated" -H "Authorization: Bearer $BINVAULT_ADMIN_TOKEN" \
+#        -d '{"name":"photos","home":"b"}'
+#   curl -sX POST "$ADM/buckets/photos/tokens" -H "Authorization: Bearer $BINVAULT_ADMIN_TOKEN" \
+#        -d '{"name":"web","grants":[{"actions":["read","write","list"]}]}'
+#   # use the token through ANY node: node c (port 9002) forwards to the home, node b
+#   AWS_ACCESS_KEY_ID=BVK… AWS_SECRET_ACCESS_KEY=… aws --endpoint-url http://localhost:9002 s3 cp ./a.png s3://photos/a.png
+#   # later: move the bucket online, watch the move, or empty a node (spec §8.8)
+#   curl -sX POST "$ADM/buckets/photos/move" -H "Authorization: Bearer $BINVAULT_ADMIN_TOKEN" -d '{"to":"c"}'
+#   curl -s "$ADM/moves" -H "Authorization: Bearer $BINVAULT_ADMIN_TOKEN"
+#   curl -sX POST "$ADM/cluster/nodes/b/drain" -H "Authorization: Bearer $BINVAULT_ADMIN_TOKEN"
+#
+# The published ports can be moved with BINVAULT_S3_PORT_A/B/C and
+# BINVAULT_ADMIN_PORT_A/B/C when the defaults are taken.
+x-node: &node
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  environment: &env
+    BINVAULT_ADMIN_TOKEN: ${BINVAULT_ADMIN_TOKEN:?set BINVAULT_ADMIN_TOKEN}
+    BINVAULT_MASTER_KEY: ${BINVAULT_MASTER_KEY:?set BINVAULT_MASTER_KEY}
+    BINVAULT_CLUSTER_KEY: ${BINVAULT_CLUSTER_KEY:?set BINVAULT_CLUSTER_KEY}
+    BINVAULT_CLUSTER_INSECURE_HTTP: "true"
+    # the peer-* names exist only on the "peer" network: cutting it cuts the peer link
+    BINVAULT_CLUSTER_URLS: http://peer-a:9100,http://peer-b:9100,http://peer-c:9100
+  read_only: true
+  cap_drop: [ALL]
+  # SIGTERM drains for up to BINVAULT_SHUTDOWN_TIMEOUT (60s by default); compose's own
+  # default of 10s would kill a node with transfers in flight
+  stop_grace_period: 70s
+
+services:
+  node-a:
+    <<: *node
+    environment:
+      <<: *env
+      BINVAULT_NODE_NAME: a
+      BINVAULT_ENDPOINT_URL: http://node-a:9000
+    ports: ["${BINVAULT_S3_PORT_A:-9000}:9000", "127.0.0.1:${BINVAULT_ADMIN_PORT_A:-9011}:9001"]
+    volumes: ["data-a:/var/lib/binvault"]
+    networks:
+      default: {}
+      peer: {aliases: [peer-a]}
+
+  node-b:
+    <<: *node
+    environment:
+      <<: *env
+      BINVAULT_NODE_NAME: b
+      BINVAULT_ENDPOINT_URL: http://node-b:9000
+    ports: ["${BINVAULT_S3_PORT_B:-9001}:9000", "127.0.0.1:${BINVAULT_ADMIN_PORT_B:-9012}:9001"]
+    volumes: ["data-b:/var/lib/binvault"]
+    networks:
+      default: {}
+      peer: {aliases: [peer-b]}
+
+  node-c:
+    <<: *node
+    environment:
+      <<: *env
+      BINVAULT_NODE_NAME: c
+      BINVAULT_ENDPOINT_URL: http://node-c:9000
+    ports: ["${BINVAULT_S3_PORT_C:-9002}:9000", "127.0.0.1:${BINVAULT_ADMIN_PORT_C:-9013}:9001"]
+    volumes: ["data-c:/var/lib/binvault"]
+    networks:
+      default: {}
+      peer: {aliases: [peer-c]}
+
+networks:
+  peer: {}
+
+volumes:
+  data-a:
+  data-b:
+  data-c:

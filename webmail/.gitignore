@@ -1,0 +1,5 @@
+# Built SPA (npm run build in web/); the .gitkeep keeps the embed directory valid.
+internal/web/dist/*
+!internal/web/dist/.gitkeep
+/webmail
+/bin/

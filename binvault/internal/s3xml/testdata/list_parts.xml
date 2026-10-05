@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListPartsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <Bucket>photos</Bucket>
+  <Key>big file.bin</Key>
+  <UploadId>VXBsb2FkIElEIGZvciBlbHZpbmcncyBteS1tb3ZpZS5tMnRzIHVwbG9hZA</UploadId>
+  <Initiator>
+    <ID>photos</ID>
+    <DisplayName>photos</DisplayName>
+  </Initiator>
+  <Owner>
+    <ID>photos</ID>
+    <DisplayName>photos</DisplayName>
+  </Owner>
+  <StorageClass>STANDARD</StorageClass>
+  <PartNumberMarker>1</PartNumberMarker>
+  <NextPartNumberMarker>3</NextPartNumberMarker>
+  <MaxParts>2</MaxParts>
+  <IsTruncated>true</IsTruncated>
+  <Part>
+    <PartNumber>2</PartNumber>
+    <LastModified>2010-11-10T20:48:34.000Z</LastModified>
+    <ETag>&quot;7778aef83f66abc1fa1e8477f296d394&quot;</ETag>
+    <Size>10485760</Size>
+    <ChecksumCRC32>AAAAAA==</ChecksumCRC32>
+  </Part>
+  <Part>
+    <PartNumber>3</PartNumber>
+    <LastModified>2010-11-10T20:48:33.000Z</LastModified>
+    <ETag>&quot;aaaa18db4cc2f85cedef654fccc4a4x8&quot;</ETag>
+    <Size>10485760</Size>
+    <ChecksumCRC32>AAAAAQ==</ChecksumCRC32>
+  </Part>
+  <ChecksumAlgorithm>CRC32</ChecksumAlgorithm>
+  <ChecksumType>COMPOSITE</ChecksumType>
+</ListPartsResult>

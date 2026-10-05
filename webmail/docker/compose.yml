@@ -1,0 +1,24 @@
+# Local development: webmail + a FAKE platform and FAKE JMAP server (no real
+# mail server). Mailbox: ann@example.test / correct-horse.
+#   docker compose -f docker/compose.yml up --build
+# then open http://localhost:8080 (the __Host- cookie works on localhost).
+services:
+  fakes:
+    image: golang:1.25-alpine
+    working_dir: /src
+    volumes: ["..:/src"]
+    command: go run ./test/fake-servers -platform :9101 -jmap :9102
+  webmail:
+    build: { context: .., dockerfile: Dockerfile }
+    depends_on: [fakes]
+    ports: ["8080:8080", "127.0.0.1:8081:8081"]
+    environment:
+      WEBMAIL_PUBLIC_URL: http://localhost:8080
+      WEBMAIL_JMAP_URL: http://fakes:9102
+      WEBMAIL_PLATFORM_URL: http://fakes:9101
+      WEBMAIL_PLATFORM_TOKEN: svc-token
+      # dev only - generate your own: openssl rand -base64 32
+      WEBMAIL_SESSION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    volumes: ["webmail-data:/var/lib/webmail"]
+volumes:
+  webmail-data:

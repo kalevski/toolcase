@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <Name>photos</Name>
+  <Prefix></Prefix>
+  <StartAfter>a.jpg</StartAfter>
+  <ContinuationToken>MS9hLmpwZw==</ContinuationToken>
+  <NextContinuationToken>MS9hbGJ1bXMv</NextContinuationToken>
+  <KeyCount>3</KeyCount>
+  <MaxKeys>3</MaxKeys>
+  <Delimiter>/</Delimiter>
+  <IsTruncated>true</IsTruncated>
+  <Contents>
+    <Key>b.jpg</Key>
+    <LastModified>2026-09-30T08:15:00.000Z</LastModified>
+    <ETag>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</ETag>
+    <ChecksumAlgorithm>CRC32</ChecksumAlgorithm>
+    <ChecksumType>FULL_OBJECT</ChecksumType>
+    <Size>0</Size>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+  <Contents>
+    <Key>c &amp; d &lt;e&gt;.jpg</Key>
+    <LastModified>2026-09-30T08:16:00.000Z</LastModified>
+    <ETag>&quot;3858f62230ac3c915f300c664312c11f-9&quot;</ETag>
+    <Size>47185920</Size>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+  <CommonPrefixes>
+    <Prefix>albums/</Prefix>
+  </CommonPrefixes>
+</ListBucketResult>

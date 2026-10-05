@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <Name>photos</Name>
+  <Prefix>2026/</Prefix>
+  <Marker></Marker>
+  <NextMarker>2026/albums/</NextMarker>
+  <MaxKeys>2</MaxKeys>
+  <Delimiter>/</Delimiter>
+  <IsTruncated>true</IsTruncated>
+  <Contents>
+    <Key>2026/a.jpg</Key>
+    <LastModified>2009-10-12T17:50:30.000Z</LastModified>
+    <ETag>&quot;fba9dede5f27731c9771645a39863328&quot;</ETag>
+    <Size>434234</Size>
+    <Owner>
+      <ID>photos</ID>
+      <DisplayName>photos</DisplayName>
+    </Owner>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+  <CommonPrefixes>
+    <Prefix>2026/albums/</Prefix>
+  </CommonPrefixes>
+</ListBucketResult>

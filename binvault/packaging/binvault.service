@@ -1,0 +1,53 @@
+[Unit]
+Description=binvault — S3-compatible object store with pipelines
+Documentation=https://github.com/kalevski/toolcase/tree/main/binvault
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Secrets and settings live in the environment file (mode 0600):
+#   BINVAULT_ADMIN_TOKEN=...   (>= 32 characters)
+#   BINVAULT_MASTER_KEY=...    (base64 of 32 random bytes — back it up!)
+EnvironmentFile=/etc/binvault/env
+Environment=BINVAULT_DATA_DIR=/var/lib/binvault
+ExecStart=/usr/local/bin/binvault run
+ExecStartPre=/usr/local/bin/binvault validate
+Restart=on-failure
+RestartSec=5s
+# SIGTERM drains: in-flight transfers and before-chains get BINVAULT_SHUTDOWN_TIMEOUT.
+TimeoutStopSec=90s
+
+User=binvault
+Group=binvault
+StateDirectory=binvault
+UMask=0027
+
+# Hardening — the process writes only inside its data dir.
+ProtectSystem=strict
+ReadWritePaths=/var/lib/binvault
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# Ports 9000/9001/9100 are unprivileged: no capabilities are needed.
+
+[Install]
+WantedBy=multi-user.target

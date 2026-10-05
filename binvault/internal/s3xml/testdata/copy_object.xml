@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CopyObjectResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <LastModified>2026-09-30T08:15:00.000Z</LastModified>
+  <ETag>&quot;9b2cf535f27731c974343645a3985328&quot;</ETag>
+  <ChecksumType>FULL_OBJECT</ChecksumType>
+  <ChecksumCRC32>i9aeUg==</ChecksumCRC32>
+</CopyObjectResult>

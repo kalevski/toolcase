@@ -1,0 +1,10 @@
+# build and test artefacts
+/binvault
+*.test
+*.out
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+/test/**/.venv/
+/test/**/results/

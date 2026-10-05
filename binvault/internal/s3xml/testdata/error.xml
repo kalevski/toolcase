@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>NoSuchKey</Code>
+  <Message>The specified key does not exist.</Message>
+  <Key>a.png</Key>
+  <BucketName>photos</BucketName>
+  <Resource>/photos/a.png</Resource>
+  <RequestId>01J9ZQ6M3V8Q2T4X5Y6Z7A8B9C</RequestId>
+  <HostId>bv-node-a</HostId>
+</Error>

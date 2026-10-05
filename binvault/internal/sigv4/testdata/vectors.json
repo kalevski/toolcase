@@ -1,0 +1,527 @@
+[
+ {
+  "name": "go-odd-key-put-region-auto",
+  "source": "aws-sdk-go-v2 signer v4",
+  "kind": "header",
+  "method": "PUT",
+  "host": "localhost:9000",
+  "request_uri": "/bucket/photos/dir%20with%20space/%C3%BC%20%C3%B1%20%E6%97%A5%E6%9C%AC/%2Bplus%25percent~tilde%2Astar%21bang%27quote%28paren%29%24dollar%26amp%3Deq%2Ccomma%3Bsemi%3Acolon%40at%23hash%3Fq%5B%5D%7B%7D%7C%5E%60%22%3C%3E%5Cback",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/auto/s3/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-meta-note, Signature=9e75e2b0d9afc9e75235c6505df449e5da026fdb50a3f9e7860e74dfbc0a8294"
+   ],
+   [
+    "Content-Type",
+    "text/plain; charset=utf-8"
+   ],
+   [
+    "X-Amz-Content-Sha256",
+    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "X-Amz-Meta-Note",
+    "a  b   c"
+   ],
+   [
+    "Content-Length",
+    "5"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "auto",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "9e75e2b0d9afc9e75235c6505df449e5da026fdb50a3f9e7860e74dfbc0a8294",
+  "alt_request_uris": [
+   "/bucket/%70hotos/dir%20with%20space/%c3%bc%20%c3%b1%20%e6%97%a5%e6%9c%ac/+plus%25percent%7etilde*star!bang'quote(paren)$dollar&amp=eq,comma;semi:colon@at%23hash%3fq%5b%5d%7b%7d%7c%5e%60%22%3c%3e%5cback"
+  ]
+ },
+ {
+  "name": "go-dot-segments-unsigned-payload",
+  "source": "aws-sdk-go-v2 signer v4",
+  "kind": "header",
+  "method": "GET",
+  "host": "localhost:9000",
+  "request_uri": "/bucket//a/./../b//c/",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/garage/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=9b3d3ba429e264acfee9b04cc6753df293a823d29545781c2c07f266618e969b"
+   ],
+   [
+    "X-Amz-Content-Sha256",
+    "UNSIGNED-PAYLOAD"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "garage",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "9b3d3ba429e264acfee9b04cc6753df293a823d29545781c2c07f266618e969b",
+  "alt_request_uris": [
+   "/bucket//a/%2E/../b//c/"
+  ]
+ },
+ {
+  "name": "go-query-plus-is-space",
+  "source": "aws-sdk-go-v2 signer v4",
+  "kind": "header",
+  "method": "GET",
+  "host": "s3.example.com",
+  "request_uri": "/bucket?delimiter=%2F&empty=&encoding-type=url&flag=&list-type=2&max-keys=1000&prefix=a%20b&start-after=caf%C3%A9%20%2B",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/us-west-2/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=582f3c7e941b247ed7718dc01d97ac905b85b5ff6ebcad184b6b347117ce1d4d"
+   ],
+   [
+    "X-Amz-Content-Sha256",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "us-west-2",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "582f3c7e941b247ed7718dc01d97ac905b85b5ff6ebcad184b6b347117ce1d4d",
+  "alt_request_uris": [
+   "/bucket?prefix=a+b&list-type=2&delimiter=%2F&empty=&flag&encoding-type=url&start-after=caf%C3%A9%20%2B&max-keys=1000",
+   "/bucket?&max-keys=1000&&start-after=caf%c3%a9+%2b&prefix=a%20b&list-type=2&delimiter=/&empty&flag=&encoding-type=url&"
+  ]
+ },
+ {
+  "name": "go-unsigned-trailer-seed-odd-region",
+  "source": "aws-sdk-go-v2 signer v4",
+  "kind": "header",
+  "method": "PUT",
+  "host": "s3.local",
+  "request_uri": "/bucket/trailer.bin",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/my_region.weird-1/s3/aws4_request, SignedHeaders=content-encoding;host;x-amz-content-sha256;x-amz-date;x-amz-decoded-content-length;x-amz-sdk-checksum-algorithm;x-amz-trailer, Signature=edf6bcd68d2a7358385cf1f497704523d01c3d9fdeeb62017fbb1c9fec742151"
+   ],
+   [
+    "Content-Encoding",
+    "aws-chunked"
+   ],
+   [
+    "X-Amz-Content-Sha256",
+    "STREAMING-UNSIGNED-PAYLOAD-TRAILER"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "X-Amz-Decoded-Content-Length",
+    "11"
+   ],
+   [
+    "X-Amz-Sdk-Checksum-Algorithm",
+    "CRC32"
+   ],
+   [
+    "X-Amz-Trailer",
+    "x-amz-checksum-crc32"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "my_region.weird-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "edf6bcd68d2a7358385cf1f497704523d01c3d9fdeeb62017fbb1c9fec742151",
+  "alt_request_uris": []
+ },
+ {
+  "name": "go-presign-get-odd-key-auto",
+  "source": "aws-sdk-go-v2 signer v4 (presign)",
+  "kind": "presigned",
+  "method": "GET",
+  "host": "localhost:9000",
+  "request_uri": "/bucket/photos/dir%20with%20space/%C3%BC%20%C3%B1%20%E6%97%A5%E6%9C%AC/%2Bplus%25percent~tilde%2Astar%21bang%27quote%28paren%29%24dollar%26amp%3Deq%2Ccomma%3Bsemi%3Acolon%40at%23hash%3Fq%5B%5D%7B%7D%7C%5E%60%22%3C%3E%5Cback?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2F20250115%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20250115T123456Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22a%20b.txt%22&versionId=3%2FL4kq%2BrmSpX&X-Amz-Signature=1f5ffa559c4b49792f9fc5ddcb9b0c8bfd0829bbbc4ed0c524b3e493d4c4fad6",
+  "headers": [],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "auto",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "1f5ffa559c4b49792f9fc5ddcb9b0c8bfd0829bbbc4ed0c524b3e493d4c4fad6",
+  "alt_request_uris": [
+   "/bucket/%70hotos/dir%20with%20space/%c3%bc%20%c3%b1%20%e6%97%a5%e6%9c%ac/+plus%25percent%7etilde*star!bang'quote(paren)$dollar&amp=eq,comma;semi:colon@at%23hash%3fq%5b%5d%7b%7d%7c%5e%60%22%3c%3e%5cback?X-Amz-Signature=1f5ffa559c4b49792f9fc5ddcb9b0c8bfd0829bbbc4ed0c524b3e493d4c4fad6&versionId=3%2FL4kq%2BrmSpX&response-content-disposition=attachment%3B%20filename%3D%22a%20b.txt%22&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Date=20250115T123456Z&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2F20250115%2Fauto%2Fs3%2Faws4_request&X-Amz-Algorithm=AWS4-HMAC-SHA256"
+  ]
+ },
+ {
+  "name": "go-presign-put-hoisted-meta",
+  "source": "aws-sdk-go-v2 signer v4 (presign)",
+  "kind": "presigned",
+  "method": "PUT",
+  "host": "127.0.0.1:9000",
+  "request_uri": "/bucket/uploads/file.bin?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2F20250115%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250115T123456Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=content-type%3Bhost%3Bx-amz-meta-owner&X-Amz-Signature=ef2b8696ada0dd94629e13f650bba15a2e7218a1733f2dec3858dabb8983ae92",
+  "headers": [
+   [
+    "Content-Type",
+    "image/png"
+   ],
+   [
+    "X-Amz-Meta-Owner",
+    "42"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "eu-central-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "ef2b8696ada0dd94629e13f650bba15a2e7218a1733f2dec3858dabb8983ae92",
+  "alt_request_uris": []
+ },
+ {
+  "name": "boto-repeated-params-tab-header",
+  "source": "botocore 1.43.107",
+  "kind": "header",
+  "method": "GET",
+  "host": "localhost:9000",
+  "request_uri": "/bucket?a=2&a=1&b=&c=x%2By&list-type=2",
+  "headers": [
+   [
+    "X-Amz-Meta-Tabbed",
+    "a\t\tb  c"
+   ],
+   [
+    "x-amz-request-payer",
+    "requester"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "X-Amz-Content-SHA256",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   ],
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-meta-tabbed;x-amz-request-payer, Signature=4bbf672cb7260d770b098540dc7304a4f759ee3d6c880682a4cfc10460c62993"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "us-east-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "4bbf672cb7260d770b098540dc7304a4f759ee3d6c880682a4cfc10460c62993",
+  "alt_request_uris": [
+   "/bucket?list-type=2&c=x%2by&b&a=1&a=2"
+  ]
+ },
+ {
+  "name": "boto-put-signed-payload-headers",
+  "source": "botocore 1.43.107",
+  "kind": "header",
+  "method": "PUT",
+  "host": "localhost:9000",
+  "request_uri": "/bucket/docs/report%20%28final%29.pdf",
+  "headers": [
+   [
+    "Content-Type",
+    "application/pdf"
+   ],
+   [
+    "Content-MD5",
+    "XrY7u+Ae7tCTyyK7j1rNww=="
+   ],
+   [
+    "x-amz-storage-class",
+    "STANDARD"
+   ],
+   [
+    "x-amz-tagging",
+    "a=b&c=d"
+   ],
+   [
+    "x-amz-meta-author",
+    "Ana  Smith"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "X-Amz-Content-SHA256",
+    "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+   ],
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/us-east-1/s3/aws4_request, SignedHeaders=content-md5;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-meta-author;x-amz-storage-class;x-amz-tagging, Signature=3bbcda67375c24f3bfa02243dddc04403c4c195e702ad5cad34a9b1f9a5ec575"
+   ],
+   [
+    "Content-Length",
+    "11"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "us-east-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "3bbcda67375c24f3bfa02243dddc04403c4c195e702ad5cad34a9b1f9a5ec575"
+ },
+ {
+  "name": "boto-presign-unicode-week",
+  "source": "botocore 1.43.107 (presign)",
+  "kind": "presigned",
+  "method": "GET",
+  "host": "s3.example.com:8443",
+  "request_uri": "/bucket/%E6%97%A5%E6%9C%AC/%F0%9F%98%80%20x.txt?versionId=abc&response-content-type=text%2Fplain&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2F20250115%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20250115T123456Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=f6654db7db0c65a0889a597f41ee988dd04613abfef5651df94aa215e86cc5bb",
+  "headers": [],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "auto",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "f6654db7db0c65a0889a597f41ee988dd04613abfef5651df94aa215e86cc5bb",
+  "alt_request_uris": [
+   "/bucket/%E6%97%A5%E6%9C%AC/%F0%9F%98%80%20x.txt?X-Amz-Signature=f6654db7db0c65a0889a597f41ee988dd04613abfef5651df94aa215e86cc5bb&X-Amz-SignedHeaders=host&X-Amz-Expires=604800&X-Amz-Date=20250115T123456Z&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2f20250115%2fauto%2fs3%2faws4_request&X-Amz-Algorithm=AWS4-HMAC-SHA256&response-content-type=text%2Fplain&versionId=abc"
+  ]
+ },
+ {
+  "name": "boto-presign-delete-1s",
+  "source": "botocore 1.43.107 (presign)",
+  "kind": "presigned",
+  "method": "DELETE",
+  "host": "localhost:9000",
+  "request_uri": "/bucket/tmp/x?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=BVKABCDEFGHIJKLMNOPQ%2F20250115%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250115T123456Z&X-Amz-Expires=1&X-Amz-SignedHeaders=host&X-Amz-Signature=073c8708b7375cd094ac51e3d2859e29035703371a881b77507361a18e380e0c",
+  "headers": [],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "us-east-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "073c8708b7375cd094ac51e3d2859e29035703371a881b77507361a18e380e0c"
+ },
+ {
+  "name": "boto-post-policy",
+  "source": "botocore 1.43.107 (S3SigV4PostAuth)",
+  "kind": "post",
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "eu-west-3",
+  "now": "2025-01-15T12:34:56Z",
+  "policy": "eyJleHBpcmF0aW9uIjogIjIwMjUtMDEtMTZUMTI6MzQ6NTZaIiwgImNvbmRpdGlvbnMiOiBbeyJidWNrZXQiOiAidXBsb2FkcyJ9LCBbInN0YXJ0cy13aXRoIiwgIiRrZXkiLCAidXNlci80Mi8iXSwgWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsIDEsIDEwNDg1NzYwXSwgeyJ4LWFtei1hbGdvcml0aG0iOiAiQVdTNC1ITUFDLVNIQTI1NiJ9LCB7IngtYW16LWNyZWRlbnRpYWwiOiAiQlZLQUJDREVGR0hJSktMTU5PUFEvMjAyNTAxMTUvZXUtd2VzdC0zL3MzL2F3czRfcmVxdWVzdCJ9LCB7IngtYW16LWRhdGUiOiAiMjAyNTAxMTVUMTIzNDU2WiJ9XX0=",
+  "credential": "BVKABCDEFGHIJKLMNOPQ/20250115/eu-west-3/s3/aws4_request",
+  "amz_date": "20250115T123456Z",
+  "signature": "34579ecb81fb689389717bae4fd0bfa267f3cd87190e0bbfbb45bdc529e5f12f"
+ },
+ {
+  "name": "java-signed-trailer",
+  "source": "aws-sdk-java-v2 2.55.10 AwsV4HttpSigner",
+  "kind": "stream",
+  "method": "PUT",
+  "host": "127.0.0.1:9000",
+  "request_uri": "/bucket/photos/caf%C3%A9%20%2B%20%2A.jpg",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/auto/s3/aws4_request, SignedHeaders=content-encoding;content-length;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-decoded-content-length;x-amz-trailer, Signature=d70f242d8d32022ffd56de3ba5c73302398f1db7f8e1cc261c642846e9b64f55"
+   ],
+   [
+    "Content-Encoding",
+    "aws-chunked"
+   ],
+   [
+    "Content-Length",
+    "300502"
+   ],
+   [
+    "Content-Type",
+    "application/octet-stream"
+   ],
+   [
+    "x-amz-content-sha256",
+    "STREAMING-AWS4-HMAC-SHA256-PAYLOAD-TRAILER"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "x-amz-decoded-content-length",
+    "300000"
+   ],
+   [
+    "x-amz-trailer",
+    "x-amz-zeta"
+   ],
+   [
+    "x-amz-trailer",
+    "x-amz-checksum-crc32"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "auto",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "d70f242d8d32022ffd56de3ba5c73302398f1db7f8e1cc261c642846e9b64f55",
+  "payload_len": 300000,
+  "chunk_lines": [
+   "20000;chunk-signature=dbb56d77e7834f3c887a95f72591595907e5809959e939730bddf24738b70176",
+   "20000;chunk-signature=a3b1ac3df09665c3c77fb5ae4adce0d8aaf7ace3f4fcebcf3543ad77afb4b265",
+   "93e0;chunk-signature=9306aad837fe7fc358fc1c3d0cc3dfbacb97b86704c25bf5f75e58ee00485ff7",
+   "0;chunk-signature=13974cc9ec3680a4a744c0bca83c3c007c725fd55a86126373e06160a003a435"
+  ],
+  "tail": "x-amz-zeta:  last   one \r\nx-amz-checksum-crc32:MSHyGA==\r\nx-amz-trailer-signature:ebd25939286b8d6373fada50d771817a41d18c2fe36a1c7fd433750358cc72cb\r\n\r\n"
+ },
+ {
+  "name": "java-signed",
+  "source": "aws-sdk-java-v2 2.55.10 AwsV4HttpSigner",
+  "kind": "stream",
+  "method": "PUT",
+  "host": "127.0.0.1:9000",
+  "request_uri": "/bucket/plain.bin",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/eu-central-1/s3/aws4_request, SignedHeaders=content-encoding;content-length;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-decoded-content-length, Signature=c8abd40c106f3697f59fc646d09a40676b7d02c5298dd3da99cc2726794acf23"
+   ],
+   [
+    "Content-Encoding",
+    "aws-chunked"
+   ],
+   [
+    "Content-Length",
+    "140265"
+   ],
+   [
+    "Content-Type",
+    "application/octet-stream"
+   ],
+   [
+    "x-amz-content-sha256",
+    "STREAMING-AWS4-HMAC-SHA256-PAYLOAD"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "x-amz-decoded-content-length",
+    "140000"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "eu-central-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "c8abd40c106f3697f59fc646d09a40676b7d02c5298dd3da99cc2726794acf23",
+  "payload_len": 140000,
+  "chunk_lines": [
+   "20000;chunk-signature=1e48ab0e453e43f2370da5c1a0ad27ca1a92d6f372d51ff0a25bc7a064050b23",
+   "22e0;chunk-signature=9e45018c6dcb5fc1eff94c02bd535ba8541f24e45f5d617818197c6b09ff39d7",
+   "0;chunk-signature=603e0cc9d151fb0ce5a8d3dccca36367c5a5897d7f2dab106cde1039d932254b"
+  ],
+  "tail": "\r\n"
+ },
+ {
+  "name": "java-unsigned-trailer",
+  "source": "aws-sdk-java-v2 2.55.10 AwsV4HttpSigner",
+  "kind": "stream",
+  "method": "PUT",
+  "host": "127.0.0.1:9000",
+  "request_uri": "/bucket/unsigned.bin",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/garage/s3/aws4_request, SignedHeaders=content-encoding;content-length;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-decoded-content-length;x-amz-trailer, Signature=032b343179720b9ea7620a73a25701bf55408e3fef8a410dd462864a56cab2e5"
+   ],
+   [
+    "Content-Encoding",
+    "aws-chunked"
+   ],
+   [
+    "Content-Length",
+    "140079"
+   ],
+   [
+    "Content-Type",
+    "application/octet-stream"
+   ],
+   [
+    "x-amz-content-sha256",
+    "STREAMING-UNSIGNED-PAYLOAD-TRAILER"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "x-amz-decoded-content-length",
+    "140000"
+   ],
+   [
+    "x-amz-trailer",
+    "x-amz-zeta"
+   ],
+   [
+    "x-amz-trailer",
+    "x-amz-checksum-crc32"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "garage",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "032b343179720b9ea7620a73a25701bf55408e3fef8a410dd462864a56cab2e5",
+  "payload_len": 140000,
+  "chunk_lines": [
+   "20000",
+   "22e0",
+   "0"
+  ],
+  "tail": "x-amz-zeta:  last   one \r\nx-amz-checksum-crc32:xFLekQ==\r\n\r\n"
+ },
+ {
+  "name": "java-signed-trailer-empty",
+  "source": "aws-sdk-java-v2 2.55.10 AwsV4HttpSigner",
+  "kind": "stream",
+  "method": "PUT",
+  "host": "127.0.0.1:9000",
+  "request_uri": "/bucket/empty",
+  "headers": [
+   [
+    "Authorization",
+    "AWS4-HMAC-SHA256 Credential=BVKABCDEFGHIJKLMNOPQ/20250115/us-east-1/s3/aws4_request, SignedHeaders=content-encoding;content-length;content-type;host;x-amz-content-sha256;x-amz-date;x-amz-decoded-content-length;x-amz-trailer, Signature=4a9f515c9d850689243bd491fb4a4278a7b67231d3b652b263f9f1b10116e426"
+   ],
+   [
+    "Content-Encoding",
+    "aws-chunked"
+   ],
+   [
+    "Content-Length",
+    "207"
+   ],
+   [
+    "Content-Type",
+    "application/octet-stream"
+   ],
+   [
+    "x-amz-content-sha256",
+    "STREAMING-AWS4-HMAC-SHA256-PAYLOAD-TRAILER"
+   ],
+   [
+    "X-Amz-Date",
+    "20250115T123456Z"
+   ],
+   [
+    "x-amz-decoded-content-length",
+    "0"
+   ],
+   [
+    "x-amz-trailer",
+    "x-amz-checksum-crc32"
+   ]
+  ],
+  "access_key_id": "BVKABCDEFGHIJKLMNOPQ",
+  "region": "us-east-1",
+  "now": "2025-01-15T12:34:56Z",
+  "signature": "4a9f515c9d850689243bd491fb4a4278a7b67231d3b652b263f9f1b10116e426",
+  "payload_len": 0,
+  "chunk_lines": [
+   "0;chunk-signature=f9458a2917ab9c77e2a7eaad6548567d5f833a8d8a75950aa70f89e60bb83811"
+  ],
+  "tail": "x-amz-checksum-crc32:AAAAAA==\r\nx-amz-trailer-signature:ca2d6c787fb4de39d9b158fb5ab3e5f65b3152af77d4c0462645a0c92bb38b0e\r\n\r\n"
+ }
+]

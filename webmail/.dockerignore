@@ -1,0 +1,8 @@
+web/node_modules
+internal/web/dist/*
+!internal/web/dist/.gitkeep
+.git
+bin
+webmail
+docker
+README.md

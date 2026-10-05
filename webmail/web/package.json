@@ -1,0 +1,34 @@
+{
+    "name": "@toolcase/webmail-web",
+    "private": true,
+    "version": "0.1.0",
+    "description": "webmail SPA (React 19 + @toolcase/web-components), built into ../internal/web/dist and embedded in the Go binary.",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc --noEmit && vite build",
+        "build:local-wc": "LOCAL_WC=1 npm run build",
+        "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+        "test": "node --experimental-strip-types --test test/*.test.ts"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@fontsource/chakra-petch": "^5.3.0",
+        "@fontsource/jetbrains-mono": "^5.3.0",
+        "@fontsource/playfair-display": "^5.3.0",
+        "@fontsource/source-sans-3": "^5.3.0",
+        "@fontsource/space-grotesk": "^5.3.0",
+        "@toolcase/base": "^5.0.0",
+        "@toolcase/web-components": "^6.2.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.0",
+        "@vitejs/plugin-react": "^4.4.1",
+        "typescript": "^5.8.0",
+        "vite": "^6.3.0"
+    }
+}

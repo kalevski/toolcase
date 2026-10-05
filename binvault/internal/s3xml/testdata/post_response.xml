@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PostResponse xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <Location>http://localhost:9000/photos/uploads%2Fcat.jpg</Location>
+  <Bucket>photos</Bucket>
+  <Key>uploads/cat.jpg</Key>
+  <ETag>&quot;fba9dede5f27731c9771645a39863328&quot;</ETag>
+</PostResponse>

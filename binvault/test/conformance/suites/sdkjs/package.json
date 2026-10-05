@@ -1,0 +1,12 @@
+{
+  "name": "binvault-sdkjs-suite",
+  "private": true,
+  "type": "module",
+  "description": "aws-sdk-js-v3 conformance cases for binvault; installed into the harness cache, never into the repo",
+  "dependencies": {
+    "@aws-sdk/client-s3": "latest",
+    "@aws-sdk/lib-storage": "latest",
+    "@aws-sdk/s3-request-presigner": "latest",
+    "@aws-sdk/s3-presigned-post": "latest"
+  }
+}

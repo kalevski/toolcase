@@ -1,0 +1,104 @@
+/*
+ * The blueprint theme as the platform dashboard wears it: the component tokens and font roles from the
+ * dashboard's theme layer, scoped to the webmail's data-tc-theme attribute.
+ */
+
+html[data-tc-theme='blueprint'] {
+
+
+    --bs-taxonomy-card-tint: 4%;
+    --bs-taxonomy-card-bg: var(--bp-paper);
+    --bs-taxonomy-card-border-color: var(--bp-border);
+    --bs-taxonomy-card-heading-font: 600 17px/1.2 var(--bp-display);
+    --bs-taxonomy-card-heading-color: var(--bp-emphasis);
+    --bs-taxonomy-card-desc-font: 400 12px/1.45 var(--bp-mono);
+    --bs-taxonomy-card-desc-color: var(--bp-text-muted);
+    --bs-taxonomy-card-subheading-font: 400 12px var(--bp-mono);
+    --bs-taxonomy-card-chips-offset: 12px;
+    --bs-taxonomy-card-hover-lift: -2px;
+    --bs-taxonomy-card-hover-shadow-base: var(--bp-text);
+    --bs-taxonomy-card-metric-value-font: 700 20px/1 var(--bp-mono);
+    --bs-taxonomy-card-metric-unit-font: 500 10px var(--bp-mono);
+    --bs-taxonomy-card-metric-unit-color: var(--bp-text-muted);
+    --bs-taxonomy-card-metric-padding: 7px 11px 6px;
+    --bs-taxonomy-card-metric-gap: 14px;
+    --bs-taxonomy-card-metric-tint: 45%;
+    --bs-taxonomy-card-metric-bg: var(--bp-paper);
+
+    --bs-list-section-header-bg: var(--bp-paper-tint);
+    --bs-list-section-tone: var(--bp-text-muted);
+    --bs-list-section-heading-font: 600 11px var(--bp-mono);
+    --bs-list-section-heading-track: 0.04em;
+    --bs-list-section-row-padding: 12px 16px;
+    --bs-list-row-meta-font-family: var(--bp-mono);
+    --bs-list-row-meta-font-size: 0.75rem;
+    --bs-list-row-label-font-size: 0.9375rem;
+    --bs-list-row-selected-bg: var(--bp-pink-soft);
+
+    --bs-page-tabs-gap: 18px;
+    --bs-page-tabs-tab-font: 500 13px var(--bp-body);
+    --bs-page-tabs-tab-font-active: 700 13px var(--bp-body);
+    --bs-page-tabs-tab-color: var(--bp-text-muted);
+    --bs-page-tabs-tab-color-active: var(--bp-emphasis);
+    --bs-page-tabs-underline-color: var(--tc-app-accent);
+
+    --bs-fab-radius: 14px;
+    --bs-fab-shadow: 0 0 0 1px var(--bp-pink-line), 0 14px 30px -12px var(--bp-pink-glow);
+    --bs-fab-shadow-active: 0 0 0 1px var(--bp-pink-line), 0 6px 14px -8px var(--bp-pink-glow);
+    --bs-fab-focus-color: var(--tc-app-accent);
+
+    --bs-quota-meter-fill: var(--tc-app-accent);
+    --bs-quota-meter-track-bg: var(--bp-border-faint);
+    --bs-quota-meter-label-color: var(--bp-text-muted);
+    --bs-quota-meter-label-font: 500 12px var(--bp-mono);
+
+    --bs-empty-state-icon-bg: var(--bp-paper);
+    --bs-empty-state-icon-color: var(--tc-app-accent);
+    --bs-empty-state-icon-padding: 0.875rem;
+    --bs-empty-state-icon-max: 52px;
+    --bs-empty-state-heading-size: 1.0625rem;
+    --bs-empty-state-description-size: 0.875rem;
+
+    --bs-notice-font: 400 12.5px/1.45 var(--bp-body);
+    --bs-notice-label-font: 600 11px var(--bp-mono);
+    --bs-notice-label-track: 0.03em;
+
+    --bs-status-card-item-separator-color: var(--bp-border-faint);
+    --bs-status-card-header-bg: var(--bp-paper-tint);
+    --bs-list-card-header-bg: var(--bp-paper-tint);
+
+    --bs-section-card-header-bg: var(--bp-paper-tint);
+    --bs-section-card-icon-color: var(--tc-app-accent);
+
+    --bs-tab-dock-icon-stroke: 1.7;
+    --bs-tab-dock-padding-top: 7px;
+    --bs-tab-dock-badge-bg: var(--bp-danger);
+
+    --bs-bottom-sheet-handle-bg: var(--bp-border-strong);
+
+    --bs-rich-page-header-icon-bg: var(--bp-paper-tint);
+
+    --bs-empty-state-color: var(--bp-text-muted);
+
+    color: var(--bp-text);
+    font-family: var(--bp-body);
+
+    & :is(h1, h2, h3, h4) {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    & :is(code, kbd, samp, .tc-list-row-meta, .tc-quota-meter-label, .tc-list-section-meta) {
+        font-variant-numeric: tabular-nums;
+    }
+
+    & .tc-list-section-heading {
+        text-transform: none;
+    }
+
+    & .tc-taxonomy-card-eyebrow {
+        text-transform: none;
+    }
+
+}
