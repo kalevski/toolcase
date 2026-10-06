@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -72,6 +73,20 @@ func (s *SiteState) NeverSynced() bool { return s.LastSuccess.IsZero() }
 // Store reads and writes per-site state files.
 type Store struct {
 	dir string
+
+	// cache holds the last parsed state per domain, valid while the file is the
+	// same one we read (same inode, mtime and size — atomic renames always yield
+	// a new file). GET /status loads every site's state; without this each call
+	// re-opened and re-parsed N files. Stat-validated rather than write-through
+	// because the CLI (`nginxpilot sync`) writes the same files from another
+	// process.
+	mu    sync.Mutex
+	cache map[string]cachedState
+}
+
+type cachedState struct {
+	info os.FileInfo
+	st   SiteState
 }
 
 // NewStore creates the state directory under dataDir if needed.
@@ -80,7 +95,7 @@ func NewStore(dataDir string) (*Store, error) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return nil, fmt.Errorf("create state dir: %w", err)
 	}
-	return &Store{dir: dir}, nil
+	return &Store{dir: dir, cache: map[string]cachedState{}}, nil
 }
 
 func (s *Store) path(domain string) string {
@@ -90,8 +105,24 @@ func (s *Store) path(domain string) string {
 // Load returns the stored state for domain, or a fresh zero state if none
 // exists yet.
 func (s *Store) Load(domain string) (*SiteState, error) {
-	raw, err := os.ReadFile(s.path(domain))
+	path := s.path(domain)
+	fi, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {
+		s.forget(domain)
+		return &SiteState{Domain: domain}, nil
+	}
+	if err == nil {
+		s.mu.Lock()
+		c, ok := s.cache[domain]
+		s.mu.Unlock()
+		if ok && os.SameFile(c.info, fi) && c.info.ModTime().Equal(fi.ModTime()) && c.info.Size() == fi.Size() {
+			st := c.st // callers mutate and Save the result: hand out a copy
+			return &st, nil
+		}
+	}
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		s.forget(domain)
 		return &SiteState{Domain: domain}, nil
 	}
 	if err != nil {
@@ -101,10 +132,22 @@ func (s *Store) Load(domain string) (*SiteState, error) {
 	if err := json.Unmarshal(raw, &st); err != nil {
 		// Corrupt state file: start over rather than refusing to run; the
 		// next sync re-deploys and rewrites it.
+		s.forget(domain)
 		return &SiteState{Domain: domain}, nil
 	}
 	st.Domain = domain
+	if fi != nil && int64(len(raw)) == fi.Size() { // the stat describes the bytes we parsed
+		s.mu.Lock()
+		s.cache[domain] = cachedState{info: fi, st: st}
+		s.mu.Unlock()
+	}
 	return &st, nil
+}
+
+func (s *Store) forget(domain string) {
+	s.mu.Lock()
+	delete(s.cache, domain)
+	s.mu.Unlock()
 }
 
 // Save writes the state crash-durably: fsync the temp file before rename,
@@ -133,6 +176,7 @@ func (s *Store) Save(st *SiteState) error {
 	if err := os.Rename(tmp, s.path(st.Domain)); err != nil {
 		return fmt.Errorf("commit state for %s: %w", st.Domain, err)
 	}
+	s.forget(st.Domain)
 	d, err := os.Open(s.dir)
 	if err == nil {
 		_ = d.Sync()
@@ -144,6 +188,7 @@ func (s *Store) Save(st *SiteState) error {
 // Delete removes the state file for a domain (used by --prune-orphans).
 func (s *Store) Delete(domain string) error {
 	err := os.Remove(s.path(domain))
+	s.forget(domain)
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}

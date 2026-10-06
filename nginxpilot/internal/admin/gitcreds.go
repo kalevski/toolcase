@@ -44,7 +44,7 @@ func (s *Server) handleSetGitCred(w http.ResponseWriter, r *http.Request) {
 	if !existed {
 		w.WriteHeader(http.StatusCreated)
 	}
-	writeJSON(w, map[string]any{
+	writeJSON(w, r, map[string]any{
 		"status": map[bool]string{true: "replaced", false: "created"}[existed],
 		"name":   name,
 		"path":   path,
@@ -53,8 +53,8 @@ func (s *Server) handleSetGitCred(w http.ResponseWriter, r *http.Request) {
 
 // handleListGitCreds lists stored credentials — names + metadata only, no
 // secrets (GET /git-credentials).
-func (s *Server) handleListGitCreds(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]any{"credentials": s.mgr.ListGitCredentials()}, s)
+func (s *Server) handleListGitCreds(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, r, map[string]any{"credentials": s.mgr.ListGitCredentials()}, s)
 }
 
 // handleDeleteGitCred removes a stored credential (DELETE /git-credentials/{name}).

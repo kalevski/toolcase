@@ -42,6 +42,9 @@ type Manager struct {
 	mu  sync.RWMutex
 	cfg *config.Config
 
+	effMu sync.Mutex
+	effc  *effCache
+
 	applyMu    sync.Mutex
 	last       bindctl.ApplyResult
 	hasApplied bool
@@ -83,40 +86,100 @@ func (m *Manager) Config() *config.Config {
 	return m.cfg
 }
 
+// effZone is one replicated zone's validated contribution to the effective
+// config, cached against the store's change stamp for that zone.
+type effZone struct {
+	ver       uint64
+	etag      string // memoized content ETag of zone; "" until first asked
+	zone      config.Zone
+	repairs   []string
+	invalid   string
+	shadowed  bool
+	conflicts []Conflict
+}
+
+// effCache is the last effective config. Replicated zones are unchanged most
+// of the time, so only zones whose stamp moved are re-read and re-validated,
+// and nothing at all is rebuilt while the store and the file config are as
+// they were.
+type effCache struct {
+	cfg       *config.Config
+	ver       uint64
+	eff       *config.Config
+	conflicts []Conflict
+	zones     map[string]*effZone
+	local     map[string]string // memoized ETags of file-declared zones (valid while cfg is)
+}
+
 // Effective returns the file config with replicated zones merged in, plus
 // the conflicts found while merging. A replicated zone shadowed by a local
 // zone of the same name is left out; one whose merged state fails
 // validation is kept with Invalid set so the engine serves its last good
-// file.
+// file. The result is shared between callers and must be treated as
+// read-only.
 func (m *Manager) Effective() (*config.Config, []Conflict) {
 	cfg := m.Config()
+	ver := m.repl.Version()
+	m.effMu.Lock()
+	defer m.effMu.Unlock()
+	c := m.effc
+	if c != nil && c.cfg == cfg && c.ver == ver {
+		return c.eff, append([]Conflict(nil), c.conflicts...)
+	}
 	eff := *cfg
 	eff.Zones = append([]config.Zone(nil), cfg.Zones...)
-	var conflicts []Conflict
-	zones, err := m.repl.Zones()
+	names, err := m.repl.ZoneNames()
 	if err != nil {
 		m.log.Error("read replicated zones", "error", err)
 		return &eff, nil
 	}
-	for i := range zones {
-		rz := &zones[i]
-		if cfg.FindZone(rz.Name) >= 0 {
-			conflicts = append(conflicts, Conflict{rz.Name, "shadowed", "a zone with this name is declared in a config file; the local zone is served"})
-			continue
+	var prev map[string]*effZone
+	if c != nil && c.cfg == cfg {
+		prev = c.zones
+	}
+	next := make(map[string]*effZone, len(names))
+	var conflicts []Conflict
+	for _, name := range names {
+		zv := m.repl.ZoneVersion(name)
+		ez := prev[name]
+		if ez == nil || ez.ver != zv {
+			rz, ok, err := m.repl.Zone(name)
+			if err != nil {
+				m.log.Error("read replicated zones", "error", err)
+				return &eff, nil
+			}
+			if !ok {
+				continue
+			}
+			ez = &effZone{ver: zv, repairs: rz.Repairs, shadowed: cfg.FindZone(name) >= 0}
+			if ez.shadowed {
+				ez.conflicts = []Conflict{{name, "shadowed", "a zone with this name is declared in a config file; the local zone is served"}}
+			} else {
+				for _, r := range rz.Repairs {
+					ez.conflicts = append(ez.conflicts, Conflict{name, "repaired", r})
+				}
+				z := rz.Config()
+				z.File, z.Serial = config.ReplicatedFile, rz.Serial
+				if err := config.ValidateZone(&eff, &z); err != nil {
+					z.Invalid = "merged state is invalid: " + err.Error()
+					ez.conflicts = append(ez.conflicts, Conflict{name, "invalid", err.Error()})
+				}
+				ez.zone = z
+			}
 		}
-		for _, r := range rz.Repairs {
-			conflicts = append(conflicts, Conflict{rz.Name, "repaired", r})
+		next[name] = ez
+		conflicts = append(conflicts, ez.conflicts...)
+		if !ez.shadowed {
+			eff.Zones = append(eff.Zones, ez.zone)
 		}
-		z := rz.Config()
-		z.File, z.Serial = config.ReplicatedFile, rz.Serial
-		if err := config.ValidateZone(&eff, &z); err != nil {
-			z.Invalid = "merged state is invalid: " + err.Error()
-			conflicts = append(conflicts, Conflict{rz.Name, "invalid", err.Error()})
-		}
-		eff.Zones = append(eff.Zones, z)
 	}
 	sort.SliceStable(conflicts, func(i, j int) bool { return conflicts[i].Zone < conflicts[j].Zone })
-	return &eff, conflicts
+	local := map[string]string{}
+	if c != nil && c.cfg == cfg {
+		local = c.local
+	}
+	m.effc = &effCache{cfg: cfg, ver: ver, eff: &eff, conflicts: conflicts, zones: next, local: local}
+	return &eff, append([]Conflict(nil), conflicts...)
 }
 
 // SetConfig swaps the file config without applying.
@@ -193,8 +256,8 @@ func (m *Manager) PendingRetry() bool {
 
 // Serial returns the published serial of a zone (0 when never published).
 func (m *Manager) Serial(zone string) uint32 {
-	if z, ok, _ := m.repl.Zone(zone); ok && m.Config().FindZone(zone) < 0 {
-		return z.Serial
+	if serial, ok, _ := m.repl.Serial(zone); ok && m.Config().FindZone(zone) < 0 {
+		return serial
 	}
 	st, _ := m.state.Get(zone)
 	return st.Serial

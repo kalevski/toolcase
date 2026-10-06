@@ -236,15 +236,18 @@ func validateZone(cfg *Config, z *Zone) error {
 func checkRRsets(cfg *Config, z *Zone) error {
 	zoneTTL := cfg.EffectiveTTL(z)
 	type rrsetKey struct{ name, typ string }
-	ttls := map[rrsetKey]TTL{}
-	identity := map[string]int{}
-	typesAt := map[string]map[string]bool{}
+	type identityKey struct{ name, typ, rdata string }
+	ttls := make(map[rrsetKey]TTL, len(z.Records))
+	identity := make(map[identityKey]int, len(z.Records))
+	typeCount := make(map[string]int, len(z.Records)) // distinct RR types per owner name
+	cnames := map[string]int{}                        // CNAME records per owner name
+	apexNS := false
 
 	for i := range z.Records {
 		r := &z.Records[i]
-		id := r.Name + " " + r.Type + " " + r.RData()
+		id := identityKey{r.Name, r.Type, r.RData()}
 		if j, dup := identity[id]; dup {
-			return fmt.Errorf("records[%d] duplicates records[%d] (%s %s %s)", i, j, r.Name, r.Type, r.RData())
+			return fmt.Errorf("records[%d] duplicates records[%d] (%s %s %s)", i, j, r.Name, r.Type, id.rdata)
 		}
 		identity[id] = i
 
@@ -253,39 +256,36 @@ func checkRRsets(cfg *Config, z *Zone) error {
 			ttl = zoneTTL
 		}
 		k := rrsetKey{r.Name, r.Type}
-		if prev, ok := ttls[k]; ok && prev != ttl {
+		prev, seen := ttls[k]
+		if seen && prev != ttl {
 			return fmt.Errorf("records[%d]: the %s %s RRset mixes TTLs %d and %d — every record of one name+type must share a TTL", i, r.Name, r.Type, prev, ttl)
+		}
+		if !seen {
+			typeCount[r.Name]++
 		}
 		ttls[k] = ttl
 
-		if typesAt[r.Name] == nil {
-			typesAt[r.Name] = map[string]bool{}
+		if r.Type == TypeCNAME {
+			cnames[r.Name]++
 		}
-		typesAt[r.Name][r.Type] = true
+		if r.Name == "@" && r.Type == TypeNS {
+			apexNS = true
+		}
 	}
 
-	for name, types := range typesAt {
-		if !types[TypeCNAME] {
-			continue
-		}
+	for name, n := range cnames {
 		if name == "@" {
 			return fmt.Errorf("a CNAME is not allowed at the zone apex (use A/AAAA records there)")
 		}
-		if len(types) > 1 {
+		if typeCount[name] > 1 {
 			return fmt.Errorf("%s has a CNAME and other records — a CNAME must be the only record at its name", name)
-		}
-		n := 0
-		for i := range z.Records {
-			if z.Records[i].Name == name && z.Records[i].Type == TypeCNAME {
-				n++
-			}
 		}
 		if n > 1 {
 			return fmt.Errorf("%s has %d CNAME records — only one is allowed", name, n)
 		}
 	}
 
-	if len(cfg.EffectiveNameservers(z)) == 0 && !typesAt["@"][TypeNS] {
+	if len(cfg.EffectiveNameservers(z)) == 0 && !apexNS {
 		return fmt.Errorf("no nameservers: set nameservers (on the zone or in defaults) or add an NS record at \"@\"")
 	}
 	return nil

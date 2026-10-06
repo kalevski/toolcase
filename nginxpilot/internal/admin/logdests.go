@@ -21,13 +21,13 @@ var logDestNameRe = regexp.MustCompile(`^[a-z0-9-]+$`)
 // handleListLogDests lists configured log destinations. Secret material is
 // never present — auth carries only *_env / *_file references (inline values
 // sent to POST /log-destinations are stored as files first).
-func (s *Server) handleListLogDests(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleListLogDests(w http.ResponseWriter, r *http.Request) {
 	cfg := s.mgr.Config()
 	dests := cfg.LogDestinations
 	if dests == nil {
 		dests = []config.LogDestination{}
 	}
-	writeJSON(w, map[string]any{"log_destinations": dests}, s)
+	writeJSON(w, r, map[string]any{"log_destinations": dests}, s)
 }
 
 // handleCreateLogDest accepts a fragment declaring exactly one log
@@ -104,8 +104,8 @@ func (s *Server) handleDeleteLogDest(w http.ResponseWriter, r *http.Request) {
 
 // handleLogsStatus serves the shipping stats standalone (also embedded in
 // GET /status as the `logs` object).
-func (s *Server) handleLogsStatus(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, s.mgr.LogsStatus(), s)
+func (s *Server) handleLogsStatus(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, r, s.mgr.LogsStatus(), s)
 }
 
 // handleTestLogDest is the body-based "Test connection" (G11): it accepts a
@@ -156,8 +156,8 @@ func (s *Server) runLogDestTest(w http.ResponseWriter, r *http.Request, d *confi
 	if err := s.mgr.TestLogDestination(r.Context(), d); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadGateway)
-		writeJSON(w, map[string]any{"ok": false, "name": d.Name, "error": err.Error()}, s)
+		writeJSON(w, r, map[string]any{"ok": false, "name": d.Name, "error": err.Error()}, s)
 		return
 	}
-	writeJSON(w, map[string]any{"ok": true, "name": d.Name}, s)
+	writeJSON(w, r, map[string]any{"ok": true, "name": d.Name}, s)
 }

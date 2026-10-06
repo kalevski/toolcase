@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func writeFile(t *testing.T, path string) {
+func writeFile(t testing.TB, path string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
@@ -27,7 +27,7 @@ func writeFile(t *testing.T, path string) {
 // writeCert writes a real self-signed leaf cert (with the given SAN DNS names)
 // to certPath and a placeholder key to keyPath, so SAN-based matching can be
 // exercised. The key content is irrelevant — the index never parses it.
-func writeCert(t *testing.T, certPath, keyPath string, dnsNames ...string) {
+func writeCert(t testing.TB, certPath, keyPath string, dnsNames ...string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(certPath), 0o755); err != nil {
 		t.Fatal(err)

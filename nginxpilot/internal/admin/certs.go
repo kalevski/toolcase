@@ -49,7 +49,7 @@ type certInfo struct {
 // loads the dir on each call, so renewals show immediately. Works in both
 // managed and generate-only mode; an unconfigured/missing cert dir yields an
 // empty list (not an error). The list always serializes as an array, never null.
-func (s *Server) handleListCerts(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleListCerts(w http.ResponseWriter, r *http.Request) {
 	dir := s.mgr.CertDir()
 	idx, err := certs.Load(dir)
 	if err != nil {
@@ -88,7 +88,14 @@ func (s *Server) handleListCerts(w http.ResponseWriter, _ *http.Request) {
 		}
 		out = append(out, info)
 	}
-	writeJSON(w, map[string]any{"cert_dir": dir, "certs": out}, s)
+	p, ok := parsePage(w, r, false)
+	if !ok {
+		return
+	}
+	page, body := paginate(out, func(x certInfo) string { return x.Domain }, p)
+	body["cert_dir"] = dir
+	body["certs"] = page
+	writeJSON(w, r, body, s)
 }
 
 // nonZeroTime maps the zero time (an unparseable cert) to nil so the JSON field
@@ -158,7 +165,7 @@ func (s *Server) handleCertBundle(w http.ResponseWriter, r *http.Request) {
 	bundle.RenewManaged = s.mgr.RenewManaged(name)
 	s.log.Info("cert bundle exported", "domain", name, "fingerprint_sha256", bundle.FingerprintSHA256)
 	w.Header().Set("Cache-Control", "no-store")
-	writeJSON(w, bundle, s)
+	writeJSON(w, r, bundle, s)
 }
 
 // readCertBundle reads a cert/key pair off disk and splits the cert file into

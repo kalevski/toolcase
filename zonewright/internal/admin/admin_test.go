@@ -135,7 +135,7 @@ func TestZoneLifecycle(t *testing.T) {
 
 	// serial = base + one per change: create + 2 RRsets.
 	code, body := h.do("POST", "/zones", exampleZone)
-	if code != http.StatusCreated || !strings.Contains(body, `"serial": 2026092503`) {
+	if code != http.StatusCreated || !strings.Contains(body, `"serial":2026092503`) {
 		t.Fatalf("create: %d %s", code, body)
 	}
 	if !strings.Contains(h.zoneFile("example.com"), "www\t3600\tIN\tCNAME\t@") {
@@ -146,14 +146,14 @@ func TestZoneLifecycle(t *testing.T) {
 	}
 
 	code, body = h.do("GET", "/zones/example.com", "")
-	if code != 200 || !strings.Contains(body, `"managed": true`) || !strings.Contains(body, `"state": "active"`) {
+	if code != 200 || !strings.Contains(body, `"managed":true`) || !strings.Contains(body, `"state":"active"`) {
 		t.Fatalf("get: %d %s", code, body)
 	}
 
 	// Re-POST of identical content → 200 unchanged: nothing is committed
 	// and the serial does not move (idempotent for sync clients).
 	code, body = h.do("POST", "/zones", exampleZone)
-	if code != http.StatusOK || !strings.Contains(body, `"unchanged"`) || !strings.Contains(body, `"serial": 2026092503`) {
+	if code != http.StatusOK || !strings.Contains(body, `"unchanged"`) || !strings.Contains(body, `"serial":2026092503`) {
 		t.Fatalf("replace: %d %s", code, body)
 	}
 
@@ -220,7 +220,7 @@ func TestBindRejectionRollsBack(t *testing.T) {
 	}
 	// And the zone is healthy again, not left "stale".
 	_, st := h.do("GET", "/status", "")
-	if !strings.Contains(st, `"state": "active"`) || strings.Contains(st, "stale") {
+	if !strings.Contains(st, `"state":"active"`) || strings.Contains(st, "stale") {
 		t.Fatalf("status after rollback: %s", st)
 	}
 
@@ -240,7 +240,7 @@ func TestRecordEndpoints(t *testing.T) {
 
 	// Add.
 	code, body := h.do("POST", "/zones/example.com/records", `{"name":"api","type":"a","value":"192.0.2.10","ttl":"5m"}`)
-	if code != 201 || !strings.Contains(body, `"serial": 2026092504`) {
+	if code != 201 || !strings.Contains(body, `"serial":2026092504`) {
 		t.Fatalf("add: %d %s", code, body)
 	}
 	if !strings.Contains(h.zoneFile("example.com"), "api\t300\tIN\tA\t192.0.2.10") {
@@ -316,7 +316,7 @@ func TestRecordEndpoints(t *testing.T) {
 func TestMainConfigZonesAreReadOnly(t *testing.T) {
 	h := newHarness(t, "")
 	code, body := h.do("GET", "/zones/static.org", "")
-	if code != 200 || !strings.Contains(body, `"managed": false`) {
+	if code != 200 || !strings.Contains(body, `"managed":false`) {
 		t.Fatalf("%d %s", code, body)
 	}
 	if code, _ = h.do("POST", "/zones/static.org/records", `{"name":"x","type":"A","value":"192.0.2.1"}`); code != 409 {
@@ -451,7 +451,7 @@ func TestETagIfMatch(t *testing.T) {
 func TestWaitReplicatedSingleNode(t *testing.T) {
 	h := newHarness(t, "")
 	code, body := h.do("POST", "/zones?wait=replicated", exampleZone)
-	if code != 201 || !strings.Contains(body, `"replicated": true`) || !strings.Contains(body, `"op": "n-`) {
+	if code != 201 || !strings.Contains(body, `"replicated":true`) || !strings.Contains(body, `"op":"n-`) {
 		t.Fatalf("%d %s", code, body)
 	}
 }

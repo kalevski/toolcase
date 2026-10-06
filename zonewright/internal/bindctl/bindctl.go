@@ -178,7 +178,7 @@ func (e *Engine) CheckZone(ctx context.Context, cfg *config.Config, z *config.Zo
 	if err := os.MkdirAll(cfg.Bind.ZoneDir, 0o750); err != nil {
 		return err
 	}
-	staged, err := writeTemp(cfg.Bind.ZoneDir, ".stage-check-"+z.Name+"-*", []byte(zonefile.Render(cfg, z, serial)))
+	staged, err := writeTemp(cfg.Bind.ZoneDir, ".stage-check-"+z.Name+"-*", []byte(zonefile.Render(cfg, z, serial)), false)
 	if err != nil {
 		return err
 	}
@@ -237,15 +237,18 @@ func (e *Engine) applyZone(ctx context.Context, cfg *config.Config, z *config.Zo
 		return fail(z.Invalid)
 	}
 
-	hash := zonefile.ContentHash(cfg, z)
 	serial := prev.Serial
-	if !hasPrev || prev.Hash != hash || !liveExists {
-		serial = state.NextSerial(prev.Serial, e.now())
-	}
+	hash := ""
 	if z.Serial != 0 {
 		// Replicated zone: the serial is part of the replicated state, so
-		// every node publishes the same one (REPLICATION.md §7).
+		// every node publishes the same one (REPLICATION.md §7). The content
+		// hash is only needed once the file is actually rewritten.
 		serial = z.Serial
+	} else {
+		hash = zonefile.ContentHash(cfg, z)
+		if !hasPrev || prev.Hash != hash || !liveExists {
+			serial = state.NextSerial(prev.Serial, e.now())
+		}
 	}
 	content := []byte(zonefile.Render(cfg, z, serial))
 
@@ -265,7 +268,7 @@ func (e *Engine) applyZone(ctx context.Context, cfg *config.Config, z *config.Zo
 		content = []byte(zonefile.Render(cfg, z, serial))
 	}
 
-	staged, err := writeTemp(cfg.Bind.ZoneDir, ".stage-"+z.Name+"-*", content)
+	staged, err := writeTemp(cfg.Bind.ZoneDir, ".stage-"+z.Name+"-*", content, true)
 	if err != nil {
 		return fail("stage zone file: " + err.Error())
 	}
@@ -284,6 +287,9 @@ func (e *Engine) applyZone(ctx context.Context, cfg *config.Config, z *config.Zo
 	if err := swap(staged, live); err != nil {
 		return fail("swap zone file: " + err.Error())
 	}
+	if hash == "" {
+		hash = zonefile.ContentHash(cfg, z)
+	}
 	store.Put(z.Name, state.ZoneState{Serial: serial, Hash: hash, UpdatedAt: e.now().UTC()})
 	zr.State, zr.Serial, zr.Changed = StateActive, serial, true
 	e.log.Info("zone published", "zone", z.Name, "serial", serial)
@@ -296,7 +302,7 @@ func (e *Engine) applyConf(ctx context.Context, cfg *config.Config, zones []zone
 		return false, nil
 	}
 	dir := filepath.Dir(cfg.Bind.ConfFile)
-	staged, err := writeTemp(dir, ".stage-conf-*", content)
+	staged, err := writeTemp(dir, ".stage-conf-*", content, true)
 	if err != nil {
 		return false, err
 	}
@@ -373,8 +379,10 @@ func sweepStaged(cfg *config.Config) {
 	}
 }
 
-// writeTemp writes data to a new 0640 temp file in dir and fsyncs it.
-func writeTemp(dir, pattern string, data []byte) (string, error) {
+// writeTemp writes data to a new 0640 temp file in dir, fsyncing it when
+// durable (files that will be renamed into place; a scratch file that is only
+// read back by a checker needs no fsync).
+func writeTemp(dir, pattern string, data []byte, durable bool) (string, error) {
 	f, err := os.CreateTemp(dir, pattern)
 	if err != nil {
 		return "", err
@@ -390,10 +398,12 @@ func writeTemp(dir, pattern string, data []byte) (string, error) {
 		os.Remove(name)
 		return "", err
 	}
-	if err := f.Sync(); err != nil {
-		f.Close()
-		os.Remove(name)
-		return "", err
+	if durable {
+		if err := f.Sync(); err != nil {
+			f.Close()
+			os.Remove(name)
+			return "", err
+		}
 	}
 	if err := f.Close(); err != nil {
 		os.Remove(name)

@@ -29,13 +29,28 @@ func (s *Server) handleListRecords(w http.ResponseWriter, r *http.Request) {
 		name = n
 	}
 	typ := strings.ToUpper(q.Get("type"))
+	pg, err := parsePage(q, 3)
+	if err != nil {
+		badPage(w, err)
+		return
+	}
 	out := []config.Record{}
 	for _, rec := range z.Records {
 		if (name == "" || rec.Name == name) && (typ == "" || rec.Type == typ) {
 			out = append(out, rec)
 		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"zone": z.Name, "records": out}, s)
+	resp := map[string]any{"zone": z.Name}
+	if pg.active {
+		// Paged order is by (name, type, rdata) — the record's identity, since
+		// the API refuses exact duplicates — so a cursor survives edits.
+		var next string
+		var total int
+		out, next, total = paginate(out, func(rec config.Record) []string { return []string{rec.Name, rec.Type, rec.RData()} }, pg)
+		pageFields(resp, next, total)
+	}
+	resp["records"] = out
+	writeJSON(w, r, http.StatusOK, resp, s)
 }
 
 // existing wraps a record mutation: the zone must exist.

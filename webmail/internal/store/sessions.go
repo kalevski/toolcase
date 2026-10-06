@@ -48,19 +48,33 @@ func scanSession(sc interface{ Scan(...any) error }) (*Session, error) {
 
 // CreateSession inserts a session.
 func (s *Store) CreateSession(ctx context.Context, x *Session) error {
+	defer s.sc.drop(x.ID)
 	_, err := s.w.ExecContext(ctx, `INSERT INTO sessions (`+sessionCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		x.ID, x.PublicID, x.Address, x.Domain, x.CreatedAt.Unix(), x.LastUsedAt.Unix(), x.IdleExpiresAt.Unix(),
 		x.ExpiresAt.Unix(), b2i(x.Remember), x.IP, x.UserAgent, x.PlatformID, x.CredSealed, x.AccountID, x.CSRF)
 	return err
 }
 
-// GetSession loads a session by id (the cookie hash).
+// GetSession loads a session by id (the cookie hash). Hits come from a short
+// in-memory cache (see sesscache.go); every writer below drops its entries, so
+// callers must still check the expiry fields against the real clock. The
+// result is a private copy. Misses (unknown id) are never cached.
 func (s *Store) GetSession(ctx context.Context, id string) (*Session, error) {
-	return scanSession(s.r.QueryRowContext(ctx, `SELECT `+sessionCols+` FROM sessions WHERE id = ?`, id))
+	cached, epoch, ok := s.sc.get(id)
+	if ok {
+		return cached, nil
+	}
+	x, err := scanSession(s.r.QueryRowContext(ctx, `SELECT `+sessionCols+` FROM sessions WHERE id = ?`, id))
+	if err != nil {
+		return nil, err
+	}
+	s.sc.put(id, x, epoch)
+	return x, nil
 }
 
 // TouchSession records use and the new idle expiry.
 func (s *Store) TouchSession(ctx context.Context, id string, last, idle time.Time) error {
+	defer s.sc.drop(id)
 	_, err := s.w.ExecContext(ctx, `UPDATE sessions SET last_used_at = ?, idle_expires_at = ? WHERE id = ?`,
 		last.Unix(), idle.Unix(), id)
 	return err
@@ -68,12 +82,14 @@ func (s *Store) TouchSession(ctx context.Context, id string, last, idle time.Tim
 
 // SetAccountID stores the JMAP account id learned from the session document.
 func (s *Store) SetAccountID(ctx context.Context, id, accountID string) error {
+	defer s.sc.drop(id)
 	_, err := s.w.ExecContext(ctx, `UPDATE sessions SET account_id = ? WHERE id = ?`, accountID, id)
 	return err
 }
 
 // DeleteSession removes a session and reports whether it existed.
 func (s *Store) DeleteSession(ctx context.Context, id string) (bool, error) {
+	defer s.sc.drop(id)
 	r, err := s.w.ExecContext(ctx, `DELETE FROM sessions WHERE id = ?`, id)
 	if err != nil {
 		return false, err
@@ -104,6 +120,7 @@ func (s *Store) ListSessions(ctx context.Context, address string, now time.Time)
 
 // TakeSessionByPublicID deletes and returns one of an address's sessions.
 func (s *Store) TakeSessionByPublicID(ctx context.Context, address, publicID string) (*Session, error) {
+	defer s.sc.dropAll() // the id is only known after the read; rare, so drop everything
 	tx, err := s.w.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -121,6 +138,7 @@ func (s *Store) TakeSessionByPublicID(ctx context.Context, address, publicID str
 
 // TakeAllSessions deletes and returns every session of an address.
 func (s *Store) TakeAllSessions(ctx context.Context, address string) ([]*Session, error) {
+	defer s.sc.dropAll()
 	tx, err := s.w.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -148,6 +166,7 @@ func (s *Store) TakeAllSessions(ctx context.Context, address string) ([]*Session
 
 // TakeExpired deletes and returns sessions past their idle or absolute expiry.
 func (s *Store) TakeExpired(ctx context.Context, now time.Time) ([]*Session, error) {
+	defer s.sc.dropAll()
 	tx, err := s.w.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err

@@ -37,8 +37,8 @@ func source(z *config.Zone) string {
 	return "local"
 }
 
-func (s *Server) view(z *config.Zone) ZoneView {
-	v := ZoneView{Zone: *z, Serial: s.mgr.Serial(z.Name), State: "pending", Source: source(z), ETag: s.mgr.ETag(z)}
+func (s *Server) view(eff *config.Config, z *config.Zone) ZoneView {
+	v := ZoneView{Zone: *z, Serial: s.mgr.Serial(z.Name), State: "pending", Source: source(z), ETag: s.mgr.ETagOf(eff, z)}
 	v.Managed = v.Source == "replicated"
 	if v.Records == nil {
 		v.Records = []config.Record{}
@@ -51,13 +51,78 @@ func (s *Server) view(z *config.Zone) ZoneView {
 	return v
 }
 
-func (s *Server) handleListZones(w http.ResponseWriter, _ *http.Request) {
-	eff, _ := s.mgr.Effective()
-	out := make([]ZoneView, 0, len(eff.Zones))
-	for i := range eff.Zones {
-		out = append(out, s.view(&eff.Zones[i]))
+// ZoneSummary is a zone without its records (GET /zones?view=summary).
+type ZoneSummary struct {
+	Name        string `json:"name"`
+	Serial      uint32 `json:"serial"`
+	State       string `json:"state"`
+	Reason      string `json:"reason,omitempty"`
+	Source      string `json:"source"`
+	Managed     bool   `json:"managed"`
+	RecordCount int    `json:"record_count"`
+	ETag        string `json:"etag"`
+}
+
+func (s *Server) summary(eff *config.Config, z *config.Zone) ZoneSummary {
+	v := ZoneSummary{Name: z.Name, Serial: s.mgr.Serial(z.Name), State: "pending", Source: source(z), RecordCount: len(z.Records), ETag: s.mgr.ETagOf(eff, z)}
+	v.Managed = v.Source == "replicated"
+	if last, ok := s.mgr.LastApply(); ok {
+		if zr := last.Zone(z.Name); zr != nil {
+			v.State, v.Reason = zr.State, zr.Reason
+		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"zones": out}, s)
+	return v
+}
+
+// handleListZones lists zones. ?view=summary leaves out the records, and
+// ?limit=/&cursor= page the list in name order (see paging.go). Without
+// parameters it returns every zone in full, in config order.
+func (s *Server) handleListZones(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	summary := false
+	if q.Has("view") {
+		switch q.Get("view") {
+		case "full":
+		case "summary":
+			summary = true
+		default:
+			writeError(w, http.StatusBadRequest, "view must be full or summary")
+			return
+		}
+	}
+	pg, err := parsePage(q, 1)
+	if err != nil {
+		badPage(w, err)
+		return
+	}
+	eff, _ := s.mgr.Effective()
+	zones := make([]*config.Zone, len(eff.Zones))
+	for i := range eff.Zones {
+		zones[i] = &eff.Zones[i]
+	}
+	next, total := "", 0
+	if pg.active {
+		zones, next, total = paginate(zones, func(z *config.Zone) []string { return []string{z.Name} }, pg)
+	}
+	var out any
+	if summary {
+		list := make([]ZoneSummary, 0, len(zones))
+		for _, z := range zones {
+			list = append(list, s.summary(eff, z))
+		}
+		out = list
+	} else {
+		list := make([]ZoneView, 0, len(zones))
+		for _, z := range zones {
+			list = append(list, s.view(eff, z))
+		}
+		out = list
+	}
+	resp := map[string]any{"zones": out}
+	if pg.active {
+		pageFields(resp, next, total)
+	}
+	writeJSON(w, r, http.StatusOK, resp, s)
 }
 
 // lookupZone resolves the {zone} path value against the effective config,
@@ -78,13 +143,13 @@ func (s *Server) lookupZone(w http.ResponseWriter, r *http.Request) (*config.Con
 }
 
 func (s *Server) handleGetZone(w http.ResponseWriter, r *http.Request) {
-	_, z := s.lookupZone(w, r)
+	eff, z := s.lookupZone(w, r)
 	if z == nil {
 		return
 	}
-	v := s.view(z)
+	v := s.view(eff, z)
 	w.Header().Set("ETag", v.ETag)
-	writeJSON(w, http.StatusOK, v, s)
+	writeJSON(w, r, http.StatusOK, v, s)
 }
 
 // handleZoneFile renders the zone file text with its published serial.
@@ -208,7 +273,7 @@ func (s *Server) writeAs(w http.ResponseWriter, r *http.Request, zone string, cr
 	if s.waitReplicated(r, out.Ops, resp) {
 		code = http.StatusAccepted
 	}
-	writeJSON(w, code, resp, s)
+	writeJSON(w, r, code, resp, s)
 }
 
 // waitReplicated honours ?wait=replicated for ops just committed: it adds

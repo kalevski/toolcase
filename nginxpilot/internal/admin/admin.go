@@ -32,7 +32,6 @@ package admin
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log/slog"
 	"net"
@@ -253,7 +252,7 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	payload := map[string]any{"sites": s.mgr.Status(), "version": s.Version}
 	// Managed mode: surface the last apply's per-resource states (active /
@@ -322,11 +321,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 		"error_codes":   true,
 	}
 
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(payload); err != nil {
-		s.log.Warn("status encode failed", "error", err)
-	}
+	writeJSON(w, r, payload, s)
 }
 
 // handleNginxTest runs a managed-mode dry-run apply (render + validate, no
@@ -338,16 +333,11 @@ func (s *Server) handleNginxTest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "managed mode is off (nginx.manage: false)", http.StatusNotImplemented)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
 	out := map[string]any{"resources": res.Resources}
 	if err != nil {
 		out["error"] = err.Error()
 	}
-	if err := enc.Encode(out); err != nil {
-		s.log.Warn("nginx test encode failed", "error", err)
-	}
+	writeJSON(w, r, out, s)
 }
 
 func (s *Server) handleSync(w http.ResponseWriter, r *http.Request) {

@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -231,8 +232,8 @@ func Load(dir string) (*Index, error) {
 		domain := e.Name()
 		cert := filepath.Join(dir, domain, "fullchain.pem")
 		key := filepath.Join(dir, domain, "privkey.pem")
-		if regular(cert) && regular(key) {
-			idx.entries[domain] = newEntry(cert, key)
+		if ci, ki := regularInfo(cert), regularInfo(key); ci != nil && ki != nil {
+			idx.entries[domain] = newEntry(cert, key, ci, ki)
 		}
 	}
 
@@ -248,31 +249,98 @@ func Load(dir string) (*Index, error) {
 		}
 		cert := filepath.Join(dir, e.Name())
 		key := filepath.Join(dir, domain+".key")
-		if regular(cert) && regular(key) {
-			idx.entries[domain] = newEntry(cert, key)
+		if ci, ki := regularInfo(cert), regularInfo(key); ci != nil && ki != nil {
+			idx.entries[domain] = newEntry(cert, key, ci, ki)
 		}
 	}
+	pruneLeafCache(idx)
 	return idx, nil
 }
+
+// leafMeta is the parsed-leaf part of an Entry.
+type leafMeta struct {
+	names                 []string
+	notBefore, notAfter   time.Time
+	issuer, serial, print string
+	parsed                bool
+}
+
+// leafKey identifies one on-disk version of a cert file: renewals rewrite the
+// file, which changes its mtime and (almost always) size.
+type leafKey struct {
+	mtime int64
+	size  int64
+}
+
+type leafCacheEntry struct {
+	key  leafKey
+	meta leafMeta
+}
+
+// leafCache memoizes parsed leaf metadata per cert path so the cert-watcher
+// poll and GET /certs don't re-read and re-parse every PEM on each call. An
+// entry is valid only while the file's (mtime, size) are unchanged; Load prunes
+// paths that left the directory, so the cache is bounded by the cert count.
+var leafCache = struct {
+	sync.Mutex
+	m map[string]leafCacheEntry
+}{m: map[string]leafCacheEntry{}}
 
 // newEntry builds an Entry for a cert/key pair, parsing the leaf cert's SANs and
 // validity/issuer metadata best-effort (an unparseable cert still yields a
 // usable Entry matchable by its directory/file-name key).
-func newEntry(cert, key string) Entry {
-	e := Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key)}
-	if leaf := parseLeaf(cert); leaf != nil {
-		for _, n := range leaf.DNSNames {
-			e.Names = append(e.Names, strings.ToLower(n))
-		}
-		e.NotBefore, e.NotAfter = leaf.NotBefore, leaf.NotAfter
-		e.Issuer = leaf.Issuer.CommonName
-		if e.Issuer == "" {
-			e.Issuer = leaf.Issuer.String()
-		}
-		e.Serial = LeafSerial(leaf)
-		e.FingerprintSHA256 = LeafFingerprint(leaf)
+func newEntry(cert, key string, certInfo, keyInfo os.FileInfo) Entry {
+	e := Entry{CertPath: cert, KeyPath: key, ModTime: keyInfo.ModTime()}
+	m := cachedLeaf(cert, certInfo)
+	if m.parsed {
+		e.Names = m.names
+		e.NotBefore, e.NotAfter = m.notBefore, m.notAfter
+		e.Issuer, e.Serial, e.FingerprintSHA256 = m.issuer, m.serial, m.print
 	}
 	return e
+}
+
+func cachedLeaf(cert string, fi os.FileInfo) leafMeta {
+	k := leafKey{mtime: fi.ModTime().UnixNano(), size: fi.Size()}
+	leafCache.Lock()
+	c, ok := leafCache.m[cert]
+	leafCache.Unlock()
+	if ok && c.key == k {
+		return c.meta
+	}
+	var m leafMeta
+	if leaf := parseLeaf(cert); leaf != nil {
+		for _, n := range leaf.DNSNames {
+			m.names = append(m.names, strings.ToLower(n))
+		}
+		m.notBefore, m.notAfter = leaf.NotBefore, leaf.NotAfter
+		m.issuer = leaf.Issuer.CommonName
+		if m.issuer == "" {
+			m.issuer = leaf.Issuer.String()
+		}
+		m.serial = LeafSerial(leaf)
+		m.print = LeafFingerprint(leaf)
+		m.parsed = true
+	}
+	leafCache.Lock()
+	leafCache.m[cert] = leafCacheEntry{key: k, meta: m}
+	leafCache.Unlock()
+	return m
+}
+
+// pruneLeafCache drops cache entries for certs no longer in the index.
+func pruneLeafCache(idx *Index) {
+	live := make(map[string]bool, len(idx.entries))
+	for _, e := range idx.entries {
+		live[e.CertPath] = true
+	}
+	leafCache.Lock()
+	defer leafCache.Unlock()
+	for p := range leafCache.m {
+		if !live[p] {
+			delete(leafCache.m, p)
+		}
+	}
 }
 
 // LeafSerial renders a certificate's serial number as lowercase hex, the form
@@ -314,17 +382,13 @@ func parseLeaf(certPath string) *x509.Certificate {
 	return nil
 }
 
-func regular(path string) bool {
+// regularInfo stats path and returns its info, or nil unless it is a regular file.
+func regularInfo(path string) os.FileInfo {
 	fi, err := os.Stat(path)
-	return err == nil && fi.Mode().IsRegular()
-}
-
-func mtime(path string) time.Time {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return time.Time{}
+	if err != nil || !fi.Mode().IsRegular() {
+		return nil
 	}
-	return fi.ModTime()
+	return fi
 }
 
 // Watcher polls a cert directory and invokes onChange whenever the discovered

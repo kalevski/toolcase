@@ -133,6 +133,50 @@ type Store struct {
 	nodeID string
 	clock  *hlc.Clock
 	now    func() time.Time
+
+	// Change stamps for readers that cache zone views (the manager's
+	// effective config): gen counts commits that may have changed what Zone
+	// returns, zoneGen holds the gen of each zone's last such commit and
+	// allGen that of the last commit that touched everything (a snapshot
+	// merge). Bumped after the commit, read before the data, so a reader can
+	// only ever see a stamp that is too old, never too new.
+	verMu   sync.Mutex
+	gen     uint64
+	allGen  uint64
+	zoneGen map[string]uint64
+}
+
+// Version is the store-wide change stamp: it differs whenever any zone view
+// may have changed since it was last read.
+func (s *Store) Version() uint64 {
+	s.verMu.Lock()
+	defer s.verMu.Unlock()
+	return s.gen
+}
+
+// ZoneVersion is the change stamp of one zone's view (see Version).
+func (s *Store) ZoneVersion(name string) uint64 {
+	s.verMu.Lock()
+	defer s.verMu.Unlock()
+	return max(s.zoneGen[name], s.allGen)
+}
+
+// bump records a commit that changed the views of zones (all zones when
+// zones is nil).
+func (s *Store) bump(zones ...string) {
+	s.verMu.Lock()
+	defer s.verMu.Unlock()
+	s.gen++
+	if zones == nil {
+		s.allGen = s.gen
+		return
+	}
+	if s.zoneGen == nil {
+		s.zoneGen = map[string]uint64{}
+	}
+	for _, z := range zones {
+		s.zoneGen[z] = s.gen
+	}
 }
 
 const schema = `
@@ -323,7 +367,15 @@ func (s *Store) LocalWrite(drafts []Draft) ([]Op, error) {
 	if err := setMetaTx(tx, "hlc", strconv.FormatUint(uint64(s.clock.Last()), 10)); err != nil {
 		return nil, err
 	}
-	return out, tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	for i := range out {
+		if out[i].Kind != KindToken {
+			s.bump(out[i].Zone)
+		}
+	}
+	return out, nil
 }
 
 // nextBase is the serial base for a (re)created zone: today's YYYYMMDD00, or
@@ -504,6 +556,9 @@ func (s *Store) ApplyRemote(ops []Op, maxFuture time.Duration, validate func(*Op
 		res.Touched = append(res.Touched, z)
 	}
 	sort.Strings(res.Touched)
+	if len(res.Touched) > 0 {
+		s.bump(res.Touched...)
+	}
 	return res, nil
 }
 
@@ -562,22 +617,30 @@ func (s *Store) OpsSince(since map[string]int64, limit int) (ops []Op, more bool
 	return ops, false, nil
 }
 
-// Zones returns every visible replicated zone, sorted by name.
-func (s *Store) Zones() ([]Zone, error) {
+// ZoneNames returns the names of the visible replicated zones, sorted.
+func (s *Store) ZoneNames() ([]string, error) {
 	rows, err := s.db.Query(`SELECT name FROM zones WHERE exists_flag = 1 ORDER BY name`)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var names []string
 	for rows.Next() {
 		var n string
 		if err := rows.Scan(&n); err != nil {
-			rows.Close()
 			return nil, err
 		}
 		names = append(names, n)
 	}
-	rows.Close()
+	return names, rows.Err()
+}
+
+// Zones returns every visible replicated zone, sorted by name.
+func (s *Store) Zones() ([]Zone, error) {
+	names, err := s.ZoneNames()
+	if err != nil {
+		return nil, err
+	}
 	out := make([]Zone, 0, len(names))
 	for _, n := range names {
 		z, ok, err := s.Zone(n)
@@ -589,6 +652,23 @@ func (s *Store) Zones() ([]Zone, error) {
 		}
 	}
 	return out, nil
+}
+
+// Serial returns a visible replicated zone's current serial, without loading
+// its records.
+func (s *Store) Serial(name string) (uint32, bool, error) {
+	var exists int
+	var gen string
+	var base, count int64
+	err := s.db.QueryRow(`SELECT z.exists_flag, z.generation, z.base, COALESCE(c.count, 0) FROM zones z
+		LEFT JOIN counters c ON c.zone = z.name AND c.generation = z.generation WHERE z.name = ?`, name).Scan(&exists, &gen, &base, &count)
+	if errors.Is(err, sql.ErrNoRows) || (err == nil && exists == 0) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	return uint32(base + count), true, nil
 }
 
 type rrsetRow struct {

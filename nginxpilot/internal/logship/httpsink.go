@@ -194,49 +194,61 @@ type lokiStream struct {
 }
 
 func (s *lokiSink) Send(ctx context.Context, batch []Entry, _ string) error {
-	byLabels := map[string]*lokiStream{}
-	var order []string
-	lastNS := map[string]int64{}
+	payload, err := json.Marshal(s.buildPayload(batch))
+	if err != nil {
+		return &sendError{err: err, permanent: true}
+	}
+	return s.post(ctx, payload)
+}
+
+// buildPayload groups a batch into per-label-set streams.
+func (s *lokiSink) buildPayload(batch []Entry) lokiPush {
+	// Labels depend only on the entry's host and status values, so resolve and
+	// key them once per distinct pair instead of once per entry.
+	type streamKey struct{ host, status string }
+	streams := map[streamKey]*lokiStream{}
+	var order []*lokiStream
+	lastNS := map[*lokiStream]int64{}
 	for i := range batch {
 		e := &batch[i]
-		labels := s.resolveLabels(e)
-		key := labelKey(labels)
-		st := byLabels[key]
+		k := streamKey{host: s.hostLabel(e), status: s.statusLabel(e)}
+		st := streams[k]
 		if st == nil {
-			st = &lokiStream{Stream: labels}
-			byLabels[key] = st
-			order = append(order, key)
+			st = &lokiStream{Stream: s.labelSet(k.host, k.status)}
+			streams[k] = st
+			order = append(order, st)
 		}
 		// Loki drops an entry whose (stream, timestamp, line) already exists, so
 		// two identical requests in the same millisecond would silently vanish.
 		// Nudge each collision forward by a nanosecond — the order within a
 		// millisecond is arbitrary anyway, and nothing is lost.
 		ns := e.TS.UnixNano()
-		if last, seen := lastNS[key]; seen && ns <= last {
+		if last, seen := lastNS[st]; seen && ns <= last {
 			ns = last + 1
 		}
-		lastNS[key] = ns
+		lastNS[st] = ns
 		st.Values = append(st.Values, [2]string{strconv.FormatInt(ns, 10), string(e.Raw)})
 	}
 	push := lokiPush{Streams: make([]lokiStream, 0, len(order))}
-	for _, key := range order {
-		st := byLabels[key]
+	for _, st := range order {
 		// Numeric-aware compare (decimal strings of differing length) so the
 		// per-stream sort holds for any timestamp magnitude.
-		sort.Slice(st.Values, func(i, j int) bool {
+		less := func(i, j int) bool {
 			a, b := st.Values[i][0], st.Values[j][0]
 			if len(a) != len(b) {
 				return len(a) < len(b)
 			}
 			return a < b
-		})
+		}
+		if !sort.SliceIsSorted(st.Values, less) { // arrival order is usually already time order
+			sort.Slice(st.Values, less)
+		}
 		push.Streams = append(push.Streams, *st)
 	}
-	payload, err := json.Marshal(push)
-	if err != nil {
-		return &sendError{err: err, permanent: true}
-	}
+	return push
+}
 
+func (s *lokiSink) post(ctx context.Context, payload []byte) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.url, bytes.NewReader(payload))
 	if err != nil {
 		return &sendError{err: err, permanent: true}
@@ -259,47 +271,45 @@ func (s *lokiSink) Send(ctx context.Context, batch []Entry, _ string) error {
 
 func (s *lokiSink) Close() error { return nil }
 
-// resolveLabels builds the label set for one entry: the static job + extras,
-// plus the whitelisted dynamic host/status_code sources. A dynamic label whose
-// source field is missing is dropped, not emitted empty (G22) — an
-// empty-string label value would mint a junk stream.
-func (s *lokiSink) resolveLabels(e *Entry) map[string]string {
+// hostLabel / statusLabel resolve the whitelisted dynamic label sources for
+// one entry ("" = label omitted: a missing source field is dropped, not
+// emitted empty (G22) — an empty-string label value would mint a junk stream).
+func (s *lokiSink) hostLabel(e *Entry) string {
+	if src := s.labels.HostSource; src != "" {
+		if v, ok := e.Field(strings.TrimPrefix(src, "$")); ok {
+			return v
+		}
+	}
+	return ""
+}
+
+func (s *lokiSink) statusLabel(e *Entry) string {
+	switch s.labels.StatusSource {
+	case "$status":
+		if e.F.Status > 0 {
+			return strconv.Itoa(e.F.Status)
+		}
+	case "$status_class":
+		if e.F.Status >= 100 && e.F.Status <= 599 {
+			return strconv.Itoa(e.F.Status/100) + "xx"
+		}
+	}
+	return ""
+}
+
+// labelSet builds the label set for one stream: the static job + extras plus
+// the resolved dynamic host/status_code values.
+func (s *lokiSink) labelSet(host, status string) map[string]string {
 	labels := make(map[string]string, 3+len(s.labels.Static))
 	labels["job"] = s.labels.Job
 	for k, v := range s.labels.Static {
 		labels[k] = v
 	}
-	if src := s.labels.HostSource; src != "" {
-		if v, ok := e.Field(strings.TrimPrefix(src, "$")); ok && v != "" {
-			labels["host"] = v
-		}
+	if host != "" {
+		labels["host"] = host
 	}
-	switch s.labels.StatusSource {
-	case "$status":
-		if e.F.Status > 0 {
-			labels["status_code"] = strconv.Itoa(e.F.Status)
-		}
-	case "$status_class":
-		if e.F.Status >= 100 && e.F.Status <= 599 {
-			labels["status_code"] = strconv.Itoa(e.F.Status/100) + "xx"
-		}
+	if status != "" {
+		labels["status_code"] = status
 	}
 	return labels
-}
-
-// labelKey builds a deterministic grouping key for a label set.
-func labelKey(labels map[string]string) string {
-	keys := make([]string, 0, len(labels))
-	for k := range labels {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	var b strings.Builder
-	for _, k := range keys {
-		b.WriteString(k)
-		b.WriteByte('=')
-		b.WriteString(labels[k])
-		b.WriteByte('\xff')
-	}
-	return b.String()
 }

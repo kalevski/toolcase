@@ -92,7 +92,7 @@ func TestStatusReportsAcmeCapabilities(t *testing.T) {
 	off := newTestServer(t, &config.Config{})
 	rec = httptest.NewRecorder()
 	off.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/status", nil))
-	if !strings.Contains(rec.Body.String(), `"acme": {`) || !strings.Contains(rec.Body.String(), `"enabled": false`) {
+	if !strings.Contains(rec.Body.String(), `"acme":{`) || !strings.Contains(rec.Body.String(), `"enabled":false`) {
 		t.Fatalf("disabled acme should still be reported: %s", rec.Body.String())
 	}
 }

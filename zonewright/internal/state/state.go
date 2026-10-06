@@ -27,6 +27,9 @@ type Store struct {
 	path string
 	mu   sync.Mutex
 	data map[string]ZoneState
+	// dirty is set by Put/Delete (and for a state file that does not exist
+	// yet) so Save rewrites the file only when something changed.
+	dirty bool
 }
 
 // NewStore loads (or initializes) data_dir/state.json.
@@ -34,6 +37,7 @@ func NewStore(dataDir string) (*Store, error) {
 	s := &Store{path: filepath.Join(dataDir, "state.json"), data: map[string]ZoneState{}}
 	raw, err := os.ReadFile(s.path)
 	if errors.Is(err, os.ErrNotExist) {
+		s.dirty = true
 		return s, nil
 	}
 	if err != nil {
@@ -66,7 +70,7 @@ func (s *Store) Get(zone string) (ZoneState, bool) {
 func (s *Store) Put(zone string, st ZoneState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.data[zone] = st
+	s.data[zone], s.dirty = st, true
 }
 
 // Delete forgets a zone.
@@ -74,6 +78,7 @@ func (s *Store) Delete(zone string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.data, zone)
+	s.dirty = true
 }
 
 // Zones lists every zone with state, sorted.
@@ -94,11 +99,24 @@ func (s *Store) Save() error {
 		return nil
 	}
 	s.mu.Lock()
+	if !s.dirty {
+		s.mu.Unlock()
+		return nil
+	}
 	raw, err := json.MarshalIndent(map[string]any{"zones": s.data}, "", "  ")
+	s.dirty = err != nil
 	s.mu.Unlock()
 	if err != nil {
 		return err
 	}
+	ok := false
+	defer func() {
+		if !ok {
+			s.mu.Lock()
+			s.dirty = true
+			s.mu.Unlock()
+		}
+	}()
 	dir := filepath.Dir(s.path)
 	tmp, err := os.CreateTemp(dir, ".state-*.tmp")
 	if err != nil {
@@ -116,7 +134,11 @@ func (s *Store) Save() error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tmp.Name(), s.path)
+	if err := os.Rename(tmp.Name(), s.path); err != nil {
+		return err
+	}
+	ok = true
+	return nil
 }
 
 // NextSerial returns the serial to publish after prev, in the conventional

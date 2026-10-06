@@ -49,13 +49,13 @@ func maskAccessList(l *config.AccessList) accessListInfo {
 }
 
 // handleListAccessLists lists every configured access list, masked.
-func (s *Server) handleListAccessLists(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleListAccessLists(w http.ResponseWriter, r *http.Request) {
 	cfg := s.mgr.Config()
 	out := make([]accessListInfo, 0, len(cfg.AccessLists))
 	for i := range cfg.AccessLists {
 		out = append(out, maskAccessList(&cfg.AccessLists[i]))
 	}
-	writeJSON(w, map[string]any{"access_lists": out}, s)
+	listRoute(s, w, r, "access_lists", out, func(x accessListInfo) string { return x.Name })
 }
 
 // handleCreateAccessList accepts an access-list fragment (one access_lists:

@@ -84,8 +84,8 @@ internal/jmap        upstream client, allow-lists, session rewrite; quirks.go = 
 internal/sanitize    HTML+CSS allow-list sanitiser (x/net/html tokenizer)
 internal/session     sealed credentials, cookie, expiry, CSRF/Origin
 internal/platform    agent client + branding cache + public-branding validation
-internal/ratelimit   SQLite-backed failure/window limiters
-internal/store       SQLite (WAL, writer pool of 1, append-only migrations)
+internal/ratelimit   SQLite-backed failure/window limiters; window limiter refuses blocked keys from memory
+internal/store       SQLite (WAL, writer pool of 1, append-only migrations); 5 s in-process session cache
 internal/fakes       fake platform + JMAP for tests and local runs
 web/                 React 19 + tc-* SPA, built into internal/web/dist
 ```
@@ -94,6 +94,13 @@ web/                 React 19 + tc-* SPA, built into internal/web/dist
 
 - Allow-lists: capabilities `core, mail, submission, vacationresponse, quota`; no `Email/copy`, `Email/import`, `Blob/*`.
   `accountId` is overwritten in every call; 1 MiB body, 32 calls.
+- Rate limits: the branding and invite window limiters refuse a key already over its limit from memory (no SQLite
+  write) until that window ends. Memory only repeats a decision the store made; it is bounded (10k keys), and after
+  eviction or restart the store decides again. Login/password failure limiters read the store on every check.
+- Sessions are cached in memory for 5 s (`store.DefaultSessionCacheTTL`). Every session write in the process (logout,
+  end session, password change, upstream 401, reaper, touch) drops the entry at once, expiry is always checked against
+  the clock, and callers get copies. Only a writer outside this process (a second process on the same file) can be
+  seen up to 5 s late; run one instance.
 - An upstream 401 ends the session (password change or revocation takes effect on the next call).
 - Sign-in failures answer identically for unknown address and wrong password, with a minimum response time.
 - Remote images, fonts and `@import` are never loaded unless the reader asks per message; there is no image proxy.

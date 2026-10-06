@@ -1,8 +1,11 @@
 package admin
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 // GET /schema serves a hand-kept OpenAPI 3.1 description of the admin surface
@@ -112,7 +115,16 @@ func buildOpenAPI() map[string]any {
 			"operationId": operationID(e.method, e.pattern),
 			"responses":   responsesFor(e, doc),
 		}
-		if params := paramsFor(e.pattern); len(params) > 0 {
+		params := paramsFor(e.pattern)
+		if e.method == "GET" {
+			if _, ok := pagedLists[e.pattern]; ok {
+				params = append(params, pageParamsDoc(e.pattern)...)
+			}
+			if doc.responseRef != "" {
+				params = append(params, prettyParamDoc())
+			}
+		}
+		if len(params) > 0 {
 			op["parameters"] = params
 		}
 		if e.method == "POST" || e.method == "PUT" {
@@ -140,9 +152,80 @@ func buildOpenAPI() map[string]any {
 			"securitySchemes": map[string]any{
 				"bearerAuth": map[string]any{"type": "http", "scheme": "bearer"},
 			},
-			"schemas": componentSchemas(),
+			"schemas": withPageFields(componentSchemas()),
 		},
 	}
+}
+
+// pagedLists maps each opt-in paginated list route to its list schema; the
+// value is true when the route also has a fields=summary view.
+var pagedLists = map[string]struct {
+	ref     string
+	summary bool
+}{
+	"/sites":            {"SiteList", true},
+	"/apps":             {"AppList", false},
+	"/upstreams":        {"UpstreamList", false},
+	"/proxies":          {"ProxyList", false},
+	"/redirects":        {"RedirectList", false},
+	"/dead-hosts":       {"DeadHostList", false},
+	"/access-lists":     {"AccessListList", false},
+	"/streams":          {"StreamList", false},
+	"/stream-upstreams": {"StreamUpstreamList", false},
+	"/certs":            {"CertList", false},
+}
+
+// pageParamsDoc describes limit / cursor / fields for a paginated list route.
+func pageParamsDoc(pattern string) []map[string]any {
+	fields := []string{"full"}
+	desc := "Only full is available on this route."
+	if pagedLists[pattern].summary {
+		fields = []string{"summary", "full"}
+		desc = "summary returns only domain, type (source type) and routing per item; full (default) is the whole object."
+	}
+	return []map[string]any{
+		{
+			"name": "limit", "in": "query", "required": false,
+			"description": "Opt-in paging: items per page (1-500), ordered by the item's key (domain or name). Omitted = the whole list in one response, as before. Adds next_cursor and total to the body.",
+			"schema":      map[string]any{"type": "integer", "minimum": 1, "maximum": 500},
+		},
+		{
+			"name": "cursor", "in": "query", "required": false,
+			"description": "Opaque next_cursor from the previous page: everything after its last key. Requires limit; a malformed cursor is a 400.",
+			"schema":      map[string]any{"type": "string"},
+		},
+		{
+			"name": "fields", "in": "query", "required": false,
+			"description": desc,
+			"schema":      map[string]any{"type": "string", "enum": fields, "default": "full"},
+		},
+	}
+}
+
+func prettyParamDoc() map[string]any {
+	return map[string]any{
+		"name": "pretty", "in": "query", "required": false,
+		"description": "Responses are compact JSON; pretty=1 indents them.",
+		"schema":      map[string]any{"type": "string", "enum": []string{"1"}},
+	}
+}
+
+// withPageFields adds the paging envelope (next_cursor, total) to the list
+// schemas; both are present only when the request sent limit.
+func withPageFields(schemas map[string]any) map[string]any {
+	for _, l := range pagedLists {
+		sch, ok := schemas[l.ref].(map[string]any)
+		if !ok {
+			continue
+		}
+		props, ok := sch["properties"].(map[string]any)
+		if !ok {
+			continue
+		}
+		props["next_cursor"] = map[string]any{"type": []string{"string", "null"}, "description": "Present with limit; null on the last page."}
+		props["total"] = map[string]any{"type": "integer", "description": "Present with limit; the number of items across all pages."}
+	}
+	return schemas
 }
 
 // operationID derives a stable id: "GET /access-lists" → "getAccessLists".
@@ -214,7 +297,32 @@ func responsesFor(e endpoint, doc operationDoc) map[string]any {
 	return out
 }
 
+// schemaJSON is the encoded document, built once: it derives only from the
+// static endpoint table, so rebuilding and re-indenting ~85 KB per request is
+// pure waste.
+var (
+	schemaOnce sync.Once
+	schemaBody []byte
+	schemaErr  error
+)
+
+func schemaJSON() ([]byte, error) {
+	schemaOnce.Do(func() {
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		enc.SetIndent("", "  ")
+		schemaErr = enc.Encode(buildOpenAPI())
+		schemaBody = buf.Bytes()
+	})
+	return schemaBody, schemaErr
+}
+
 func (s *Server) handleSchema(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	writeJSON(w, buildOpenAPI(), s)
+	body, err := schemaJSON()
+	if err != nil {
+		s.log.Warn("admin schema encode failed", "error", err)
+		return
+	}
+	_, _ = w.Write(body)
 }

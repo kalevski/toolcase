@@ -90,14 +90,14 @@ start 1
 start 2
 wait_for 30 sh -c "curl -sf http://127.0.0.1:19061/healthz >/dev/null && curl -sf http://127.0.0.1:19062/healthz >/dev/null" \
     || { docker logs zw1 | tail -20; exit 1; }
-wait_for 30 sh -c "curl -s -H 'Authorization: Bearer $TOKEN' http://127.0.0.1:19061/cluster/status | grep -q '\"ready\": true'" \
+wait_for 30 sh -c "curl -s -H 'Authorization: Bearer $TOKEN' http://127.0.0.1:19061/cluster/status | grep -q '\"ready\": *true'" \
     || { docker logs zw1 | tail -20; exit 1; }
 
 echo "== discovery"
 st1="$(api 1 GET /cluster/status)"
-check "zw1 found itself" "$(echo "$st1" | grep -c '"self": true')" "1"
-id1="$(echo "$st1" | sed -n 's/^  "node_id": "\(.*\)",/\1/p')"
-id2="$(api 2 GET /cluster/status | sed -n 's/^  "node_id": "\(.*\)",/\1/p')"
+check "zw1 found itself" "$(echo "$st1" | grep -c '"self": *true')" "1"
+id1="$(echo "$st1" | sed -n 's/.*"node_id": *"\([^"]*\)".*/\1/p')"
+id2="$(api 2 GET /cluster/status | sed -n 's/.*"node_id": *"\([^"]*\)".*/\1/p')"
 [ -n "$id1" ] && [ "$id1" != "$id2" ] && ok "each deployment generated its own id ($id1 / $id2)" || bad "node ids: '$id1' '$id2'"
 
 echo "== write on zw1, read from both"
@@ -108,7 +108,7 @@ resp="$(api 1 POST '/zones?wait=replicated' 'zones:
       - {name: ns1, type: A, value: 192.0.2.53}
       - {name: ns2, type: A, value: 192.0.2.54}
       - {name: www, type: CNAME, value: "@"}')"
-check "create replicated before responding" "$(echo "$resp" | grep -c '"replicated": true')" "1"
+check "create replicated before responding" "$(echo "$resp" | grep -c '"replicated": *true')" "1"
 check "zw1 answers" "$(q 1 www.example.test A)" "192.0.2.1 example.test."
 check "zw2 answers (replicated)" "$(q 2 www.example.test A)" "192.0.2.1 example.test."
 
@@ -150,7 +150,7 @@ check "zw2 never received it" "$(q 2 example.test NS)" "ns1.example.test. ns2.ex
 echo "== restart keeps identity and state"
 docker restart zw2 >/dev/null
 wait_for 30 sh -c "curl -sf http://127.0.0.1:19062/healthz >/dev/null" || true
-id2b="$(api 2 GET /cluster/status | sed -n 's/^  "node_id": "\(.*\)",/\1/p')"
+id2b="$(api 2 GET /cluster/status | sed -n 's/.*"node_id": *"\([^"]*\)".*/\1/p')"
 check "node id survives restart" "$id2b" "$id2"
 wait_for 20 sh -c "[ \"\$(dig @127.0.0.1 -p 15362 +short api.example.test A)\" = 192.0.2.2 ]" && ok "zw2 serves after restart" || bad "zw2 not serving after restart"
 
@@ -165,7 +165,7 @@ tcode() { # tcode <1|2> TOKEN METHOD PATH [BODY]
     if [ $# -ge 5 ]; then args+=(--data-binary "$5"); fi
     curl "${args[@]}"
 }
-acme="$(api 1 POST '/tokens?wait=replicated' '{"name":"e2e-acme","zones":["example.test"]}' | sed -n 's/^  "token": "\(zwt_[0-9a-f]*\)",*$/\1/p')"
+acme="$(api 1 POST '/tokens?wait=replicated' '{"name":"e2e-acme","zones":["example.test"]}' | sed -n 's/.*"token": *"\(zwt_[0-9a-f]*\)".*/\1/p')"
 check "zw1 returns the new token's secret once" "${acme:0:4}" "zwt_"
 check "zw2 accepts it for a challenge" \
     "$(tcode 2 "$acme" POST '/zones/example.test/records?wait=replicated' '{"name":"_acme-challenge","type":"TXT","value":"api-tok","ttl":60}')" "201"

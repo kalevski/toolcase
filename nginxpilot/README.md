@@ -678,6 +678,15 @@ A control plane (e.g. Quaykeeper) drives the **entire** config — sites, upstre
 
 Validation errors come back as a precise `400` (bad source, duplicate domain — sites and proxies share one domain namespace —, unknown upstream reference, unknown key, …). If the post-write reload is rejected (e.g. a concurrent edit to another file) the write is rolled back and reported as `500`. The `GET` list endpoints serialize the running merged config (main file + all fragments) as JSON; secret material is never present (auth carries only `*_env` / `*_file` references) and durations/sizes render as their human strings (`"5m"`, `"512MiB"`).
 
+**Paging (opt-in).** Every `GET` list route (`/sites`, `/apps`, `/upstreams`, `/proxies`, `/redirects`, `/dead-hosts`, `/access-lists`, `/streams`, `/stream-upstreams`, `/certs`) takes `limit` (1–500), `cursor` and `fields`. With none of them the body is the whole list in config order, as before (there is no default cap). With `limit` the list is ordered by its key (`domain`, or `name`) and the body gains `next_cursor` (a string, `null` on the last page) and `total` (all items, not the page). Pass `next_cursor` back as `cursor` for the next page; it means "everything after the last key", so items added or removed between pages are never repeated or skipped. `fields=summary` is only available on `/sites` and returns `domain`, `type` (the source type) and `routing` per site; `fields=full` is the default. A bad `limit`, `cursor` or `fields` is a `400`, and `cursor` without `limit` is too.
+
+```bash
+curl -fsS "$BASE/sites?limit=200&fields=summary"            # first page
+curl -fsS "$BASE/sites?limit=200&cursor=$NEXT_CURSOR"       # next page, until next_cursor is null
+```
+
+**Compact JSON.** JSON responses are compact (one line); add `?pretty=1` for indented output (`curl "$BASE/status?pretty=1"`). Scripts that grep line-oriented output should pipe through `jq`. `GET /schema` is a pre-encoded document and stays indented.
+
 ```bash
 # Stand up a reverse proxy entirely over REST — no YAML files touched by hand.
 BASE=http://127.0.0.1:9090

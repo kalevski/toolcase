@@ -29,9 +29,22 @@ func scanObject(s rowScanner) (*Object, error) {
 		v := fromMS(nc.Int64)
 		o.NoncurrentSince = &v
 	}
-	_ = json.Unmarshal([]byte(meta), &o.Metadata)
-	_ = json.Unmarshal([]byte(tags), &o.Tags)
-	_ = json.Unmarshal([]byte(parts), &o.Parts)
+	// the stored text is "{}" / "[]" for most rows: skip the decoder, keep its result (empty, non-nil)
+	if meta == "{}" {
+		o.Metadata = map[string]string{}
+	} else {
+		_ = json.Unmarshal([]byte(meta), &o.Metadata)
+	}
+	if tags == "{}" {
+		o.Tags = map[string]string{}
+	} else {
+		_ = json.Unmarshal([]byte(tags), &o.Tags)
+	}
+	if parts == "[]" {
+		o.Parts = []int64{}
+	} else {
+		_ = json.Unmarshal([]byte(parts), &o.Parts)
+	}
 	return &o, nil
 }
 

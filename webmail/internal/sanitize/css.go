@@ -46,6 +46,30 @@ var (
 	reMedia    = regexp.MustCompile(`^[A-Za-z0-9_\-:(),. \t\r\n]+$`)
 )
 
+// badWords are the literal alternatives of reBadValue (lower case).
+var badWords = []string{"expression", "javascript:", "vbscript:", "livescript:", "behavio", "binding", "@import", "-moz-", "image-set", "/*"}
+
+// badValue reports whether a declaration value matches reBadValue. Pure-ASCII
+// values (nearly all of them) take a plain substring scan, which is equivalent
+// there because ASCII only case-folds to ASCII; anything else uses the regexp.
+func badValue(val string) bool {
+	for i := 0; i < len(val); i++ {
+		if val[i] >= 0x80 {
+			return reBadValue.MatchString(val)
+		}
+	}
+	if strings.ContainsAny(val, "\\<>{}") {
+		return true
+	}
+	lower := strings.ToLower(val)
+	for _, w := range badWords {
+		if strings.Contains(lower, w) {
+			return true
+		}
+	}
+	return false
+}
+
 // SanitizeCSS cleans the text of a <style> element: rules with unsafe
 // selectors are dropped, at-rules other than @media are dropped (@import,
 // @font-face, @keyframes, @namespace, ...), declarations are filtered.
@@ -210,7 +234,7 @@ func SanitizeDeclarations(decls string, o CSSOptions) string {
 }
 
 func cleanValue(prop, val string, o CSSOptions) (string, bool) {
-	if reBadValue.MatchString(val) {
+	if badValue(val) {
 		return "", false
 	}
 	if prop == "display" {

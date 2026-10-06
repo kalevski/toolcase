@@ -55,12 +55,24 @@ type writerSink struct {
 func (s *writerSink) Send(_ context.Context, batch []Entry, _ string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	for _, e := range batch {
-		if _, err := s.w.Write(append(e.Raw, '\n')); err != nil {
-			return &sendError{err: err, permanent: true} // stdout write errors won't heal on retry
-		}
+	// One write per batch instead of one per line (a syscall each on stdout).
+	buf := make([]byte, 0, batchBytes(batch))
+	for i := range batch {
+		buf = append(append(buf, batch[i].Raw...), '\n')
+	}
+	if _, err := s.w.Write(buf); err != nil {
+		return &sendError{err: err, permanent: true} // stdout write errors won't heal on retry
 	}
 	return nil
+}
+
+// batchBytes is the NDJSON size of a batch (lines plus newlines).
+func batchBytes(batch []Entry) int {
+	n := 0
+	for i := range batch {
+		n += len(batch[i].Raw) + 1
+	}
+	return n
 }
 
 func (s *writerSink) Close() error { return nil }
@@ -97,17 +109,31 @@ func (s *fileSink) Send(_ context.Context, batch []Entry, _ string) error {
 	if err := s.open(); err != nil {
 		return &sendError{err: err}
 	}
-	for _, e := range batch {
-		n, err := s.f.Write(append(e.Raw, '\n'))
-		s.size += int64(n)
-		if err != nil {
-			return &sendError{err: err}
+	// Lines are coalesced into one write per rotation window rather than one
+	// syscall per line; rotation still happens at the same line boundaries.
+	buf := make([]byte, 0, min(batchBytes(batch), int(s.maxSize)+4096))
+	flush := func() error {
+		if len(buf) == 0 {
+			return nil
 		}
-		if s.size >= s.maxSize {
+		n, err := s.f.Write(buf)
+		s.size += int64(n)
+		buf = buf[:0]
+		return err
+	}
+	for i := range batch {
+		buf = append(append(buf, batch[i].Raw...), '\n')
+		if s.size+int64(len(buf)) >= s.maxSize {
+			if err := flush(); err != nil {
+				return &sendError{err: err}
+			}
 			if err := s.rotate(); err != nil {
 				return &sendError{err: err}
 			}
 		}
+	}
+	if err := flush(); err != nil {
+		return &sendError{err: err}
 	}
 	return nil
 }

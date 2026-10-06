@@ -266,6 +266,7 @@ func (s *Store) MergeSnapshot(snap *Snapshot) ([]string, error) {
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	s.bump() // counters (serials) change too, not only the touched zones
 	out := make([]string, 0, len(touched))
 	for z := range touched {
 		out = append(out, z)

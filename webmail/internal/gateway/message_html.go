@@ -31,7 +31,7 @@ type bodyPart struct {
 }
 
 type emailGetResponse struct {
-	MethodResponses []json.RawMessage `json:"methodResponses"`
+	MethodResponses [][]json.RawMessage `json:"methodResponses"`
 }
 
 type emailGetResult struct {
@@ -102,10 +102,8 @@ func (g *Gateway) handleMessageHTML(w http.ResponseWriter, r *http.Request, a *s
 	}
 	var resp emailGetResponse
 	var res emailGetResult
-	var triple []json.RawMessage
-	if json.Unmarshal(data, &resp) != nil || len(resp.MethodResponses) != 1 ||
-		json.Unmarshal(resp.MethodResponses[0], &triple) != nil || len(triple) != 3 ||
-		json.Unmarshal(triple[1], &res) != nil {
+	if json.Unmarshal(data, &resp) != nil || len(resp.MethodResponses) != 1 || len(resp.MethodResponses[0]) != 3 ||
+		json.Unmarshal(resp.MethodResponses[0][1], &res) != nil {
 		httpx.Error(w, r, http.StatusBadGateway, "upstream_error", "The mail server answered in an unexpected way.")
 		return
 	}

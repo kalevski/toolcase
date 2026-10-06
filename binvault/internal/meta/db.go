@@ -38,6 +38,7 @@ type DB struct {
 	ro   bool
 	w    *sql.DB
 	r    *sql.DB
+	rq   *stmtDB // r with its hot statements prepared once; nil on a read-only inspection handle
 	now  func() time.Time
 
 	gate   atomic.Pointer[gateHolder]
@@ -111,7 +112,8 @@ func Open(ctx context.Context, path string, opt Options) (*DB, error) {
 		return nil, err
 	}
 	r.SetMaxOpenConns(opt.Readers)
-	d := &DB{path: path, base: base, w: w, r: r, now: opt.Now,
+	r.SetMaxIdleConns(opt.Readers) // the default of 2 would close and reopen (pragmas, statements) connections under concurrency
+	d := &DB{path: path, base: base, w: w, r: r, rq: newStmtDB(r), now: opt.Now,
 		reqs: make(chan *txReq, 1024), stop: make(chan struct{}), done: make(chan struct{})}
 	if err := d.migrate(ctx); err != nil {
 		w.Close()
@@ -171,7 +173,12 @@ func (d *DB) Version(ctx context.Context) (int, error) {
 }
 
 // Read returns the read helpers over the reader pool.
-func (d *DB) Read() Q { return Q{d.r} }
+func (d *DB) Read() Q {
+	if d.rq != nil {
+		return Q{d.rq}
+	}
+	return Q{d.r}
+}
 
 // Raw exposes the reader pool (tests, validate).
 func (d *DB) Raw() *sql.DB { return d.r }
@@ -351,6 +358,7 @@ func (d *DB) Close() error {
 		<-d.done
 		// checkpoint the WAL on the way out (spec §9.4)
 		d.w.Exec(`PRAGMA wal_checkpoint(TRUNCATE)`)
+		d.rq.close()
 		err = errors.Join(d.r.Close(), d.w.Close())
 	})
 	return err

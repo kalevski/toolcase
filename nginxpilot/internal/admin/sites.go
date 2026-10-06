@@ -171,7 +171,7 @@ func (s *Server) writeFragmentAndReload(w http.ResponseWriter, target string, bo
 	if len(warnings) > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(code)
-		writeJSON(w, map[string]any{"status": status, "warnings": warnings}, s)
+		writeJSON(w, nil, map[string]any{"status": status, "warnings": warnings}, s)
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")

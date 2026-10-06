@@ -206,30 +206,45 @@ func redactQuery(query string, deny []string) (string, bool) {
 	if query == "" || len(deny) == 0 {
 		return query, false
 	}
-	denySet := make(map[string]bool, len(deny))
-	for _, p := range deny {
-		denySet[strings.ToLower(p)] = true
-	}
-	parts := strings.Split(query, "&")
-	changed := false
-	for i, part := range parts {
-		name, _, hasVal := strings.Cut(part, "=")
-		if !hasVal {
-			continue
+	var parts []string // split lazily: most lines carry nothing to redact
+	rest := query
+	for i := 0; ; i++ {
+		part := rest
+		next := strings.IndexByte(rest, '&')
+		if next >= 0 {
+			part = rest[:next]
 		}
-		decoded, err := url.QueryUnescape(name)
-		if err != nil {
-			decoded = name
-		}
-		if denySet[strings.ToLower(decoded)] {
+		if name, _, hasVal := strings.Cut(part, "="); hasVal && denied(name, deny) {
+			if parts == nil {
+				parts = strings.Split(query, "&")
+			}
 			parts[i] = name + "=" + redactedValue
-			changed = true
 		}
+		if next < 0 {
+			break
+		}
+		rest = rest[next+1:]
 	}
-	if !changed {
+	if parts == nil {
 		return query, false
 	}
 	return strings.Join(parts, "&"), true
+}
+
+// denied reports whether a (possibly percent-encoded) parameter name is on the
+// deny-list, case-insensitively.
+func denied(name string, deny []string) bool {
+	if strings.ContainsAny(name, "%+") {
+		if decoded, err := url.QueryUnescape(name); err == nil {
+			name = decoded
+		}
+	}
+	for _, p := range deny {
+		if strings.EqualFold(name, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // anonymizeIP zeroes the host part of an address: the last octet of an IPv4,

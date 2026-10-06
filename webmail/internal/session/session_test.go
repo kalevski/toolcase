@@ -195,3 +195,62 @@ func TestCookieAttributes(t *testing.T) {
 		t.Fatal("normal cookie should be a browser-session cookie")
 	}
 }
+
+// The session cache must not extend a session: expiry is judged against the
+// manager's clock on every lookup, even while the row is served from memory.
+func TestCachedSessionStillExpires(t *testing.T) {
+	storeNow := time.Unix(1_700_000_000, 0) // frozen: the cache TTL never lapses
+	st, err := store.Open(context.Background(), t.TempDir(), store.Options{Now: func() time.Time { return storeNow }, SessionCacheTTL: time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer st.Close()
+	ck := &clock{t: storeNow}
+	m := &Manager{Store: st, Key: testKey, PublicURL: "https://mail.example.test", Now: ck.now,
+		Settings: Settings{Idle: time.Hour, RememberIdle: 2 * time.Hour, Max: 3 * time.Hour}}
+	ctx := context.Background()
+	cookie, _, _ := m.Create(ctx, CreateParams{Address: "a@x.test", Credential: "c"})
+	if _, err := m.Lookup(ctx, cookie); err != nil { // warm
+		t.Fatal(err)
+	}
+	ck.t = ck.t.Add(30 * time.Second)
+	if _, err := m.Lookup(ctx, cookie); err != nil {
+		t.Fatal(err)
+	}
+	ck.t = ck.t.Add(61 * time.Minute) // past idle; cache entry is "fresh" by the store clock
+	if _, err := m.Lookup(ctx, cookie); err != ErrNoSession {
+		t.Fatalf("idle expiry not enforced on a cached session: %v", err)
+	}
+}
+
+func TestLogoutThenReplayFailsAtOnce(t *testing.T) {
+	m, _ := newMgr(t)
+	ctx := context.Background()
+	cookie, s, _ := m.Create(ctx, CreateParams{Address: "a@x.test", Credential: "c"})
+	a, err := m.Lookup(ctx, cookie)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.Session.CSRF = "tampered" // callers get a copy
+	if b, _ := m.Lookup(ctx, cookie); b.CSRF == "tampered" {
+		t.Fatal("cache state mutated through a returned session")
+	}
+	m.Terminate(ctx, s)
+	if _, err := m.Lookup(ctx, cookie); err != ErrNoSession {
+		t.Fatalf("old cookie replayed after logout: %v", err)
+	}
+}
+
+func TestTouchRefreshesCachedIdle(t *testing.T) {
+	m, ck := newMgr(t)
+	ctx := context.Background()
+	cookie, _, _ := m.Create(ctx, CreateParams{Address: "a@x.test", Credential: "c"})
+	m.Lookup(ctx, cookie)
+	ck.t = ck.t.Add(2 * time.Minute)
+	a, _ := m.Lookup(ctx, cookie) // touches
+	ck.t = ck.t.Add(2 * time.Minute)
+	b, _ := m.Lookup(ctx, cookie)
+	if !b.IdleExpiresAt.After(a.IdleExpiresAt) {
+		t.Fatalf("touch effect lost: %v then %v", a.IdleExpiresAt, b.IdleExpiresAt)
+	}
+}

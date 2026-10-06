@@ -151,5 +151,5 @@ func (s *Server) handleLookup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	src := source(best)
-	writeJSON(w, http.StatusOK, Lookup{Zone: best.Name, Name: name, Source: src, Writable: src == "replicated"}, s)
+	writeJSON(w, r, http.StatusOK, Lookup{Zone: best.Name, Name: name, Source: src, Writable: src == "replicated"}, s)
 }

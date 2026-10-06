@@ -184,13 +184,13 @@ JSON everywhere (errors are `{"error": "…"}`); loopback by default; optional `
 | `GET /status` | per-zone state/serial + last apply (reload errors, pending retry) |
 | `POST /reload` | re-read config from disk and apply (same as `SIGHUP`) |
 | `GET /lookup?name=<fqdn>` | the most specific zone that holds a name: `{"zone","name","source","writable"}`, `name` relative to the zone (`@` for the apex); `404` when no zone holds it |
-| `GET /zones` | all zones with records, serial, state, `source` (`replicated`/`local`), `etag` |
+| `GET /zones[?view=summary][&limit=&cursor=]` | all zones with records, serial, state, `source` (`replicated`/`local`), `etag`. `view=summary` drops the records and adds `record_count` (cheap for dashboards). Paging is opt-in — see below |
 | `POST /zones` | create/replace one zone: a YAML **or** JSON fragment with exactly one zone (`201` created / `200` updated / `200` unchanged) |
 | `GET /zones/{zone}` | one zone, with an `ETag` header |
 | `PUT /zones/{zone}` | create/replace the zone from a bare zone object (YAML/JSON, name from the path) — removed records are deleted |
 | `DELETE /zones/{zone}` | remove the zone everywhere |
 | `GET /zones/{zone}/file` | the rendered zone file, as named serves it |
-| `GET /zones/{zone}/records?name=&type=` | list records, optionally filtered |
+| `GET /zones/{zone}/records?name=&type=[&limit=&cursor=]` | list records, optionally filtered and paged |
 | `POST /zones/{zone}/records` | add one record — `409` if an identical one exists |
 | `PUT /zones/{zone}/records/{name}/{type}` | replace one RRset: `{"records":[{"value":"…"},…]}`; `[]` empties it |
 | `DELETE /zones/{zone}/records/{name}/{type}[?value=…]` | delete the RRset, or only the matching value |
@@ -201,6 +201,16 @@ JSON everywhere (errors are `{"error": "…"}`); loopback by default; optional `
 | `DELETE /tokens/{name}` | revoke an API token on every server |
 | `GET /cluster/status` | this node's id; per URL: which server answered, self/peer, lag, last pull, clock skew, alarms; conflicts; log size |
 | `DELETE /cluster/peers/{id}` | retire the id of a server removed for good (a redeployed server is retired automatically) |
+
+**Paging.** `GET /zones` and `GET /zones/{zone}/records` return everything unless you pass `limit` (1–500) and/or `cursor`; there is no default cap. With either, the list is in stable order (zones by name; records by name, type, value) and the body gains `"total"` (items before the cursor is applied) and `"next_cursor"` (`null` on the last page). A cursor is opaque and means "everything after this item", so zones or records added or removed between pages never skip or repeat items. Bad `limit`, `cursor` or `view` values are `400`.
+
+```bash
+curl -H 'Authorization: Bearer change-me' 'localhost:9053/zones?view=summary&limit=200'
+# {"next_cursor":"eyJ…","total":412,"zones":[{"name":"a.example.","serial":…,"record_count":12,"etag":"\"…\"",…}, …]}
+curl -H 'Authorization: Bearer change-me' 'localhost:9053/zones?view=summary&limit=200&cursor=eyJ…'
+```
+
+**JSON formatting.** Responses are compact, one line. Add `?pretty=1` for indented output when reading by eye (`curl … | jq` works too). Error bodies are always compact.
 
 **On every write:**
 - `If-Match: <etag>` → `412` if the zone changed since you read it (`If-Match: *` = "must exist").

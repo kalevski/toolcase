@@ -14,13 +14,8 @@ const appStemPrefix = "app-"
 
 // handleListApps exposes the running apps as JSON so a control plane reads
 // current state without re-reading the fragment directory off disk.
-func (s *Server) handleListApps(w http.ResponseWriter, _ *http.Request) {
-	cfg := s.mgr.Config()
-	apps := cfg.Apps
-	if apps == nil {
-		apps = []config.App{}
-	}
-	writeJSON(w, map[string]any{"apps": apps}, s)
+func (s *Server) handleListApps(w http.ResponseWriter, r *http.Request) {
+	listRoute(s, w, r, "apps", s.mgr.Config().Apps, func(x config.App) string { return x.Domain })
 }
 
 // handleCreateApp accepts an app fragment, validates the candidate merged
@@ -105,5 +100,5 @@ func (s *Server) handleDeleteAppData(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("remove app data: %v", err), http.StatusInternalServerError)
 		return
 	}
-	writeJSON(w, map[string]any{"status": "deleted", "domain": domain}, s)
+	writeJSON(w, r, map[string]any{"status": "deleted", "domain": domain}, s)
 }

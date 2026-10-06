@@ -1,6 +1,8 @@
 package state
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -38,5 +40,37 @@ func TestStorePersists(t *testing.T) {
 	}
 	if st, ok := s2.Get("example.com"); !ok || st.Serial != 7 || st.Hash != "h" {
 		t.Fatalf("not persisted: %+v %v", st, ok)
+	}
+}
+
+// Save rewrites the file only when something changed.
+func TestSaveSkipsWhenClean(t *testing.T) {
+	dir := t.TempDir()
+	s, err := NewStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Save(); err != nil { // first save always creates the file
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "state.json")
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("state.json not created: %v", err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Save(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Fatal("clean Save rewrote the file")
+	}
+	s.Put("example.com", ZoneState{Serial: 1})
+	if err := s.Save(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal("dirty Save did not write the file")
 	}
 }

@@ -62,6 +62,9 @@ type Options struct {
 	Readers int
 	// Now overrides the clock (tests).
 	Now func() time.Time
+	// SessionCacheTTL bounds how long GetSession may serve from memory
+	// (default DefaultSessionCacheTTL; negative disables the cache).
+	SessionCacheTTL time.Duration
 }
 
 // Store is the database handle.
@@ -70,6 +73,7 @@ type Store struct {
 	w    *sql.DB
 	r    *sql.DB
 	now  func() time.Time
+	sc   *sessionCache
 }
 
 // ErrNotFound is returned when a row does not exist.
@@ -105,7 +109,11 @@ func Open(ctx context.Context, dir string, opt Options) (*Store, error) {
 		return nil, err
 	}
 	r.SetMaxOpenConns(opt.Readers)
-	s := &Store{path: path, w: w, r: r, now: opt.Now}
+	r.SetMaxIdleConns(opt.Readers) // the default of 2 closes and reopens a connection (and re-prepares) under concurrency
+	if opt.SessionCacheTTL == 0 {
+		opt.SessionCacheTTL = DefaultSessionCacheTTL
+	}
+	s := &Store{path: path, w: w, r: r, now: opt.Now, sc: newSessionCache(opt.SessionCacheTTL, opt.Now)}
 	if err := s.migrate(ctx); err != nil {
 		w.Close()
 		r.Close()

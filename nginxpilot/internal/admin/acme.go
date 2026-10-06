@@ -142,7 +142,7 @@ func (s *Server) handleIssueCert(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.WriteHeader(http.StatusAccepted)
-	writeJSON(w, map[string]any{
+	writeJSON(w, r, map[string]any{
 		"status":    "accepted",
 		"job_id":    job.ID,
 		"state":     job.State,
@@ -160,13 +160,13 @@ func (s *Server) handleCertJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no such job", http.StatusNotFound)
 		return
 	}
-	writeJSON(w, job, s)
+	writeJSON(w, r, job, s)
 }
 
 // handleListCertJobs lists the tracked async issuance jobs, newest first
 // (GET /certs/jobs). Ephemeral + best-effort — finished jobs are pruned after a TTL.
-func (s *Server) handleListCertJobs(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]any{"jobs": s.jobs.list()}, s)
+func (s *Server) handleListCertJobs(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, r, map[string]any{"jobs": s.jobs.list()}, s)
 }
 
 // handleUploadCert stores a manually supplied cert/key (PUT /certs/{domain}).
@@ -203,7 +203,7 @@ func (s *Server) handleUploadCert(w http.ResponseWriter, r *http.Request) {
 	if !existed {
 		w.WriteHeader(http.StatusCreated)
 	}
-	writeJSON(w, map[string]any{
+	writeJSON(w, r, map[string]any{
 		"status": map[bool]string{true: "replaced", false: "created"}[existed],
 		"domain": domain,
 		"cert":   s.certInfoFor(domain),
@@ -307,7 +307,7 @@ func (s *Server) handleRevokeCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.log.Info("cert revoked", "cert_name", name, "reason", req.Reason, "deleted", req.Delete)
-	writeJSON(w, map[string]any{"status": "revoked", "domain": name, "reason": req.Reason, "deleted": req.Delete}, s)
+	writeJSON(w, r, map[string]any{"status": "revoked", "domain": name, "reason": req.Reason, "deleted": req.Delete}, s)
 }
 
 // handleDeleteCert deletes a certbot-managed or manually uploaded cert
@@ -364,7 +364,7 @@ func (s *Server) handleSetCreds(w http.ResponseWriter, r *http.Request) {
 	if !existed {
 		w.WriteHeader(http.StatusCreated)
 	}
-	writeJSON(w, map[string]any{
+	writeJSON(w, r, map[string]any{
 		"status":    map[bool]string{true: "replaced", false: "created"}[existed],
 		"provider":  provider,
 		"account":   account,
@@ -374,8 +374,8 @@ func (s *Server) handleSetCreds(w http.ResponseWriter, r *http.Request) {
 
 // handleListCreds lists stored providers — names + metadata only, no secrets
 // (GET /acme/credentials).
-func (s *Server) handleListCreds(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]any{"credentials": s.mgr.ListAcmeCredentials()}, s)
+func (s *Server) handleListCreds(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, r, map[string]any{"credentials": s.mgr.ListAcmeCredentials()}, s)
 }
 
 // handleDeleteCreds removes a provider's credentials (DELETE /acme/credentials/{provider}).

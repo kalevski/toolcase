@@ -89,7 +89,7 @@ func checkTokenBody(b *tokenBody) error {
 
 // handleListTokens lists every scoped token this server accepts: its own
 // config tokens and the replicated API tokens.
-func (s *Server) handleListTokens(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleListTokens(w http.ResponseWriter, r *http.Request) {
 	out := []TokenView{}
 	for _, t := range s.scoped {
 		zones := t.Zones
@@ -106,7 +106,7 @@ func (s *Server) handleListTokens(w http.ResponseWriter, _ *http.Request) {
 	for _, t := range api {
 		out = append(out, viewOf(t))
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"tokens": out}, s)
+	writeJSON(w, r, http.StatusOK, map[string]any{"tokens": out}, s)
 }
 
 // handleCreateToken creates a replicated scoped token and returns its secret
@@ -202,7 +202,7 @@ func (s *Server) handleDeleteToken(w http.ResponseWriter, r *http.Request) {
 	if s.waitReplicated(r, ops, resp) {
 		code = http.StatusAccepted
 	}
-	writeJSON(w, code, resp, s)
+	writeJSON(w, r, code, resp, s)
 }
 
 // apiToken resolves {name} to a live API token, writing 404 (or 409 for a
@@ -242,7 +242,7 @@ func (s *Server) commitToken(w http.ResponseWriter, r *http.Request, name string
 	if s.waitReplicated(r, ops, resp) {
 		code = http.StatusAccepted
 	}
-	writeJSON(w, code, resp, s)
+	writeJSON(w, r, code, resp, s)
 }
 
 func (s *Server) writeTokenError(w http.ResponseWriter, err error) {

@@ -142,8 +142,7 @@ func (m *Manager) Mutate(ctx context.Context, zone string, fn func(cur Current) 
 // ETag is a strong validator of a zone's served content (serial excluded).
 func (m *Manager) ETag(z *config.Zone) string {
 	eff, _ := m.Effective()
-	zz := config.CloneZone(*z)
-	return `"` + zonefile.ContentHash(eff, &zz)[:20] + `"`
+	return `"` + zonefile.ContentHash(eff, z)[:20] + `"`
 }
 
 type rrKey struct{ name, typ string }
@@ -432,4 +431,43 @@ func (m *Manager) MigrateFragments(legacyState bool, serials *state.Store) ([]st
 		}
 	}
 	return migrated, m.repl.SetMeta("migrated_fragments", time.Now().UTC().Format(time.RFC3339))
+}
+
+// ETagOf is ETag for a zone taken from eff (a result of Effective), memoized
+// per zone: a replicated zone's ETag stays valid while its store change stamp
+// is the one its cached view was built from, a file-declared zone's while the
+// file config is. Values are identical to ETag's. When eff is no longer the
+// current effective config the answer is computed without the cache.
+func (m *Manager) ETagOf(eff *config.Config, z *config.Zone) string {
+	m.effMu.Lock()
+	c := m.effc
+	if c == nil || c.eff != eff {
+		m.effMu.Unlock()
+		return `"` + zonefile.ContentHash(eff, z)[:20] + `"`
+	}
+	var ez *effZone
+	if z.File == config.ReplicatedFile {
+		ez = c.zones[z.Name]
+	}
+	var hit string
+	if ez != nil {
+		hit = ez.etag
+	} else {
+		hit = c.local[z.Name]
+	}
+	m.effMu.Unlock()
+	if hit != "" {
+		return hit
+	}
+	etag := `"` + zonefile.ContentHash(eff, z)[:20] + `"`
+	m.effMu.Lock()
+	if m.effc == c { // still the same generation: ez/local are still current
+		if ez != nil {
+			ez.etag = etag
+		} else {
+			c.local[z.Name] = etag
+		}
+	}
+	m.effMu.Unlock()
+	return etag
 }

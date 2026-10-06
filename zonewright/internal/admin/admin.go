@@ -5,14 +5,14 @@
 //	POST   /reload                                re-read config from disk and apply (same as SIGHUP)
 //	GET    /lookup?name=<fqdn>                    the zone that holds a name, and the name relative to it
 //
-//	GET    /zones                                 list zones (replicated + local)
+//	GET    /zones                                 list zones (replicated + local); ?view=full|summary, ?limit=1..500&cursor=
 //	POST   /zones                                 create/replace one zone (YAML or JSON fragment)
 //	GET    /zones/{zone}                          one zone (ETag)
 //	PUT    /zones/{zone}                          create/replace one zone (YAML or JSON zone object)
 //	DELETE /zones/{zone}                          remove a zone
 //	GET    /zones/{zone}/file                     the rendered zone file (text)
 //
-//	GET    /zones/{zone}/records                  list records (?name=&type= filters)
+//	GET    /zones/{zone}/records                  list records (?name=&type= filters, ?limit=&cursor=)
 //	POST   /zones/{zone}/records                  add one record (JSON)
 //	PUT    /zones/{zone}/records/{name}/{type}    replace one RRset (JSON {"records":[…]})
 //	DELETE /zones/{zone}/records/{name}/{type}    delete one RRset, or one record with ?value=
@@ -32,6 +32,16 @@
 // it is committed — a committed change replicates and cannot be rolled back,
 // so the API never commits a zone BIND would not load. Writes accept
 // If-Match (412 on a stale ETag) and ?wait=replicated.
+//
+// Responses are compact JSON; add ?pretty=1 to any request for indented output.
+//
+// Lists page only on request: without ?limit=/?cursor= GET /zones and
+// GET /zones/{zone}/records return everything, as before. With either, the
+// list is ordered (zones by name, records by name, type, rdata) and the body
+// adds "next_cursor" (null on the last page) and "total". A cursor is opaque
+// and means "everything after this key", so edits between pages never skip or
+// repeat an item. view=summary drops the records: name, serial, state, source,
+// managed, record_count, etag (ETags come from a per-zone cache).
 //
 // Next to the admin token, limited tokens come from admin.scoped_tokens (this
 // server only) or from /tokens (replicated, managed with the admin token).
@@ -269,7 +279,7 @@ type Status struct {
 	PendingReload bool                 `json:"pending_reload"`
 }
 
-func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	eff, _ := s.mgr.Effective()
 	last, ok := s.mgr.LastApply()
 	out := Status{NodeID: s.mgr.Store().NodeID(), Zones: []ZoneStatus{}, Conflicts: s.mgr.Conflicts(), PendingReload: s.mgr.PendingRetry()}
@@ -289,7 +299,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 		}
 		out.Zones = append(out.Zones, zs)
 	}
-	writeJSON(w, http.StatusOK, out, s)
+	writeJSON(w, r, http.StatusOK, out, s)
 }
 
 func (s *Server) handleReload(w http.ResponseWriter, r *http.Request) {
@@ -302,15 +312,15 @@ func (s *Server) handleReload(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "reload rejected, running config kept: "+err.Error())
 		return
 	}
-	writeJSON(w, http.StatusOK, res, s)
+	writeJSON(w, r, http.StatusOK, res, s)
 }
 
-func (s *Server) handleClusterStatus(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleClusterStatus(w http.ResponseWriter, r *http.Request) {
 	if s.cluster == nil {
 		writeError(w, http.StatusNotImplemented, "not a cluster: no cluster: block in the config")
 		return
 	}
-	writeJSON(w, http.StatusOK, s.cluster.ClusterStatus(), s)
+	writeJSON(w, r, http.StatusOK, s.cluster.ClusterStatus(), s)
 }
 
 func (s *Server) handleRetirePeer(w http.ResponseWriter, r *http.Request) {
@@ -322,14 +332,29 @@ func (s *Server) handleRetirePeer(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "retired", "id": r.PathValue("id")}, s)
+	writeJSON(w, r, http.StatusOK, map[string]string{"status": "retired", "id": r.PathValue("id")}, s)
 }
 
-func writeJSON(w http.ResponseWriter, code int, v any, s *Server) {
+// wantPretty reports whether the caller asked for indented JSON (?pretty=1).
+// Output is compact otherwise; error bodies (no request) are always compact.
+func wantPretty(r *http.Request) bool {
+	if r == nil {
+		return false
+	}
+	switch r.URL.Query().Get("pretty") {
+	case "1", "true":
+		return true
+	}
+	return false
+}
+
+func writeJSON(w http.ResponseWriter, r *http.Request, code int, v any, s *Server) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
+	if wantPretty(r) {
+		enc.SetIndent("", "  ")
+	}
 	if err := enc.Encode(v); err != nil && s != nil {
 		s.log.Warn("admin encode failed", "error", err)
 	}
@@ -338,5 +363,5 @@ func writeJSON(w http.ResponseWriter, code int, v any, s *Server) {
 // writeError responds with {"error": msg}. Every error is JSON so API clients
 // have one shape to parse.
 func writeError(w http.ResponseWriter, code int, msg string) {
-	writeJSON(w, code, map[string]string{"error": msg}, nil)
+	writeJSON(w, nil, code, map[string]string{"error": msg}, nil)
 }

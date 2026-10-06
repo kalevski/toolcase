@@ -115,6 +115,7 @@ func Sanitize(src string, o Options) Result {
 		}
 	}
 	s := &state{o: o}
+	s.body.Grow(len(src)) // output is about the size of the input; avoids repeated regrowth
 	s.run(src)
 	return Result{HTML: s.document(), HasRemote: s.remote > 0, Blocked: s.blocked, Plain: false}
 }
@@ -230,12 +231,13 @@ func (s *state) start(name string, attrs []html.Attribute, selfClosing bool) {
 		out, ok = s.imgAttrs(attrs, out)
 		_ = ok
 	}
-	s.body.WriteString("<" + name + out)
+	s.body.WriteByte('<')
+	s.body.WriteString(name)
+	s.body.WriteString(out)
+	s.body.WriteByte('>')
 	if voidTags[name] {
-		s.body.WriteString(">")
 		return
 	}
-	s.body.WriteString(">")
 	s.stack = append(s.stack, name)
 }
 
@@ -253,7 +255,9 @@ func (s *state) end(name string) {
 func (s *state) pop() {
 	n := s.stack[len(s.stack)-1]
 	s.stack = s.stack[:len(s.stack)-1]
-	s.body.WriteString("</" + n + ">")
+	s.body.WriteString("</")
+	s.body.WriteString(n)
+	s.body.WriteByte('>')
 }
 
 // attrs renders the allowed attributes of an element (without img/a special
@@ -268,24 +272,24 @@ func (s *state) attrs(tag string, attrs []html.Attribute, full bool) string {
 		switch {
 		case k == "style":
 			if css := SanitizeDeclarations(v, s.cssOpts()); css != "" {
-				fmt.Fprintf(&b, ` style="%s"`, html.EscapeString(css))
+				writeAttr(&b, "style", html.EscapeString(css))
 			}
 		case k == "class":
 			if reClass.MatchString(v) {
-				fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(v))
+				writeAttr(&b, "class", html.EscapeString(v))
 			}
 		case k == "lang":
 			if reLang.MatchString(v) {
-				fmt.Fprintf(&b, ` lang="%s"`, html.EscapeString(v))
+				writeAttr(&b, "lang", html.EscapeString(v))
 			}
 		case k == "title":
 			hasTitle = true
-			fmt.Fprintf(&b, ` title="%s"`, html.EscapeString(clip(v, 200)))
+			writeAttr(&b, "title", html.EscapeString(clip(v, 200)))
 		case k == "alt" && tag == "img":
-			fmt.Fprintf(&b, ` alt="%s"`, html.EscapeString(clip(v, 500)))
+			writeAttr(&b, "alt", html.EscapeString(clip(v, 500)))
 		case k == "face" && tag == "font":
 			if reFace.MatchString(v) {
-				fmt.Fprintf(&b, ` face="%s"`, html.EscapeString(v))
+				writeAttr(&b, "face", html.EscapeString(v))
 			}
 		case k == "href" && tag == "a":
 			href = v
@@ -303,7 +307,7 @@ func (s *state) attrs(tag string, attrs []html.Attribute, full bool) string {
 				rule, ok = tagAttrs[tag][k]
 			}
 			if ok && attrValueOK(rule, v) {
-				fmt.Fprintf(&b, ` %s="%s"`, k, html.EscapeString(v))
+				writeAttr(&b, k, html.EscapeString(v))
 			}
 		}
 	}
@@ -311,11 +315,20 @@ func (s *state) attrs(tag string, attrs []html.Attribute, full bool) string {
 		if u, ok := SafeLinkURL(href); ok {
 			fmt.Fprintf(&b, ` href="%s" target="_blank" rel="noopener noreferrer"`, html.EscapeString(u))
 			if !hasTitle {
-				fmt.Fprintf(&b, ` title="%s"`, html.EscapeString(clip(u, 200)))
+				writeAttr(&b, "title", html.EscapeString(clip(u, 200)))
 			}
 		}
 	}
 	return b.String()
+}
+
+// writeAttr appends ` name="escapedValue"`.
+func writeAttr(b *strings.Builder, name, escaped string) {
+	b.WriteByte(' ')
+	b.WriteString(name)
+	b.WriteString(`="`)
+	b.WriteString(escaped)
+	b.WriteByte('"')
 }
 
 func attrValueOK(rule attrRule, v string) bool {

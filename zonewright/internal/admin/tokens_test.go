@@ -157,7 +157,7 @@ func TestAPITokenZoneScope(t *testing.T) {
 
 	code, body := h.as(adminToken, "POST", "/tokens", `{"name":"node-1"}`)
 	created := decodeToken(t, body)
-	if code != http.StatusCreated || len(created.Zones) != 0 || strings.Contains(body, `"all_zones": true`) {
+	if code != http.StatusCreated || len(created.Zones) != 0 || strings.Contains(body, `"all_zones":true`) {
 		t.Fatalf("create without zones: %d %s", code, body)
 	}
 	secret := created.Token
@@ -178,13 +178,13 @@ func TestAPITokenZoneScope(t *testing.T) {
 	}
 
 	code, body = h.as(adminToken, "PUT", "/tokens/node-1", `{"all_zones":true}`)
-	if code != http.StatusOK || !strings.Contains(body, `"all_zones": true`) {
+	if code != http.StatusOK || !strings.Contains(body, `"all_zones":true`) {
 		t.Fatalf("switch to all_zones: %d %s", code, body)
 	}
 	if code, _ := h.as(secret, "POST", "/zones/other.org/records", challenge); code != http.StatusCreated {
 		t.Fatalf("all_zones token in other.org: %d", code)
 	}
-	if _, body := h.as(adminToken, "GET", "/tokens", ""); !strings.Contains(body, `"all_zones": true`) {
+	if _, body := h.as(adminToken, "GET", "/tokens", ""); !strings.Contains(body, `"all_zones":true`) {
 		t.Fatalf("list does not show all_zones: %s", body)
 	}
 

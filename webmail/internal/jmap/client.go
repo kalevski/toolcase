@@ -4,6 +4,7 @@
 package jmap
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -39,7 +40,7 @@ func New(base string, timeout time.Duration) *Client {
 	}
 	return &Client{Base: strings.TrimRight(base, "/"), Timeout: timeout,
 		HTTP: &http.Client{
-			Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, MaxIdleConnsPerHost: 16,
+			Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, MaxIdleConnsPerHost: 64,
 				IdleConnTimeout: 60 * time.Second, ResponseHeaderTimeout: timeout},
 			// Never follow a redirect with credentials attached.
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -144,7 +145,7 @@ func (c *Client) Call(ctx context.Context, doc *SessionDoc, address, credential,
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.Timeout)
 	defer cancel()
-	req, err := c.Request(ctx, address, credential, http.MethodPost, target, strings.NewReader(string(body)), xff)
+	req, err := c.Request(ctx, address, credential, http.MethodPost, target, bytes.NewReader(body), xff)
 	if err != nil {
 		return nil, 0, err
 	}
