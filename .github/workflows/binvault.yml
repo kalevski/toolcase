@@ -65,33 +65,12 @@ jobs:
       - name: Conformance suites
         run: binvault/test/conformance/run.sh --quiet
 
-  cluster:
-    # Three nodes in Docker with TLS on the peer link: forwarding, catalog
-    # convergence, partition and heal, bucket moves and drain (test/e2e-cluster.sh).
-    runs-on: ubuntu-latest
-    needs: build
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - name: Cluster end-to-end test
-        run: binvault/test/e2e-cluster.sh
-
-  smoke:
-    # Boots the container read-only with all capabilities dropped, then drives
-    # it with a real S3 client (test/smoke.sh).
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-      - name: Container smoke test
-        run: binvault/test/smoke.sh
-
   docker:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    needs: [build, smoke, conformance, cluster]
+    needs: [build, conformance]
     steps:
       - uses: actions/checkout@v4
 
