@@ -302,8 +302,6 @@ certbot certonly -a dns-zonewright --dns-zonewright-credentials zonewright.ini \
   -d example.com -d '*.example.com'
 ```
 
-The end-to-end test (`certbot-dns-zonewright/test/e2e-pebble.sh`) runs real certbot against this image and Pebble, Let's Encrypt's test CA.
-
 ## Running several servers (replication)
 
 Every server runs the same zonewright with the same `cluster:` block. Write to any of them; the others follow within about a second. Full design and edge cases: [REPLICATION.md](REPLICATION.md).
@@ -377,9 +375,3 @@ docker build -t zonewright:dev .
 ```
 
 Unit and in-process cluster tests (partition/heal, clone detection, restore fence, snapshot bootstrap, a convergence property test over random concurrent histories) stand in a fake runner for `named-checkzone` / `rndc`, so they run without BIND installed.
-
-The end-to-end test runs **two containers with real BIND** over TLS and checks replication both ways, `wait=replicated`, a network partition with writes on both sides, healing, restart and deletes (CI runs it too):
-
-```bash
-zonewright/test/e2e-cluster.sh      # needs docker, openssl, curl, dig
-```

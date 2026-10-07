@@ -91,7 +91,4 @@ nginxpilot drives certbot with a stored credentials file per provider. It needs 
 
 ```bash
 pip install -e '.[test]' && pytest tests          # unit tests against a fake zonewright
-test/e2e-pebble.sh                                # real certbot + zonewright (BIND) + Pebble, in Docker
 ```
-
-The end-to-end test builds the zonewright image and creates an `acme` token limited to one zone over the API. It checks that the token is refused for anything else, issues an apex + wildcard certificate from Pebble (which validates by querying zonewright over DNS), and checks that the challenge records are gone afterwards, then that the revoked token stops working.
