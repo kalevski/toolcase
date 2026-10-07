@@ -15,9 +15,13 @@ import (
 
 	"github.com/kalevski/toolcase/webmail/internal/config"
 	"github.com/kalevski/toolcase/webmail/internal/fakes"
+	"github.com/kalevski/toolcase/webmail/internal/store"
 )
 
-const origin = "https://mail.example.test"
+const (
+	origin   = "https://mail.example.test"
+	apiToken = "test-api-token-0123456789abcdef0123456789"
+)
 
 type env struct {
 	t     *testing.T
@@ -29,16 +33,14 @@ type env struct {
 func newEnv(t *testing.T) *env {
 	t.Helper()
 	w := fakes.NewWorld()
-	pl := httptest.NewServer(w.PlatformHandler())
 	jm := httptest.NewServer(w.JMAPHandler())
 	w.JMAPPublic = "https://mail.public.invalid"
-	t.Cleanup(pl.Close)
 	t.Cleanup(jm.Close)
 	key := base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789ABCDEF"))
 	cfg, _, err := config.Load(func(k string) (string, bool) {
 		m := map[string]string{
 			"WEBMAIL_LISTEN": "127.0.0.1:0", "WEBMAIL_ADMIN_LISTEN": "127.0.0.1:0", "WEBMAIL_PUBLIC_URL": origin,
-			"WEBMAIL_JMAP_URL": jm.URL, "WEBMAIL_PLATFORM_URL": pl.URL, "WEBMAIL_PLATFORM_TOKEN": w.PlatformToken,
+			"WEBMAIL_JMAP_URL": jm.URL, "WEBMAIL_API_TOKEN": apiToken,
 			"WEBMAIL_SESSION_KEY": key, "WEBMAIL_DATA_DIR": t.TempDir(), "WEBMAIL_MAX_UPLOAD_MB": "1",
 			"WEBMAIL_LOGIN_FAIL_LIMIT": "6", "WEBMAIL_ADDRESS_FAIL_LIMIT": "4",
 		}
@@ -49,6 +51,14 @@ func newEnv(t *testing.T) *env {
 		t.Fatal(err)
 	}
 	s, err := New(context.Background(), cfg, slog.New(slog.NewTextHandler(io.Discard, nil)), Build{Version: "test"}, WithMinFailDelay(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = s.store.InsertBranding(context.Background(), &store.Branding{
+		Domain: "example.test", DisplayName: "Example Co", Theme: "default", Accent: "#336699", LoginTitle: "Welcome to Example",
+		LoginMessage: "Mail for the Example team.", DefaultLocale: "en",
+		FooterLinks: []store.FooterLink{{Label: "Privacy", URL: "https://example.test/privacy"}},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,13 +170,31 @@ func TestLoginFlow(t *testing.T) {
 	if !ck.Secure || !ck.HttpOnly || ck.Path != "/" || ck.SameSite != http.SameSiteLaxMode || ck.Domain != "" {
 		t.Fatalf("cookie attrs: %+v", ck)
 	}
-	// the real password is never stored: the DB holds only a sealed credential
+	// the password is never stored in the clear: the DB holds only a sealed copy
 	rows, _ := e.s.store.ListSessions(context.Background(), "ann@example.test", time.Now())
-	if len(rows) != 1 || bytes.Contains(rows[0].CredSealed, []byte("correct-horse")) || bytes.Contains(rows[0].CredSealed, []byte("tmp_")) {
+	if len(rows) != 1 || bytes.Contains(rows[0].CredSealed, []byte("correct-horse")) {
 		t.Fatalf("session row: %+v", rows)
 	}
 	if rows[0].AccountID != "acc1" {
 		t.Fatalf("account id %q", rows[0].AccountID)
+	}
+}
+
+func TestLoginRefusedForUnregisteredDomain(t *testing.T) {
+	e := newEnv(t)
+	e.world.Users["bob@other.test"] = "correct-horse"
+	c := &client{e: e}
+	before := e.world.SessionDocs
+	r1, b1 := c.login("bob@other.test", "correct-horse")
+	r2, b2 := c.login("ann@example.test", "nope")
+	if r1.StatusCode != 401 || r2.StatusCode != 401 || string(b1) != string(b2) || c.cookie != nil {
+		t.Fatalf("not uniform: %d %q / %d %q", r1.StatusCode, b1, r2.StatusCode, b2)
+	}
+	if e.world.SessionDocs != before {
+		t.Fatalf("the mail server answered a sign-in it should never have been asked: %d", e.world.SessionDocs-before)
+	}
+	if resp, _ := c.login("ann@example.test", "correct-horse"); resp.StatusCode != 200 || e.world.SessionDocs != before+1 {
+		t.Fatalf("a registered domain signs in through the mail server: %d", resp.StatusCode)
 	}
 }
 
@@ -373,7 +401,7 @@ func TestDownloadUploadEventSource(t *testing.T) {
 func TestUpstream401EndsSession(t *testing.T) {
 	e := newEnv(t)
 	c := e.signedIn()
-	e.world.RevokeAllFor("ann@example.test") // e.g. an admin password change
+	e.world.SetPassword("ann@example.test", "changed-elsewhere") // e.g. an admin password change
 	resp, data := c.do("POST", "/api/jmap", `{"using":["urn:ietf:params:jmap:core"],"methodCalls":[["Core/echo",{},"a"]]}`, nil)
 	if resp.StatusCode != 401 {
 		t.Fatalf("%d %s", resp.StatusCode, data)
@@ -387,18 +415,15 @@ func TestUpstream401EndsSession(t *testing.T) {
 	}
 }
 
-func TestLogoutRevokesCredential(t *testing.T) {
+func TestLogoutEndsSession(t *testing.T) {
 	e := newEnv(t)
 	c := e.signedIn()
-	if e.world.Credentials() != 1 {
-		t.Fatal("no credential")
-	}
 	if resp, _ := c.do("POST", "/api/logout", "{}", nil); resp.StatusCode != 200 {
 		t.Fatal(resp.StatusCode)
 	}
-	e.s.sessions.Wait()
-	if e.world.Credentials() != 0 || len(e.world.Revoked) != 1 {
-		t.Fatalf("credential not revoked: %d %v", e.world.Credentials(), e.world.Revoked)
+	n, _ := e.s.store.CountSessions(context.Background())
+	if n != 0 {
+		t.Fatalf("%d sessions left", n)
 	}
 	if resp, _ := c.do("GET", "/api/session", nil, nil); resp.StatusCode != 401 {
 		t.Fatalf("%d", resp.StatusCode)
@@ -432,7 +457,6 @@ func TestSessionsListAndEnd(t *testing.T) {
 	if resp, _ := a.do("DELETE", "/api/sessions/"+other, nil, nil); resp.StatusCode != 200 {
 		t.Fatalf("end other: %d", resp.StatusCode)
 	}
-	e.s.sessions.Wait()
 	if resp, _ := b.do("GET", "/api/session", nil, nil); resp.StatusCode != 401 {
 		t.Fatalf("ended session still works: %d", resp.StatusCode)
 	}
@@ -488,9 +512,9 @@ func TestLoginRateLimits(t *testing.T) {
 	if !got429 {
 		t.Fatal("never rate limited")
 	}
-	// even the right password is refused while blocked: the platform is not asked
-	before := e.world.Credentials()
-	if resp, _ := c.login("ann@example.test", "correct-horse"); resp.StatusCode != 429 || e.world.Credentials() != before {
+	// even the right password is refused while blocked: the mail server is not asked
+	before := e.world.SessionDocs
+	if resp, _ := c.login("ann@example.test", "correct-horse"); resp.StatusCode != 429 || e.world.SessionDocs != before {
 		t.Fatalf("blocked login got through: %d", resp.StatusCode)
 	}
 }
@@ -541,23 +565,6 @@ func TestPrefs(t *testing.T) {
 	}
 }
 
-func TestInviteRedeem(t *testing.T) {
-	e := newEnv(t)
-	c := &client{e: e}
-	if resp, data := c.do("POST", "/api/invite", map[string]string{"token": "bad", "password": "longenough1"}, nil); resp.StatusCode != 400 || errCode(data) != "invalid_token" {
-		t.Fatalf("%d %s", resp.StatusCode, data)
-	}
-	if resp, data := c.do("POST", "/api/invite", map[string]string{"token": "good-invite", "password": "short"}, nil); errCode(data) != "password_policy" {
-		t.Fatalf("%d %s", resp.StatusCode, data)
-	}
-	if resp, _ := c.do("POST", "/api/invite", map[string]string{"token": "good-invite", "password": "longenough1"}, nil); resp.StatusCode != 200 {
-		t.Fatalf("%d", resp.StatusCode)
-	}
-	if resp, _ := c.do("POST", "/api/invite", map[string]string{"token": "good-invite", "password": "longenough1"}, nil); resp.StatusCode != 400 {
-		t.Fatal("invite reusable")
-	}
-}
-
 func TestHealthVersionMetrics(t *testing.T) {
 	e := newEnv(t)
 	c := e.signedIn()
@@ -585,7 +592,7 @@ func TestHealthVersionMetrics(t *testing.T) {
 	}
 }
 
-func TestReapEndsExpiredAndRevokes(t *testing.T) {
+func TestReapEndsExpired(t *testing.T) {
 	e := newEnv(t)
 	now := time.Now()
 	e.s.now = func() time.Time { return now }
@@ -596,8 +603,8 @@ func TestReapEndsExpiredAndRevokes(t *testing.T) {
 		t.Fatalf("idle-expired session works: %d", resp.StatusCode)
 	}
 	e.s.Reap(context.Background())
-	e.s.sessions.Wait()
-	if len(e.world.Revoked) != 1 {
-		t.Fatalf("credential not revoked on expiry: %v", e.world.Revoked)
+	n, _ := e.s.store.CountSessions(context.Background())
+	if n != 0 {
+		t.Fatalf("%d expired sessions left", n)
 	}
 }

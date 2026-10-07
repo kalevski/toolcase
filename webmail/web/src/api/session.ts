@@ -101,7 +101,7 @@ function str(v: unknown): string {
     return typeof v === 'string' ? v : ''
 }
 
-/** Branding is data from the platform; keep only the fields and types we use. */
+/** Branding is data the platform pushed; keep only the fields and types we use. */
 export function normalizeBranding(raw: Partial<Branding> | null | undefined): Branding {
     if (!raw || typeof raw !== 'object') return NEUTRAL_BRANDING
     return {
@@ -158,15 +158,6 @@ export function login(email: string, password: string, remember: boolean): Promi
     return api('/api/login', {
         method: 'POST',
         body: { email, password, remember },
-        noCsrf: true,
-        allow401: true,
-    })
-}
-
-export function redeemInvite(token: string, password: string): Promise<unknown> {
-    return api('/api/invite', {
-        method: 'POST',
-        body: { token, password },
         noCsrf: true,
         allow401: true,
     })

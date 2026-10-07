@@ -91,7 +91,7 @@ func (g *Gateway) handleMessageHTML(w http.ResponseWriter, r *http.Request, a *s
 		"using":       []string{jmap.CapCore, jmap.CapMail},
 		"methodCalls": call,
 	})
-	data, status, err := g.JMAP.Call(r.Context(), doc, a.Address, a.Credential, g.clientIP(r), reqBody)
+	data, status, err := g.client(r.Context(), a).Call(r.Context(), doc, a.Address, a.Credential, g.clientIP(r), reqBody)
 	if err != nil {
 		g.upstreamFailed(w, r, a, "message_html", err)
 		return
@@ -160,16 +160,16 @@ func (g *Gateway) handleMessageHTML(w http.ResponseWriter, r *http.Request, a *s
 // fetchBlob downloads one blob (an inline image) through the upstream
 // downloadUrl, bounded by maxInlineImage.
 func (g *Gateway) fetchBlob(ctx context.Context, r *http.Request, a *session.Active, doc *jmap.SessionDoc, acct, blobID, ctype string) ([]byte, error) {
-	target, err := g.JMAP.Resolve(jmap.ExpandTemplate(doc.DownloadURL, map[string]string{
+	target, err := g.client(r.Context(), a).Resolve(jmap.ExpandTemplate(doc.DownloadURL, map[string]string{
 		"accountId": acct, "blobId": blobID, "name": "inline", "type": ctype}))
 	if err != nil {
 		return nil, err
 	}
-	req, err := g.JMAP.Request(ctx, a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
+	req, err := g.client(r.Context(), a).Request(ctx, a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
 	if err != nil {
 		return nil, err
 	}
-	resp, err := g.JMAP.Do(req)
+	resp, err := g.client(r.Context(), a).Do(req)
 	if err != nil {
 		return nil, err
 	}

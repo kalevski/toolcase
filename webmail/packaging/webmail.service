@@ -9,8 +9,8 @@ Type=simple
 # Settings and secrets live in the environment file (mode 0600):
 #   WEBMAIL_PUBLIC_URL=https://webmail.example.com
 #   WEBMAIL_JMAP_URL=http://127.0.0.1:8090
-#   WEBMAIL_PLATFORM_URL=https://api.example.com
-#   WEBMAIL_PLATFORM_TOKEN=...      (service key with mail.webmail.agent)
+#   WEBMAIL_API_TOKEN=...           (openssl rand -hex 32; paste the same value into the
+#                                    platform's Fleet -> Webmail tab, which calls /admin/v1)
 #   WEBMAIL_SESSION_KEY=...         (base64 of 32 random bytes - back it up!)
 EnvironmentFile=/etc/webmail/env
 Environment=WEBMAIL_DATA_DIR=/var/lib/webmail

@@ -20,21 +20,20 @@ type Session struct {
 	Remember      bool
 	IP            string
 	UserAgent     string
-	PlatformID    string
 	CredSealed    []byte
 	AccountID     string
 	CSRF          string
 }
 
 const sessionCols = `id, public_id, address, domain, created_at, last_used_at, idle_expires_at, expires_at,
-	remember, ip, user_agent, platform_id, cred_sealed, account_id, csrf`
+	remember, ip, user_agent, cred_sealed, account_id, csrf`
 
 func scanSession(sc interface{ Scan(...any) error }) (*Session, error) {
 	var s Session
 	var created, last, idle, abs int64
 	var rem int
 	if err := sc.Scan(&s.ID, &s.PublicID, &s.Address, &s.Domain, &created, &last, &idle, &abs,
-		&rem, &s.IP, &s.UserAgent, &s.PlatformID, &s.CredSealed, &s.AccountID, &s.CSRF); err != nil {
+		&rem, &s.IP, &s.UserAgent, &s.CredSealed, &s.AccountID, &s.CSRF); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -49,9 +48,9 @@ func scanSession(sc interface{ Scan(...any) error }) (*Session, error) {
 // CreateSession inserts a session.
 func (s *Store) CreateSession(ctx context.Context, x *Session) error {
 	defer s.sc.drop(x.ID)
-	_, err := s.w.ExecContext(ctx, `INSERT INTO sessions (`+sessionCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	_, err := s.w.ExecContext(ctx, `INSERT INTO sessions (`+sessionCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		x.ID, x.PublicID, x.Address, x.Domain, x.CreatedAt.Unix(), x.LastUsedAt.Unix(), x.IdleExpiresAt.Unix(),
-		x.ExpiresAt.Unix(), b2i(x.Remember), x.IP, x.UserAgent, x.PlatformID, x.CredSealed, x.AccountID, x.CSRF)
+		x.ExpiresAt.Unix(), b2i(x.Remember), x.IP, x.UserAgent, x.CredSealed, x.AccountID, x.CSRF)
 	return err
 }
 

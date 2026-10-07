@@ -2,13 +2,15 @@ package gateway
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
+	"github.com/kalevski/toolcase/webmail/internal/branding"
 	"github.com/kalevski/toolcase/webmail/internal/httpx"
 	"github.com/kalevski/toolcase/webmail/internal/jmap"
-	"github.com/kalevski/toolcase/webmail/internal/platform"
 	"github.com/kalevski/toolcase/webmail/internal/session"
+	"github.com/kalevski/toolcase/webmail/internal/store"
 )
 
 // Prefs are the per-mailbox preferences kept in SQLite (spec §3.4).
@@ -107,7 +109,7 @@ type SessionResponse struct {
 	SessionID string                   `json:"sessionId"`
 	CSRF      string                   `json:"csrf"`
 	JMAP      *jmap.SessionDoc         `json:"jmap"`
-	Branding  *platform.PublicBranding `json:"branding"`
+	Branding  *branding.PublicBranding `json:"branding"`
 	Prefs     Prefs                    `json:"prefs"`
 	Limits    map[string]int64         `json:"limits"`
 }
@@ -128,15 +130,15 @@ func (g *Gateway) handleSession(w http.ResponseWriter, r *http.Request, a *sessi
 			g.Log.Error("store account id", "error", err)
 		}
 	}
-	b, err := g.Branding.Get(r.Context(), a.Domain)
-	if err != nil {
+	b, err := g.Store.GetBranding(r.Context(), a.Domain)
+	if err != nil && !errors.Is(err, store.ErrNotFound) {
 		g.Log.Warn("branding unavailable", "domain", a.Domain, "error", err)
 	}
 	g.count("session", "ok")
 	httpx.JSON(w, http.StatusOK, SessionResponse{
 		Address: a.Address, SessionID: a.PublicID, CSRF: a.CSRF,
 		JMAP:     doc.Rewrite(acct, a.Address),
-		Branding: platform.Public(a.Domain, b),
+		Branding: branding.Public(a.Domain, b),
 		Prefs:    g.loadPrefs(r, a.Address),
 		Limits: map[string]int64{
 			"maxUploadBytes": g.MaxUploadBytes, "maxCallsInRequest": jmap.MaxCalls, "maxBodyBytes": jmap.MaxBodyBytes,

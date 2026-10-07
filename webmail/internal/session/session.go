@@ -1,5 +1,5 @@
 // Package session manages server-side sessions (spec §3.3): an opaque random
-// id in a __Host- cookie, a record in SQLite whose session credential is
+// id in a __Host- cookie, a record in SQLite whose mailbox password is
 // sealed under WEBMAIL_SESSION_KEY, idle and absolute expiry, remember-me,
 // listing/ending sessions, and the CSRF + Origin check.
 package session
@@ -15,7 +15,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/kalevski/toolcase/webmail/internal/store"
@@ -55,10 +54,7 @@ type Manager struct {
 	Settings  Settings
 	PublicURL string // scheme://host[:port], for the Origin check
 	Now       func() time.Time
-	Revoker   Revoker
 	Log       *slog.Logger
-
-	bg sync.WaitGroup
 }
 
 func (m *Manager) now() time.Time {
@@ -71,7 +67,8 @@ func (m *Manager) now() time.Time {
 // Active is a resolved session with its credential opened.
 type Active struct {
 	*store.Session
-	// Credential is the upstream (JMAP) session credential. Never log it.
+	// Credential is the mailbox password, the upstream (JMAP) Basic secret.
+	// Never log it.
 	Credential string
 }
 
@@ -82,11 +79,7 @@ type CreateParams struct {
 	IP         string
 	UserAgent  string
 	Remember   bool
-	PlatformID string
 	Credential string
-	// CredentialExpires, when non-zero, caps the session's absolute expiry at
-	// the platform credential's own expiry.
-	CredentialExpires time.Time
 }
 
 func randToken(n int) string {
@@ -117,9 +110,6 @@ func (m *Manager) Create(ctx context.Context, p CreateParams) (string, *store.Se
 		idle = m.Settings.RememberIdle
 	}
 	abs := now.Add(m.Settings.Max)
-	if !p.CredentialExpires.IsZero() && p.CredentialExpires.Before(abs) {
-		abs = p.CredentialExpires
-	}
 	ua := p.UserAgent
 	if len(ua) > MaxUserAgent {
 		ua = ua[:MaxUserAgent]
@@ -127,7 +117,7 @@ func (m *Manager) Create(ctx context.Context, p CreateParams) (string, *store.Se
 	s := &store.Session{
 		ID: id, PublicID: randToken(9), Address: strings.ToLower(p.Address), Domain: p.Domain,
 		CreatedAt: now, LastUsedAt: now, IdleExpiresAt: minTime(now.Add(idle), abs), ExpiresAt: abs,
-		Remember: p.Remember, IP: p.IP, UserAgent: ua, PlatformID: p.PlatformID,
+		Remember: p.Remember, IP: p.IP, UserAgent: ua,
 		CredSealed: sealed, CSRF: randToken(24),
 	}
 	if err := m.Store.CreateSession(ctx, s); err != nil {
@@ -143,8 +133,8 @@ func minTime(a, b time.Time) time.Time {
 	return b
 }
 
-// Lookup resolves a cookie value. Expired sessions are deleted (their
-// platform credentials are swept by the caller's reaper, see Reap).
+// Lookup resolves a cookie value. Expired sessions are deleted by the
+// caller's reaper, see Reap.
 func (m *Manager) Lookup(ctx context.Context, cookieValue string) (*Active, error) {
 	if cookieValue == "" {
 		return nil, ErrNoSession
@@ -192,8 +182,8 @@ func (m *Manager) End(ctx context.Context, id string) (bool, error) {
 	return m.Store.DeleteSession(ctx, id)
 }
 
-// Reap deletes expired sessions and returns them so the caller can revoke
-// their platform credentials.
+// Reap deletes expired sessions and returns them so the caller can drop what
+// it caches for them.
 func (m *Manager) Reap(ctx context.Context) ([]*store.Session, error) {
 	return m.Store.TakeExpired(ctx, m.now())
 }

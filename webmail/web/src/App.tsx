@@ -4,7 +4,6 @@ import { fetchSession, NEUTRAL_BRANDING, type SessionInfo } from './api/session'
 import { applyAppearance, applyTitle } from './theme/branding'
 import { pickLocale, setLocale, t, type MessageKey } from './i18n'
 import { LoginScreen } from './screens/LoginScreen'
-import { InviteScreen } from './screens/InviteScreen'
 import { MailApp } from './screens/MailApp'
 import { ToastProvider } from './state/toasts'
 
@@ -12,19 +11,10 @@ type Route =
     | { kind: 'loading' }
     | { kind: 'error' }
     | { kind: 'login'; notice?: MessageKey }
-    | { kind: 'invite'; token: string }
     | { kind: 'app'; session: SessionInfo }
 
-function inviteToken(): string | null {
-    const m = /^#\/invite\/([^/?#]+)/.exec(window.location.hash)
-    return m ? decodeURIComponent(m[1]) : null
-}
-
 export function App() {
-    const [route, setRoute] = useState<Route>(() => {
-        const token = inviteToken()
-        return token ? { kind: 'invite', token } : { kind: 'loading' }
-    })
+    const [route, setRoute] = useState<Route>({ kind: 'loading' })
 
     const loadSession = useCallback(async (notice?: MessageKey) => {
         try {
@@ -51,15 +41,7 @@ export function App() {
             setCsrf('')
             setRoute((r) => (r.kind === 'app' ? { kind: 'login', notice: 'login.signedOut' } : r))
         })
-        const onHash = () => {
-            const token = inviteToken()
-            if (token) setRoute({ kind: 'invite', token })
-        }
-        window.addEventListener('hashchange', onHash)
-        return () => {
-            setUnauthorizedHandler(null)
-            window.removeEventListener('hashchange', onHash)
-        }
+        return () => setUnauthorizedHandler(null)
     }, [])
 
     useEffect(() => {
@@ -96,9 +78,6 @@ export function App() {
             break
         case 'login':
             screen = <LoginScreen notice={route.notice} onSignedIn={() => loadSession()} />
-            break
-        case 'invite':
-            screen = <InviteScreen token={route.token} onDone={() => toLogin('invite.done')} />
             break
         case 'app':
             screen = <MailApp key={route.session.sessionId} session={route.session} onSignedOut={toLogin} />

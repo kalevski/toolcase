@@ -15,8 +15,8 @@ import (
 
 	"github.com/kalevski/toolcase/webmail/internal/httpx"
 	"github.com/kalevski/toolcase/webmail/internal/jmap"
+	"github.com/kalevski/toolcase/webmail/internal/mailhost"
 	"github.com/kalevski/toolcase/webmail/internal/obs"
-	"github.com/kalevski/toolcase/webmail/internal/platform"
 	"github.com/kalevski/toolcase/webmail/internal/session"
 	"github.com/kalevski/toolcase/webmail/internal/store"
 )
@@ -24,9 +24,8 @@ import (
 // Gateway serves the authenticated /api routes that touch the mail server.
 type Gateway struct {
 	Sessions       *session.Manager
-	JMAP           *jmap.Client
+	Hosts          *mailhost.Router
 	Store          *store.Store
-	Branding       *platform.BrandingCache
 	MaxUploadBytes int64
 	Trusted        []netip.Prefix
 	Log            *slog.Logger
@@ -86,7 +85,7 @@ func (g *Gateway) sessionDoc(ctx context.Context, r *http.Request, a *session.Ac
 			return c.doc, nil
 		}
 	}
-	doc, err := g.JMAP.Session(ctx, a.Address, a.Credential, g.clientIP(r))
+	doc, err := g.client(ctx, a).Session(ctx, a.Address, a.Credential, g.clientIP(r))
 	if err != nil {
 		return nil, err
 	}
@@ -152,4 +151,9 @@ func (g *Gateway) upstreamFailed(w http.ResponseWriter, r *http.Request, a *sess
 		g.Log.Warn("upstream failed", "op", op, "error", err, "session", a.PublicID)
 		httpx.Error(w, r, http.StatusBadGateway, "upstream_unavailable", "The mail server is not reachable right now. Try again in a moment.")
 	}
+}
+
+// client is the JMAP client of the mail server this session's domain lives on.
+func (g *Gateway) client(ctx context.Context, a *session.Active) *jmap.Client {
+	return g.Hosts.For(ctx, a.Domain)
 }

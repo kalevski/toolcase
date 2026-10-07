@@ -1,9 +1,15 @@
 package jmap
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func call(t *testing.T, out []byte, i int) (string, map[string]any) {
@@ -187,5 +193,44 @@ func TestResolveRefusesSchemeRelativeAndForeignHosts(t *testing.T) {
 	}
 	if _, err := c.Resolve("//evil.example/jmap/"); err == nil {
 		t.Fatal("scheme-relative URL must be refused")
+	}
+}
+
+func TestChangePassword(t *testing.T) {
+	var gotUser, gotPass, gotBody string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotUser, gotPass, _ = r.BasicAuth()
+		b, _ := io.ReadAll(r.Body)
+		gotBody = string(b)
+		switch {
+		case gotPass == "wrong":
+			w.WriteHeader(401)
+		case strings.Contains(gotBody, `"short"`):
+			w.WriteHeader(422)
+			w.Write([]byte(`{"message":"Too short."}`))
+		case strings.Contains(gotBody, `"boom"`):
+			w.WriteHeader(500)
+		default:
+			w.WriteHeader(204)
+		}
+	}))
+	defer srv.Close()
+	c := New(srv.URL, time.Second)
+	ctx := context.Background()
+	if err := c.ChangePassword(ctx, "a@x.test", "old", "new-password", ""); err != nil {
+		t.Fatal(err)
+	}
+	if gotUser != "a@x.test" || gotPass != "old" || gotBody != `[{"password":"new-password","type":"changePassword"}]` {
+		t.Fatalf("%q %q %q", gotUser, gotPass, gotBody)
+	}
+	if err := c.ChangePassword(ctx, "a@x.test", "wrong", "new-password", ""); !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("wrong current: %v", err)
+	}
+	var pe *PolicyError
+	if err := c.ChangePassword(ctx, "a@x.test", "old", "short", ""); !errors.As(err, &pe) || pe.Message != "Too short." {
+		t.Fatalf("policy: %v", err)
+	}
+	if err := c.ChangePassword(ctx, "a@x.test", "old", "boom", ""); !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("5xx: %v", err)
 	}
 }

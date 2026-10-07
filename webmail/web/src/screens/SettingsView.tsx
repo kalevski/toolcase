@@ -270,8 +270,8 @@ function Security({ onPasswordChanged }: { onPasswordChanged: () => void }) {
     const submit = async (e: FormEvent) => {
         e.preventDefault()
         setError('')
-        if (next.length < 10) return setError(t('invite.tooShort', { min: 10 }))
-        if (next !== repeat) return setError(t('invite.mismatch'))
+        if (next.length < 10) return setError(t('password.tooShort', { min: 10 }))
+        if (next !== repeat) return setError(t('password.mismatch'))
         setBusy(true)
         try {
             await changePassword(current, next)

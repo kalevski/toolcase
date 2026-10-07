@@ -74,7 +74,7 @@ type Manager struct {
 	ctx           context.Context
 	cancel        context.CancelFunc
 	draining      atomic.Bool
-	inflight      sync.WaitGroup           // before chains and after calls in flight
+	inflight      inflightGroup            // before chains and after calls in flight
 	frz           *freezer                 // buckets being moved
 	servedBy      func(bucket string) bool // cluster: does this node serve the bucket? (SetServedBy)
 	unservedCache unservedCache

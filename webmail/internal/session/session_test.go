@@ -68,7 +68,7 @@ func TestSealRoundTripAndBinding(t *testing.T) {
 func TestCreateLookupStoresOnlySealedCredential(t *testing.T) {
 	m, _ := newMgr(t)
 	ctx := context.Background()
-	cookie, s, err := m.Create(ctx, CreateParams{Address: "Ann@Example.Test", Domain: "example.test", IP: "1.2.3.4", UserAgent: "UA", PlatformID: "p1", Credential: "cred-xyz"})
+	cookie, s, err := m.Create(ctx, CreateParams{Address: "Ann@Example.Test", Domain: "example.test", IP: "1.2.3.4", UserAgent: "UA", Credential: "cred-xyz"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,14 +127,6 @@ func TestExpiry(t *testing.T) {
 	reaped, err := m.Reap(ctx)
 	if err != nil || len(reaped) != 2 {
 		t.Fatalf("reap: %d %v", len(reaped), err)
-	}
-}
-
-func TestCredentialExpiryCapsSession(t *testing.T) {
-	m, ck := newMgr(t)
-	_, s, _ := m.Create(context.Background(), CreateParams{Address: "a@x.test", Credential: "c", CredentialExpires: ck.t.Add(time.Hour)})
-	if !s.ExpiresAt.Equal(ck.t.Add(time.Hour)) {
-		t.Fatalf("expiry %v", s.ExpiresAt)
 	}
 }
 

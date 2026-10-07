@@ -36,7 +36,7 @@ export function notifyUnauthorized(): void {
 type RequestOptions = {
     method?: string
     body?: unknown
-    /** Skip the CSRF header (login, invite redeem). */
+    /** Skip the CSRF header (login). */
     noCsrf?: boolean
     /** A 401 here is an answer (wrong password), not a signed-out session. */
     allow401?: boolean

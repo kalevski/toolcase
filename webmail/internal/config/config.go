@@ -27,18 +27,19 @@ const (
 	maxSecretFile = 64 << 10
 	// SessionKeyLen is the decoded size of WEBMAIL_SESSION_KEY.
 	SessionKeyLen = 32
+	// MinAPITokenLen is the shortest accepted WEBMAIL_API_TOKEN.
+	MinAPITokenLen = 32
 )
 
 // Config is the validated configuration.
 type Config struct {
-	Listen        string
-	AdminListen   string
-	PublicURL     string // scheme://host[:port], no trailing slash
-	JMAPURL       string // no trailing slash
-	PlatformURL   string // no trailing slash
-	PlatformToken string
-	SessionKey    []byte
-	DataDir       string
+	Listen      string
+	AdminListen string
+	PublicURL   string // scheme://host[:port], no trailing slash
+	JMAPURL     string // no trailing slash
+	APIToken    string // bearer token of the platform's calls to /admin/v1
+	SessionKey  []byte
+	DataDir     string
 
 	SessionIdle time.Duration
 	SessionMax  time.Duration
@@ -49,7 +50,6 @@ type Config struct {
 	IPFailLimit      int // failed logins per IP per window
 	AddressFailLimit int // failed logins per address per window
 	TrustedProxies   []netip.Prefix
-	BrandingTTL      time.Duration
 	UpstreamTimeout  time.Duration
 
 	LogFormat string
@@ -105,31 +105,29 @@ func (e *Error) Error() string {
 
 // Variable names, in documentation order.
 const (
-	VarListen        = "WEBMAIL_LISTEN"
-	VarAdminListen   = "WEBMAIL_ADMIN_LISTEN"
-	VarPublicURL     = "WEBMAIL_PUBLIC_URL"
-	VarJMAPURL       = "WEBMAIL_JMAP_URL"
-	VarPlatformURL   = "WEBMAIL_PLATFORM_URL"
-	VarPlatformToken = "WEBMAIL_PLATFORM_TOKEN"
-	VarSessionKey    = "WEBMAIL_SESSION_KEY"
-	VarDataDir       = "WEBMAIL_DATA_DIR"
-	VarSessionIdle   = "WEBMAIL_SESSION_IDLE"
-	VarSessionMax    = "WEBMAIL_SESSION_MAX"
-	VarMaxUploadMB   = "WEBMAIL_MAX_UPLOAD_MB"
-	VarLoginFail     = "WEBMAIL_LOGIN_FAIL_LIMIT"
-	VarAddrFail      = "WEBMAIL_ADDRESS_FAIL_LIMIT"
-	VarProxies       = "WEBMAIL_TRUSTED_PROXIES"
-	VarBrandingTTL   = "WEBMAIL_BRANDING_TTL"
-	VarUpstreamTO    = "WEBMAIL_UPSTREAM_TIMEOUT"
-	VarLogFormat     = "WEBMAIL_LOG_FORMAT"
-	VarLogLevel      = "WEBMAIL_LOG_LEVEL"
+	VarListen      = "WEBMAIL_LISTEN"
+	VarAdminListen = "WEBMAIL_ADMIN_LISTEN"
+	VarPublicURL   = "WEBMAIL_PUBLIC_URL"
+	VarJMAPURL     = "WEBMAIL_JMAP_URL"
+	VarAPIToken    = "WEBMAIL_API_TOKEN"
+	VarSessionKey  = "WEBMAIL_SESSION_KEY"
+	VarDataDir     = "WEBMAIL_DATA_DIR"
+	VarSessionIdle = "WEBMAIL_SESSION_IDLE"
+	VarSessionMax  = "WEBMAIL_SESSION_MAX"
+	VarMaxUploadMB = "WEBMAIL_MAX_UPLOAD_MB"
+	VarLoginFail   = "WEBMAIL_LOGIN_FAIL_LIMIT"
+	VarAddrFail    = "WEBMAIL_ADDRESS_FAIL_LIMIT"
+	VarProxies     = "WEBMAIL_TRUSTED_PROXIES"
+	VarUpstreamTO  = "WEBMAIL_UPSTREAM_TIMEOUT"
+	VarLogFormat   = "WEBMAIL_LOG_FORMAT"
+	VarLogLevel    = "WEBMAIL_LOG_LEVEL"
 )
 
-var allNames = []string{VarListen, VarAdminListen, VarPublicURL, VarJMAPURL, VarPlatformURL, VarPlatformToken,
+var allNames = []string{VarListen, VarAdminListen, VarPublicURL, VarJMAPURL, VarAPIToken,
 	VarSessionKey, VarDataDir, VarSessionIdle, VarSessionMax, VarMaxUploadMB, VarLoginFail, VarAddrFail,
-	VarProxies, VarBrandingTTL, VarUpstreamTO, VarLogFormat, VarLogLevel}
+	VarProxies, VarUpstreamTO, VarLogFormat, VarLogLevel}
 
-var secretNames = []string{VarPlatformToken, VarSessionKey}
+var secretNames = []string{VarAPIToken, VarSessionKey}
 
 // Load builds the configuration. env looks a variable up like os.LookupEnv
 // (nil means os.LookupEnv). Unknown variables cannot be detected: use
@@ -171,8 +169,8 @@ func load(env func(string) (string, bool), keys []string) (*Config, []string, er
 		Listen: ":8080", AdminListen: "127.0.0.1:8081", DataDir: "/var/lib/webmail",
 		SessionIdle: 12 * time.Hour, SessionMax: 720 * time.Hour, RememberIdle: 720 * time.Hour,
 		MaxUploadMB: 25, IPFailLimit: 20, AddressFailLimit: 10,
-		BrandingTTL: 60 * time.Second, UpstreamTimeout: 30 * time.Second,
-		LogFormat: "logfmt", LogLevel: "info",
+		UpstreamTimeout: 30 * time.Second,
+		LogFormat:       "logfmt", LogLevel: "info",
 	}}
 	l.warnUnknown(keys)
 	l.parse()
@@ -358,20 +356,17 @@ func (l *loader) parse() {
 			c.JMAPURL = n
 		}
 	}
-	if v, ok := l.required(VarPlatformURL); ok {
-		if n, p := baseURL(v, false); p != "" {
-			l.fail(VarPlatformURL, "%s", p)
-		} else {
-			c.PlatformURL = n
+	if v, ok := l.secret(VarAPIToken); ok {
+		switch {
+		case strings.ContainsFunc(v, unicode.IsControl) || strings.ContainsAny(v, " \t"):
+			l.fail(VarAPIToken, "must not contain spaces or control characters")
+		case len(v) < MinAPITokenLen:
+			l.fail(VarAPIToken, "must be at least %d characters (generate one with: openssl rand -hex 32)", MinAPITokenLen)
+		default:
+			c.APIToken = v
 		}
-	}
-	if v, ok := l.secret(VarPlatformToken); ok {
-		if strings.ContainsFunc(v, unicode.IsControl) || strings.ContainsAny(v, " \t") {
-			l.fail(VarPlatformToken, "must not contain spaces or control characters")
-		}
-		c.PlatformToken = v
-	} else if !l.hasProblem(VarPlatformToken) {
-		l.fail(VarPlatformToken, "is required (or %s%s)", VarPlatformToken, fileSuffix)
+	} else if !l.hasProblem(VarAPIToken) {
+		l.fail(VarAPIToken, "is required (or %s%s)", VarAPIToken, fileSuffix)
 	}
 	if v, ok := l.secret(VarSessionKey); ok {
 		key, err := base64.StdEncoding.DecodeString(v)
@@ -399,7 +394,6 @@ func (l *loader) parse() {
 	}
 	l.duration(VarSessionIdle, &c.SessionIdle, time.Minute, 24*time.Hour*365)
 	l.duration(VarSessionMax, &c.SessionMax, time.Minute, 24*time.Hour*365)
-	l.duration(VarBrandingTTL, &c.BrandingTTL, time.Second, 24*time.Hour)
 	l.duration(VarUpstreamTO, &c.UpstreamTimeout, time.Second, 10*time.Minute)
 	if c.SessionIdle > c.SessionMax && !l.hasProblem(VarSessionIdle) && !l.hasProblem(VarSessionMax) {
 		l.fail(VarSessionIdle, "must not exceed %s (%s)", VarSessionMax, c.SessionMax)

@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -86,5 +87,85 @@ func TestTakeSessions(t *testing.T) {
 	}
 	if n, _ := s.CountSessions(ctx); n != 1 {
 		t.Fatalf("%d", n)
+	}
+}
+
+func TestBrandings(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(ctx, t.TempDir(), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for _, d := range []string{"b.test", "a.test", "c.example", "d.test"} {
+		if err := s.InsertBranding(ctx, &Branding{Domain: d, DisplayName: d, FooterLinks: []FooterLink{{Label: "x", URL: "https://x.test"}}, MailboxCount: 2}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.InsertBranding(ctx, &Branding{Domain: "a.test"}); !errors.Is(err, ErrExists) {
+		t.Fatalf("duplicate: %v", err)
+	}
+	b, err := s.GetBranding(ctx, "a.test")
+	if err != nil || b.DisplayName != "a.test" || len(b.FooterLinks) != 1 || b.MailboxCount != 2 || b.HasLogo {
+		t.Fatalf("%+v %v", b, err)
+	}
+	if _, err := s.GetBranding(ctx, "nope.test"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("missing: %v", err)
+	}
+
+	page, total, err := s.ListBrandings(ctx, "", "", 3)
+	if err != nil || total != 4 || len(page) != 3 || page[0].Domain != "a.test" || page[2].Domain != "c.example" {
+		t.Fatalf("page 1: %v %d %v", err, total, page)
+	}
+	page, _, _ = s.ListBrandings(ctx, "", "c.example", 3)
+	if len(page) != 1 || page[0].Domain != "d.test" {
+		t.Fatalf("page 2: %v", page)
+	}
+	page, total, _ = s.ListBrandings(ctx, ".test", "", 10)
+	if total != 3 || len(page) != 3 {
+		t.Fatalf("filter: %d %v", total, page)
+	}
+	page, total, _ = s.ListBrandings(ctx, "100%", "", 10)
+	if total != 0 || len(page) != 0 {
+		t.Fatalf("wildcards are literal: %d %v", total, page)
+	}
+
+	if err := s.SetLogo(ctx, "a.test", "image/png", []byte("png")); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SetLogo(ctx, "nope.test", "image/png", []byte("png")); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("logo for a missing domain: %v", err)
+	}
+	data, mime, err := s.Logo(ctx, "a.test")
+	if err != nil || string(data) != "png" || mime != "image/png" {
+		t.Fatalf("%q %q %v", data, mime, err)
+	}
+	b, _ = s.GetBranding(ctx, "a.test")
+	if !b.HasLogo {
+		t.Fatal("HasLogo not set")
+	}
+	if err := s.UpdateBranding(ctx, &Branding{Domain: "a.test", DisplayName: "renamed"}); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ = s.GetBranding(ctx, "a.test"); b.DisplayName != "renamed" || !b.HasLogo || len(b.FooterLinks) != 0 {
+		t.Fatalf("update must keep the logo and replace the rest: %+v", b)
+	}
+	if err := s.UpdateBranding(ctx, &Branding{Domain: "nope.test"}); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("update missing: %v", err)
+	}
+	if err := s.ClearLogo(ctx, "a.test"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.Logo(ctx, "a.test"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("logo not cleared: %v", err)
+	}
+	if err := s.DeleteBranding(ctx, "a.test"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.DeleteBranding(ctx, "a.test"); err != nil {
+		t.Fatalf("delete is idempotent: %v", err)
+	}
+	if n, _ := s.CountBrandings(ctx); n != 3 {
+		t.Fatalf("count %d", n)
 	}
 }

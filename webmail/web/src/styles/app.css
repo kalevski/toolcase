@@ -124,7 +124,7 @@ body {
     font-size: 1.25rem;
 }
 
-/* ── Login / invite ────────────────────────────────────────────────────── */
+/* ── Login ─────────────────────────────────────────────────────────── */
 
 /* Two-column sign-in, painted by the tc-login stylesheet. The tokens are the
    ones tc-login sets on its own host element. */

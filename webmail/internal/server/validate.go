@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/kalevski/toolcase/webmail/internal/config"
 	"github.com/kalevski/toolcase/webmail/internal/jmap"
-	"github.com/kalevski/toolcase/webmail/internal/platform"
 	"github.com/kalevski/toolcase/webmail/internal/store"
 )
 
@@ -21,11 +19,11 @@ type Report struct {
 	Problems []string
 }
 
-// Validate checks the data dir, the database, and that the JMAP server and the
-// platform answer. It changes nothing but a temporary probe file.
+// Validate checks the data dir, the database, and that the JMAP server answers.
+// It changes nothing but a temporary probe file.
 func Validate(ctx context.Context, cfg *config.Config) (*Report, error) {
 	rep := &Report{}
-	rep.Info = append(rep.Info, fmt.Sprintf("configuration valid (session key %d bytes)", len(cfg.SessionKey)))
+	rep.Info = append(rep.Info, fmt.Sprintf("configuration valid (session key %d bytes, API token %d characters)", len(cfg.SessionKey), len(cfg.APIToken)))
 
 	probe := filepath.Join(cfg.DataDir, ".validate-probe")
 	if err := os.MkdirAll(cfg.DataDir, 0o750); err != nil {
@@ -40,7 +38,8 @@ func Validate(ctx context.Context, cfg *config.Config) (*Report, error) {
 			rep.Problems = append(rep.Problems, "database: "+err.Error())
 		} else {
 			v, _ := st.Version(ctx)
-			rep.Info = append(rep.Info, fmt.Sprintf("database ok (schema %d)", v))
+			n, _ := st.CountBrandings(ctx)
+			rep.Info = append(rep.Info, fmt.Sprintf("database ok (schema %d, %d registered domains)", v, n))
 			st.Close()
 		}
 	}
@@ -57,14 +56,5 @@ func Validate(ctx context.Context, cfg *config.Config) (*Report, error) {
 		rep.Info = append(rep.Info, fmt.Sprintf("JMAP server reachable (%s -> %d)", jmap.SessionPath, resp.StatusCode))
 	}
 
-	pc := platform.New(cfg.PlatformURL, cfg.PlatformToken, 10*time.Second)
-	switch err := pc.Health(cctx); {
-	case err == nil:
-		rep.Info = append(rep.Info, "platform reachable, service key accepted")
-	case errors.Is(err, platform.ErrInvalidCredentials):
-		rep.Problems = append(rep.Problems, "platform rejected the service key (needs mail.webmail.agent)")
-	default:
-		rep.Problems = append(rep.Problems, "platform: "+err.Error())
-	}
 	return rep, nil
 }

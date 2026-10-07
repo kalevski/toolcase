@@ -1,5 +1,6 @@
-# Local development: webmail + a FAKE platform and FAKE JMAP server (no real
-# mail server). Mailbox: ann@example.test / correct-horse.
+# Local development: webmail + a FAKE JMAP server (no real mail server) and a
+# one-shot `register` step that pushes the example.test branding through the
+# admin API, the way the platform does. Mailbox: ann@example.test / correct-horse.
 #   docker compose -f docker/compose.yml up --build
 # then open http://localhost:8080 (the __Host- cookie works on localhost).
 services:
@@ -7,7 +8,7 @@ services:
     image: golang:1.25-alpine
     working_dir: /src
     volumes: ["..:/src"]
-    command: go run ./test/fake-servers -platform :9101 -jmap :9102
+    command: go run ./test/fake-servers -jmap :9102
   webmail:
     build: { context: .., dockerfile: Dockerfile }
     depends_on: [fakes]
@@ -15,10 +16,19 @@ services:
     environment:
       WEBMAIL_PUBLIC_URL: http://localhost:8080
       WEBMAIL_JMAP_URL: http://fakes:9102
-      WEBMAIL_PLATFORM_URL: http://fakes:9101
-      WEBMAIL_PLATFORM_TOKEN: svc-token
+      # dev only - the same value goes into the platform's Fleet -> Webmail tab
+      WEBMAIL_API_TOKEN: dev-api-token-0123456789abcdef0123456789
       # dev only - generate your own: openssl rand -base64 32
       WEBMAIL_SESSION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
     volumes: ["webmail-data:/var/lib/webmail"]
+  register:
+    image: curlimages/curl:latest
+    depends_on: [webmail]
+    restart: "no"
+    command: >
+      sh -c 'until curl -fsS -H "Authorization: Bearer dev-api-token-0123456789abcdef0123456789" http://webmail:8080/admin/v1/health; do sleep 1; done;
+      curl -sS -H "Authorization: Bearer dev-api-token-0123456789abcdef0123456789"
+      -d "{\"domain\":\"example.test\",\"displayName\":\"Example Co\",\"theme\":\"ocean\",\"accent\":\"#336699\"}"
+      http://webmail:8080/admin/v1/brandings'
 volumes:
   webmail-data:

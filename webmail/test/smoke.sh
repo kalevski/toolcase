@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
-# Smoke test: builds the binary, starts the fake platform + fake JMAP and
-# webmail, then drives login -> session -> list -> read -> logout with curl.
+# Smoke test: builds the binary, starts the fake JMAP server and webmail,
+# registers the domain through the admin API the way the platform does, then
+# drives login -> session -> list -> read -> logout with curl.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP=$(mktemp -d); trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$TMP"' EXIT
 go build -o "$TMP/webmail" ./cmd/webmail
 go build -o "$TMP/fakes" ./test/fake-servers
-"$TMP/fakes" -platform 127.0.0.1:19101 -jmap 127.0.0.1:19102 2>"$TMP/fakes.log" &
+"$TMP/fakes" -jmap 127.0.0.1:19102 2>"$TMP/fakes.log" &
 export WEBMAIL_LISTEN=127.0.0.1:18080 WEBMAIL_ADMIN_LISTEN=127.0.0.1:18081 WEBMAIL_PUBLIC_URL=https://mail.example.test \
-  WEBMAIL_JMAP_URL=http://127.0.0.1:19102 WEBMAIL_PLATFORM_URL=http://127.0.0.1:19101 WEBMAIL_PLATFORM_TOKEN=svc-token \
+  WEBMAIL_JMAP_URL=http://127.0.0.1:19102 WEBMAIL_API_TOKEN=smoke-api-token-0123456789abcdef0123 \
   WEBMAIL_SESSION_KEY="$(head -c 32 /dev/urandom | base64)" WEBMAIL_DATA_DIR="$TMP/data"
 "$TMP/webmail" validate
 "$TMP/webmail" run 2>"$TMP/webmail.log" &
 for i in $(seq 50); do "$TMP/webmail" healthcheck 2>/dev/null && break; sleep 0.1; done
-B=http://127.0.0.1:18080; O='Origin: https://mail.example.test'
+B=http://127.0.0.1:18080; O='Origin: https://mail.example.test'; A='Authorization: Bearer smoke-api-token-0123456789abcdef0123'
+echo "== unauthorized"; curl -sS -o /dev/null -w '%{http_code}\n' "$B/admin/v1/health"
+echo "== register";   curl -fsS -H "$A" -d '{"domain":"example.test","displayName":"Example Co","theme":"ocean","accent":"#336699","mailboxCount":1}' "$B/admin/v1/brandings"; echo
+echo "== list";       curl -fsS -H "$A" "$B/admin/v1/brandings?limit=10"; echo
 echo "== branding";  curl -fsS "$B/api/branding?domain=example.test"; echo
 echo "== bad login"; curl -sS -o /dev/null -w '%{http_code}\n' -H "$O" -d '{"email":"ann@example.test","password":"x"}' "$B/api/login"
 echo "== login"

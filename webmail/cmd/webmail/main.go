@@ -20,7 +20,7 @@ const usage = `webmail - web mail client (JMAP gateway + SPA)
 
 Usage:
   webmail [run]          serve the web app and API (default)
-  webmail validate       check config, data dir, database, JMAP server and platform; changes nothing
+  webmail validate       check config, data dir, database and JMAP server; changes nothing
   webmail healthcheck    GET /_healthz on the local listen address (exit 0 or 1)
   webmail version        print build info
 

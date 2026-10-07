@@ -1,6 +1,7 @@
-// Package server wires webmail together: configuration, SQLite, the platform
-// and JMAP clients, sessions, rate limits, the gateway, the SPA, health and
-// metrics, and the public and admin listeners (spec §3.2, §3.9).
+// Package server wires webmail together: configuration, SQLite, the JMAP
+// client, sessions, rate limits, the gateway, the platform's admin API, the
+// SPA, health and metrics, and the public and metrics listeners (spec §3.2,
+// §3.9).
 package server
 
 import (
@@ -18,8 +19,8 @@ import (
 	"github.com/kalevski/toolcase/webmail/internal/gateway"
 	"github.com/kalevski/toolcase/webmail/internal/httpx"
 	"github.com/kalevski/toolcase/webmail/internal/jmap"
+	"github.com/kalevski/toolcase/webmail/internal/mailhost"
 	"github.com/kalevski/toolcase/webmail/internal/obs"
-	"github.com/kalevski/toolcase/webmail/internal/platform"
 	"github.com/kalevski/toolcase/webmail/internal/ratelimit"
 	"github.com/kalevski/toolcase/webmail/internal/session"
 	"github.com/kalevski/toolcase/webmail/internal/store"
@@ -45,9 +46,8 @@ type Server struct {
 	build Build
 
 	store    *store.Store
-	platform *platform.Client
-	branding *platform.BrandingCache
 	jmap     *jmap.Client
+	hosts    *mailhost.Router
 	sessions *session.Manager
 	gw       *gateway.Gateway
 
@@ -56,7 +56,8 @@ type Server struct {
 	pwdIP       *ratelimit.Failures
 	pwdAddr     *ratelimit.Failures
 	brandingLim *ratelimit.Window
-	inviteLim   *ratelimit.Window
+	apiLim      *ratelimit.Window
+	apiAuthFail *ratelimit.Failures
 
 	reg     *obs.Registry
 	reqs    *obs.CounterVec
@@ -84,11 +85,10 @@ func New(ctx context.Context, cfg *config.Config, log *slog.Logger, build Build,
 		return nil, fmt.Errorf("open database: %w", err)
 	}
 	s.store = st
-	s.platform = platform.New(cfg.PlatformURL, cfg.PlatformToken, cfg.UpstreamTimeout)
-	s.branding = &platform.BrandingCache{Source: s.platform, TTL: cfg.BrandingTTL, Now: s.now}
 	s.jmap = jmap.New(cfg.JMAPURL, cfg.UpstreamTimeout)
+	s.hosts = &mailhost.Router{Default: s.jmap, Store: st, Timeout: cfg.UpstreamTimeout, Now: s.now}
 	s.sessions = &session.Manager{
-		Store: st, Key: cfg.SessionKey, PublicURL: cfg.PublicURL, Now: s.now, Revoker: s.platform, Log: log,
+		Store: st, Key: cfg.SessionKey, PublicURL: cfg.PublicURL, Now: s.now, Log: log,
 		Settings: session.Settings{Idle: cfg.SessionIdle, RememberIdle: cfg.RememberIdle, Max: cfg.SessionMax},
 	}
 	const window = 15 * time.Minute
@@ -97,7 +97,8 @@ func New(ctx context.Context, cfg *config.Config, log *slog.Logger, build Build,
 	s.pwdIP = &ratelimit.Failures{Store: st, Bucket: "pwd_ip", Limit: cfg.IPFailLimit, Window: window, FreeFailures: 5, Now: s.now}
 	s.pwdAddr = &ratelimit.Failures{Store: st, Bucket: "pwd_addr", Limit: cfg.AddressFailLimit, Window: window, FreeFailures: 2, Now: s.now}
 	s.brandingLim = &ratelimit.Window{Store: st, Bucket: "branding", Limit: 60, Span: time.Minute, Now: s.now}
-	s.inviteLim = &ratelimit.Window{Store: st, Bucket: "invite", Limit: 10, Span: time.Minute, Now: s.now}
+	s.apiLim = &ratelimit.Window{Store: st, Bucket: "admin_api", Limit: 600, Span: time.Minute, Now: s.now}
+	s.apiAuthFail = &ratelimit.Failures{Store: st, Bucket: "admin_api_auth", Limit: cfg.IPFailLimit, Window: window, FreeFailures: 5, Now: s.now}
 
 	s.reg = obs.NewRegistry()
 	s.reqs = s.reg.Counter("webmail_http_requests_total", "HTTP requests by route and status.", "route", "status")
@@ -113,7 +114,7 @@ func New(ctx context.Context, cfg *config.Config, log *slog.Logger, build Build,
 	})
 
 	s.gw = &gateway.Gateway{
-		Sessions: s.sessions, JMAP: s.jmap, Store: st, Branding: s.branding,
+		Sessions: s.sessions, Hosts: s.hosts, Store: st,
 		MaxUploadBytes: cfg.MaxUploadBytes(), Trusted: cfg.TrustedProxies, Log: log, Now: s.now, Upstream: upstream,
 	}
 
@@ -165,11 +166,11 @@ func (s *Server) routes(files fs.FS) http.Handler {
 	mux.HandleFunc("GET /api/logo", s.handleLogo)
 	mux.HandleFunc("POST /api/login", s.handleLogin)
 	mux.HandleFunc("POST /api/logout", s.handleLogout)
-	mux.HandleFunc("POST /api/invite", s.handleInvite)
 	mux.HandleFunc("GET /api/sessions", s.sessions.Require(s.handleListSessions))
 	mux.HandleFunc("DELETE /api/sessions/{id}", s.sessions.Require(s.handleEndSession))
 	mux.HandleFunc("POST /api/password", s.sessions.Require(s.handlePassword))
 	s.gw.Routes(mux)
+	s.adminAPIRoutes(mux)
 	mux.Handle("/", spaHandler(files))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
@@ -227,18 +228,16 @@ func (s *Server) Run(ctx context.Context) error {
 	return nil
 }
 
-// Close releases the database after background revocations finish.
+// Close releases the database.
 func (s *Server) Close() {
 	s.closeOnce.Do(func() {
-		s.sessions.Wait()
 		_ = s.pub.Close()
 		_ = s.admin.Close()
 		_ = s.store.Close()
 	})
 }
 
-// reaper ends expired sessions (revoking their platform credentials) and
-// sweeps old rate-limit counters.
+// reaper ends expired sessions and sweeps old rate-limit counters.
 func (s *Server) reaper(ctx context.Context) {
 	t := time.NewTicker(time.Minute)
 	defer t.Stop()
@@ -260,7 +259,6 @@ func (s *Server) Reap(ctx context.Context) {
 	}
 	for _, d := range dead {
 		s.gw.Forget(d.ID)
-		s.sessions.Revoke(d)
 	}
 	if len(dead) > 0 {
 		s.log.Info("expired sessions ended", "count", len(dead))

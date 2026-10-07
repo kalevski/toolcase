@@ -1,7 +1,7 @@
-// Package fakes is a fake platform agent API and a fake JMAP server sharing
-// one in-memory world, for tests and the local smoke run. It implements just
-// enough of RFC 8620/8621 for the gateway paths; it is NOT Stalwart and proves
-// nothing about Stalwart's behaviour.
+// Package fakes is a fake JMAP server over one in-memory world, for tests and
+// the local smoke run. It implements just enough of RFC 8620/8621 for the
+// gateway paths; it is NOT Stalwart and proves nothing about Stalwart's
+// behaviour.
 package fakes
 
 import (
@@ -21,15 +21,11 @@ import (
 type World struct {
 	mu sync.Mutex
 
-	PlatformToken string
 	// JMAPPublic is the (unreachable) public name the JMAP session document
 	// advertises; the gateway must re-root it.
 	JMAPPublic string
 
-	Users    map[string]string // address -> password
-	creds    map[string]cred   // credential -> info
-	Invites  map[string]string // token -> address
-	Branding map[string]map[string]any
+	Users map[string]string // address -> password
 
 	Emails []Email
 	// Stateful makes the fake JMAP server remember keywords, folders, drafts and sends (see stateful.go).
@@ -38,16 +34,13 @@ type World struct {
 	nextID      int
 	folders     []folder
 	// Counters tests assert on.
-	Revoked       []string
 	JMAPRequests  int
+	SessionDocs   int
 	Uploads       int
 	LastForwarded string
 }
 
-type cred struct {
-	id, address string
-	expires     time.Time
-}
+type cred struct{ address string }
 
 type folder struct{ id, name, parent string }
 
@@ -67,15 +60,7 @@ type Email struct {
 func NewWorld() *World {
 	png := []byte("\x89PNG\r\n\x1a\nfake")
 	return &World{
-		PlatformToken: "svc-token",
-		Users:         map[string]string{"ann@example.test": "correct-horse"},
-		creds:         map[string]cred{},
-		Invites:       map[string]string{"good-invite": "ann@example.test"},
-		Branding: map[string]map[string]any{"example.test": {
-			"name": "Example Co", "theme": "default", "accent": "#336699", "loginTitle": "Welcome to Example",
-			"loginMessage": "Mail for the Example team.", "defaultLanguage": "en", "allowUserAccent": false,
-			"footerLinks": []map[string]string{{"label": "Privacy", "url": "https://example.test/privacy"}},
-		}},
+		Users: map[string]string{"ann@example.test": "correct-horse"},
 		Emails: []Email{
 			{ID: "e1", Subject: "Welcome", From: "boss@example.test", Unread: true,
 				HTML: `<p>Hello <b>Ann</b></p><img src="cid:logo@x"><img src="https://tracker.example/p.gif"><script>alert(1)</script><a href="javascript:alert(1)">x</a>`,
@@ -92,116 +77,18 @@ func randHex(n int) string {
 	return hex.EncodeToString(b)
 }
 
-// Credentials lists the live credentials (tests).
-func (w *World) Credentials() int {
+// SetPassword changes a mailbox password, as an admin or a password change
+// would: every client holding the old one is refused from then on.
+func (w *World) SetPassword(address, password string) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	return len(w.creds)
-}
-
-// RevokeAll kills every credential of an address (a password change).
-func (w *World) RevokeAll(address string) {
-	for k, c := range w.creds {
-		if c.address == address {
-			delete(w.creds, k)
-		}
-	}
-}
-
-// RevokeAllLocked is RevokeAll with locking, for tests simulating an admin.
-func (w *World) RevokeAllFor(address string) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	w.RevokeAll(address)
+	w.Users[address] = password
 }
 
 func writeJSON(rw http.ResponseWriter, status int, v any) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(status)
 	json.NewEncoder(rw).Encode(v)
-}
-
-// PlatformHandler serves /v1/webmail/*.
-func (w *World) PlatformHandler() http.Handler {
-	mux := http.NewServeMux()
-	auth := func(h http.HandlerFunc) http.HandlerFunc {
-		return func(rw http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("Authorization") != "Bearer "+w.PlatformToken {
-				rw.WriteHeader(401)
-				return
-			}
-			h(rw, r)
-		}
-	}
-	mux.HandleFunc("GET /v1/webmail/health", auth(func(rw http.ResponseWriter, r *http.Request) { writeJSON(rw, 200, map[string]string{"status": "ok"}) }))
-	mux.HandleFunc("GET /v1/webmail/domains/{d}", auth(func(rw http.ResponseWriter, r *http.Request) {
-		if b, ok := w.Branding[r.PathValue("d")]; ok {
-			writeJSON(rw, 200, b)
-			return
-		}
-		rw.WriteHeader(404)
-	}))
-	mux.HandleFunc("POST /v1/webmail/sessions", auth(func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ Email, Password, IP, UserAgent string }
-		json.NewDecoder(r.Body).Decode(&in)
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		if pw, ok := w.Users[strings.ToLower(in.Email)]; !ok || pw != in.Password {
-			rw.WriteHeader(401)
-			return
-		}
-		c := cred{id: "sc_" + randHex(6), address: strings.ToLower(in.Email), expires: time.Now().Add(24 * time.Hour)}
-		secret := "tmp_" + randHex(16)
-		w.creds[secret] = c
-		writeJSON(rw, 200, map[string]any{"id": c.id, "credential": secret, "expiresAt": c.expires})
-	}))
-	mux.HandleFunc("DELETE /v1/webmail/sessions/{id}", auth(func(rw http.ResponseWriter, r *http.Request) {
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		for k, c := range w.creds {
-			if c.id == r.PathValue("id") {
-				delete(w.creds, k)
-			}
-		}
-		w.Revoked = append(w.Revoked, r.PathValue("id"))
-		rw.WriteHeader(204)
-	}))
-	mux.HandleFunc("POST /v1/webmail/password", auth(func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ Email, Current, Next string }
-		json.NewDecoder(r.Body).Decode(&in)
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		if pw, ok := w.Users[in.Email]; !ok || pw != in.Current {
-			rw.WriteHeader(401)
-			return
-		}
-		if len(in.Next) < 8 {
-			writeJSON(rw, 422, map[string]string{"message": "Password must be at least 8 characters."})
-			return
-		}
-		w.Users[in.Email] = in.Next
-		w.RevokeAll(in.Email)
-		rw.WriteHeader(204)
-	}))
-	mux.HandleFunc("POST /v1/webmail/invites/redeem", auth(func(rw http.ResponseWriter, r *http.Request) {
-		var in struct{ Token, Password string }
-		json.NewDecoder(r.Body).Decode(&in)
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		addr, ok := w.Invites[in.Token]
-		if !ok {
-			rw.WriteHeader(404)
-			return
-		}
-		if len(in.Password) < 8 {
-			writeJSON(rw, 422, map[string]string{"message": "Password must be at least 8 characters."})
-			return
-		}
-		delete(w.Invites, in.Token)
-		w.Users[addr] = in.Password
-		rw.WriteHeader(204)
-	}))
-	return mux
 }
 
 // JMAPHandler serves the fake mail server.
@@ -211,18 +98,37 @@ func (w *World) JMAPHandler() http.Handler {
 		return func(rw http.ResponseWriter, r *http.Request) {
 			user, pass, ok := r.BasicAuth()
 			w.mu.Lock()
-			c, found := w.creds[pass]
+			want, found := w.Users[strings.ToLower(user)]
 			w.LastForwarded = r.Header.Get("X-Forwarded-For")
 			w.mu.Unlock()
-			if !ok || !found || c.address != user || time.Now().After(c.expires) {
+			if !ok || !found || want != pass {
 				rw.Header().Set("WWW-Authenticate", `Basic realm="jmap"`)
 				rw.WriteHeader(401)
 				return
 			}
-			h(rw, r, c)
+			h(rw, r, cred{address: strings.ToLower(user)})
 		}
 	}
+	mux.HandleFunc("POST /api/account/auth", auth(func(rw http.ResponseWriter, r *http.Request, c cred) {
+		var ops []struct{ Type, Password string }
+		json.NewDecoder(r.Body).Decode(&ops)
+		if len(ops) != 1 || ops[0].Type != "changePassword" {
+			rw.WriteHeader(400)
+			return
+		}
+		if len(ops[0].Password) < 8 {
+			writeJSON(rw, 422, map[string]string{"message": "Password must be at least 8 characters."})
+			return
+		}
+		w.mu.Lock()
+		w.Users[c.address] = ops[0].Password
+		w.mu.Unlock()
+		rw.WriteHeader(204)
+	}))
 	mux.HandleFunc("GET /.well-known/jmap", auth(func(rw http.ResponseWriter, r *http.Request, c cred) {
+		w.mu.Lock()
+		w.SessionDocs++
+		w.mu.Unlock()
 		pub := w.JMAPPublic
 		writeJSON(rw, 200, map[string]any{
 			"capabilities": map[string]any{

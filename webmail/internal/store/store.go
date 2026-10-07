@@ -1,5 +1,5 @@
 // Package store is the SQLite layer (spec §3.2): sessions, per-mailbox
-// preferences and rate-limit counters. One writer connection (writes are
+// preferences, rate-limit counters and the pushed brandings. One writer connection (writes are
 // serialised, WAL) plus a pool of readers; append-only migrations tracked in
 // PRAGMA user_version. All SQL lives in this package.
 package store
@@ -54,6 +54,26 @@ var migrations = []string{
 		blocked_until INTEGER NOT NULL DEFAULT 0,
 		PRIMARY KEY (bucket, key)
 	);`,
+	// 2: the brandings the platform pushes (one row per mail domain, logo inline).
+	`CREATE TABLE brandings (
+		domain            TEXT PRIMARY KEY,       -- lower-case
+		display_name      TEXT NOT NULL DEFAULT '',
+		theme             TEXT NOT NULL DEFAULT '',
+		accent            TEXT NOT NULL DEFAULT '',
+		login_title       TEXT NOT NULL DEFAULT '',
+		login_message     TEXT NOT NULL DEFAULT '',
+		support_email     TEXT NOT NULL DEFAULT '',
+		support_url       TEXT NOT NULL DEFAULT '',
+		footer_links      TEXT NOT NULL DEFAULT '[]', -- JSON [{label,url}]
+		default_locale    TEXT NOT NULL DEFAULT '',
+		allow_user_accent INTEGER NOT NULL DEFAULT 0,
+		mailbox_count     INTEGER NOT NULL DEFAULT 0, -- reported by the platform, shown in its list
+		logo              BLOB,
+		logo_mime         TEXT NOT NULL DEFAULT '',
+		updated_at        INTEGER NOT NULL
+	);`,
+	// 3: the mail server a domain's mailboxes live on (its JMAP base URL); empty means the configured default.
+	`ALTER TABLE brandings ADD COLUMN jmap_url TEXT NOT NULL DEFAULT '';`,
 }
 
 // Options configure Open.

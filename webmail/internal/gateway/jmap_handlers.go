@@ -52,7 +52,7 @@ func (g *Gateway) handleJMAP(w http.ResponseWriter, r *http.Request, a *session.
 		g.upstreamFailed(w, r, a, "jmap", err)
 		return
 	}
-	data, status, err := g.JMAP.Call(r.Context(), doc, a.Address, a.Credential, g.clientIP(r), filtered)
+	data, status, err := g.client(r.Context(), a).Call(r.Context(), doc, a.Address, a.Credential, g.clientIP(r), filtered)
 	if err != nil {
 		g.upstreamFailed(w, r, a, "jmap", err)
 		return
@@ -163,13 +163,13 @@ func (g *Gateway) handleDownload(w http.ResponseWriter, r *http.Request, a *sess
 		g.upstreamFailed(w, r, a, "download", err)
 		return
 	}
-	target, err := g.JMAP.Resolve(jmap.ExpandTemplate(doc.DownloadURL, map[string]string{
+	target, err := g.client(r.Context(), a).Resolve(jmap.ExpandTemplate(doc.DownloadURL, map[string]string{
 		"accountId": acct, "blobId": blobID, "name": safeFilename(name), "type": ctype}))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "download", err)
 		return
 	}
-	req, err := g.JMAP.Request(r.Context(), a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
+	req, err := g.client(r.Context(), a).Request(r.Context(), a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "download", err)
 		return
@@ -177,7 +177,7 @@ func (g *Gateway) handleDownload(w http.ResponseWriter, r *http.Request, a *sess
 	if rg := r.Header.Get("Range"); rg != "" {
 		req.Header.Set("Range", rg)
 	}
-	resp, err := g.JMAP.Do(req)
+	resp, err := g.client(r.Context(), a).Do(req)
 	if err != nil {
 		g.upstreamFailed(w, r, a, "download", err)
 		return
@@ -235,21 +235,21 @@ func (g *Gateway) handleUpload(w http.ResponseWriter, r *http.Request, a *sessio
 		g.upstreamFailed(w, r, a, "upload", err)
 		return
 	}
-	target, err := g.JMAP.Resolve(jmap.ExpandTemplate(doc.UploadURL, map[string]string{"accountId": acct}))
+	target, err := g.client(r.Context(), a).Resolve(jmap.ExpandTemplate(doc.UploadURL, map[string]string{"accountId": acct}))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "upload", err)
 		return
 	}
 	extendDeadlines(w, uploadDeadline, uploadDeadline+streamChunkDeadline)
 	body := http.MaxBytesReader(w, r.Body, g.MaxUploadBytes)
-	req, err := g.JMAP.Request(r.Context(), a.Address, a.Credential, http.MethodPost, target, body, g.clientIP(r))
+	req, err := g.client(r.Context(), a).Request(r.Context(), a.Address, a.Credential, http.MethodPost, target, body, g.clientIP(r))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "upload", err)
 		return
 	}
 	req.ContentLength = r.ContentLength
 	req.Header.Set("Content-Type", cleanMediaType(r.Header.Get("Content-Type")))
-	resp, err := g.JMAP.Do(req)
+	resp, err := g.client(r.Context(), a).Do(req)
 	if err != nil {
 		var mbe *http.MaxBytesError
 		if errors.As(err, &mbe) {
@@ -313,7 +313,7 @@ func (g *Gateway) handleEventSource(w http.ResponseWriter, r *http.Request, a *s
 		httpx.Error(w, r, http.StatusNotImplemented, "no_eventsource", "The mail server offers no push channel.")
 		return
 	}
-	target, err := g.JMAP.Resolve(jmap.ExpandTemplate(doc.EventSourceURL, map[string]string{
+	target, err := g.client(r.Context(), a).Resolve(jmap.ExpandTemplate(doc.EventSourceURL, map[string]string{
 		"types": types, "closeafter": closeafter, "ping": strconv.Itoa(ping)}))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "eventsource", err)
@@ -322,7 +322,7 @@ func (g *Gateway) handleEventSource(w http.ResponseWriter, r *http.Request, a *s
 	ctx, cancel := contextWithTimeout(r, maxStream)
 	defer cancel()
 	extendDeadlines(w, maxStream+streamChunkDeadline, maxStream+streamChunkDeadline)
-	req, err := g.JMAP.Request(ctx, a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
+	req, err := g.client(r.Context(), a).Request(ctx, a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "eventsource", err)
 		return
@@ -331,7 +331,7 @@ func (g *Gateway) handleEventSource(w http.ResponseWriter, r *http.Request, a *s
 	if id := r.Header.Get("Last-Event-ID"); id != "" && len(id) < 256 {
 		req.Header.Set("Last-Event-ID", id)
 	}
-	resp, err := g.JMAP.Do(req)
+	resp, err := g.client(r.Context(), a).Do(req)
 	if err != nil {
 		g.upstreamFailed(w, r, a, "eventsource", err)
 		return

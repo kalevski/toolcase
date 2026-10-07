@@ -41,16 +41,8 @@ export const en = {
     'login.supportEmail': 'Email support',
     'login.footer': 'Footer links',
 
-    'invite.title': 'Set your password',
-    'invite.intro': 'Choose a password for your new mailbox.',
-    'invite.password': 'New password',
-    'invite.confirm': 'Repeat password',
-    'invite.mismatch': 'The passwords do not match.',
-    'invite.tooShort': 'Use at least {min} characters.',
-    'invite.submit': 'Set password',
-    'invite.done': 'Your password is set. You can sign in now.',
-    'invite.toLogin': 'Go to sign in',
-    'invite.invalid': 'This invitation link is invalid or has expired.',
+    'password.mismatch': 'The passwords do not match.',
+    'password.tooShort': 'Use at least {min} characters.',
 
     'shell.menu': 'Folders',
     'shell.compose': 'Compose',
