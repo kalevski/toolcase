@@ -6,6 +6,7 @@ import { esc as escapeAttr } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-avatar'
 
@@ -96,7 +97,7 @@ export class Avatar extends HTMLElement {
 
         if (src) {
             // alt="" marks the image decorative; the host's aria-label carries the accessible name.
-            return `<img class="tc-avatar-img" src="${escapeAttr(src)}" alt="">`
+            return `<img class="tc-avatar-img" src="${escapeAttr(safeImgSrc(src))}" alt="">`
         }
         if (name) {
             return `<span class="tc-avatar-initials" aria-hidden="true">${escapeAttr(deriveInitials(name))}</span>`

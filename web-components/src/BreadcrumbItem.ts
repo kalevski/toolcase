@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { LinkItemBase } from './internal/link-item'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-breadcrumb-item'
 
@@ -36,7 +37,7 @@ export class BreadcrumbItem extends LinkItemBase {
         patchHtml(
             this,
             !active && href != null
-                ? `<a href="${esc(href)}" class="tc-breadcrumb-item-content tc-hit-overlay"${nameAttr}></a>`
+                ? `<a href="${esc(safeUrl(href))}" class="tc-breadcrumb-item-content tc-hit-overlay"${nameAttr}></a>`
                 : '',
         )
     }

@@ -49,11 +49,11 @@ imagewarden classify sample/*.jpg | jq -r '[.file, .decision, .unsafe_score] | @
 | Method & path | Auth | Purpose |
 |---|---|---|
 | `GET /healthz` | none | liveness: model loaded + warmed → 200 |
-| `GET /schema` | none | self-describing endpoint list |
+| `GET /schema` | bearer (when a token is set) | self-describing endpoint list |
 | `GET /status` | bearer | model info, uptime, counters, latency p50/p95/p99, decisions by type |
 | `POST /v1/classify` | bearer | classify one image |
 | `GET /metrics` | bearer | Prometheus text exposition |
-| `GET /version` | none | build info |
+| `GET /version` | bearer (when a token is set) | build info |
 
 `POST /v1/classify` accepts raw image bytes (`Content-Type: image/*` is
 advisory only — the format is sniffed) or `multipart/form-data` with an

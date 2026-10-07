@@ -2,6 +2,7 @@ import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeCssUrl, safeImgSrc, safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-hero'
 
@@ -267,7 +268,7 @@ export class Hero extends HTMLElement {
                 : 'btn btn-outline-primary tc-hero-btn-secondary'
         const inner = iconHtml + `<span class="tc-hero-btn-label">${label}</span>`
         if (action.href) {
-            return `<a href="${esc(action.href)}" class="${cls}" data-which="${which}">${inner}</a>`
+            return `<a href="${esc(safeUrl(action.href))}" class="${cls}" data-which="${which}">${inner}</a>`
         }
         return `<button type="button" class="${cls}" data-which="${which}">${inner}</button>`
     }
@@ -292,8 +293,9 @@ export class Hero extends HTMLElement {
             backdrop === 'grid' ? '<div class="tc-hero-backdrop" aria-hidden="true"></div>' : ''
 
         // Background layer (pattern image + scattered icons).
-        const patternStyle = bgPatternSrc
-            ? ` style="background-image: url('${esc(bgPatternSrc)}');"`
+        const patternUrl = safeCssUrl(bgPatternSrc)
+        const patternStyle = patternUrl
+            ? ` style="background-image: url('${esc(patternUrl)}');"`
             : ''
 
         const bgIconsHtml = this._bgIcons
@@ -385,7 +387,7 @@ export class Hero extends HTMLElement {
                       '</div>'
                     : ''
             const bodyHtml = mediaSrc
-                ? `<img class="tc-hero-panel-img" src="${esc(mediaSrc)}" alt="${esc(mediaAlt)}" />`
+                ? `<img class="tc-hero-panel-img" src="${esc(safeImgSrc(mediaSrc))}" alt="${esc(mediaAlt)}" />`
                 : BLUEPRINT_CANVAS
             mediaHtml =
                 '<div class="tc-hero-media">' +

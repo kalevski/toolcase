@@ -364,3 +364,21 @@ func TestCSSValues(t *testing.T) {
 		}
 	}
 }
+
+func TestCSSRemoteURLCannotBreakOut(t *testing.T) {
+	o := CSSOptions{LoadRemote: true}
+	cases := map[string]string{
+		`background:url("https://a.example/x);position:fixed")`: "",
+		`background:url("https://a.example/x);color:red;(")`:    "",
+		`background:url('https://a.example/x,y')`:               "",
+		`background:url("https://a.example/x y")`:               "background:url(https://a.example/xy)",
+		`background-image:url("https://a.example/a.png")`:       "background-image:url(https://a.example/a.png)",
+		`background:url("https://a.example/a%28b%29.png")`:      "background:url(https://a.example/a%28b%29.png)",
+		`background:url("https://a.example/a(b).png")`:          "background:url(https://a.example/a%28b%29.png)",
+	}
+	for in, want := range cases {
+		if got := SanitizeDeclarations(in, o); got != want {
+			t.Errorf("%q => %q, want %q", in, got, want)
+		}
+	}
+}

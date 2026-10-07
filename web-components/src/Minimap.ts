@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeCssUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-minimap'
 
 export interface MinimapMarker {
@@ -113,7 +114,8 @@ export class Minimap extends HTMLElement {
         else this.style.removeProperty('--bs-minimap-size')
 
         const bg = this.backgroundImage
-        if (bg) this.style.setProperty('--bs-minimap-bg-image', `url(${esc(bg)})`)
+        const bgUrl = safeCssUrl(bg)
+        if (bgUrl) this.style.setProperty('--bs-minimap-bg-image', `url(${bgUrl})`)
         else this.style.removeProperty('--bs-minimap-bg-image')
 
         const wx = this.worldX

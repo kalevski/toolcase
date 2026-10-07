@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var goodKey = base64.StdEncoding.EncodeToString(make([]byte, 32))
+var goodKey = base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789ABCDEF"))
 
 func minimal() map[string]string {
 	return map[string]string{
@@ -163,5 +163,21 @@ func TestWarnings(t *testing.T) {
 	_, w, err := loadEnv(m)
 	if err != nil || len(w) != 2 {
 		t.Fatalf("%v %v", err, w)
+	}
+}
+
+func TestPlaceholderSessionKeyRefusedWhenSecure(t *testing.T) {
+	m := minimal()
+	m["WEBMAIL_SESSION_KEY"] = base64.StdEncoding.EncodeToString(make([]byte, 32))
+	if _, _, err := loadEnv(m); err == nil || !strings.Contains(err.Error(), "placeholder") {
+		t.Fatalf("%v", err)
+	}
+	m["WEBMAIL_SESSION_KEY"] = base64.StdEncoding.EncodeToString([]byte(strings.Repeat("A", 32)))
+	if _, _, err := loadEnv(m); err == nil || !strings.Contains(err.Error(), "placeholder") {
+		t.Fatalf("%v", err)
+	}
+	m["WEBMAIL_PUBLIC_URL"] = "http://localhost:8080"
+	if _, _, err := loadEnv(m); err != nil {
+		t.Fatalf("dev (http) must still accept it: %v", err)
 	}
 }

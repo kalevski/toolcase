@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-plugin-grid'
 
@@ -95,7 +96,7 @@ export class PluginGrid extends HTMLElement {
         // Logo area — image URL takes priority, then lucide icon by iconName
         let logoHtml = ''
         if (item.logo) {
-            logoHtml = `<div class="tc-plugin-card-logo"><img src="${esc(item.logo)}" alt="${esc(item.name)} logo" loading="lazy"></div>`
+            logoHtml = `<div class="tc-plugin-card-logo"><img src="${esc(safeImgSrc(item.logo))}" alt="${esc(item.name)} logo" loading="lazy"></div>`
         } else if (item.iconName) {
             const iconSvg = lucideByName(item.iconName)
             if (iconSvg) {

@@ -3,6 +3,7 @@ import { consumerText } from './internal/content-observer'
 import { esc } from './internal/esc'
 import { setHostClass } from './internal/host-class'
 import { LinkItemBase } from './internal/link-item'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-dropdown-item'
 
@@ -72,7 +73,7 @@ export class DropdownItem extends LinkItemBase {
             const ariaCurrent = isActive ? ' aria-current="true"' : ''
             patchHtml(
                 this,
-                `<a href="${esc(href)}" class="tc-hit-overlay"${ariaDisabled}${ariaCurrent}${nameAttr}></a>`,
+                `<a href="${esc(safeUrl(href))}" class="tc-hit-overlay"${ariaDisabled}${ariaCurrent}${nameAttr}></a>`,
             )
         } else {
             const disabledAttr = isDisabled ? ' disabled' : ''

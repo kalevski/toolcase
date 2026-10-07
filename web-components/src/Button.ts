@@ -5,6 +5,7 @@ import { setHostClass } from './internal/host-class'
 import { VARIANTS_FULL } from './internal/variants'
 import { fieldMessageHtml, type FieldMessageState } from './internal/field-message'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-button'
 
 const has = (v: string | null | undefined): v is string => v != null && v !== ''
@@ -253,7 +254,7 @@ export class Button extends HTMLElement {
             const disabledAttr = isDisabled ? ' aria-disabled="true" tabindex="-1"' : ''
             patchHtml(
                 this,
-                `<a href="${esc(href)}" class="tc-button-hit tc-hit-overlay" role="button"${disabledAttr}${nameAttr}></a>`,
+                `<a href="${esc(safeUrl(href))}" class="tc-button-hit tc-hit-overlay" role="button"${disabledAttr}${nameAttr}></a>`,
                 { region: 'control' },
             )
         } else {

@@ -1,5 +1,6 @@
 import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-leaderboard'
 
 function initials(name: string): string {
@@ -169,7 +170,7 @@ export class Leaderboard extends HTMLElement {
                     : ` data-idx="${idx}"`
 
                 const avatarHtml = entry.avatarUrl
-                    ? `<img src="${esc(entry.avatarUrl)}" alt="${esc(entry.name)}" class="tc-leaderboard-avatar">`
+                    ? `<img src="${esc(safeImgSrc(entry.avatarUrl))}" alt="${esc(entry.name)}" class="tc-leaderboard-avatar">`
                     : `<span class="tc-leaderboard-avatar tc-leaderboard-avatar--initials" aria-hidden="true">${esc(initials(entry.name))}</span>`
 
                 const cells: string[] = []

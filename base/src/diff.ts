@@ -1,3 +1,5 @@
+import { isForbiddenKey } from './forbiddenKeys'
+
 export type Edit = [unknown] | [unknown, unknown] | [unknown, 0, 0]
 
 export type ObjectDelta = { [key: string]: unknown }
@@ -42,6 +44,7 @@ function diffObjects(a: Record<string, unknown>, b: Record<string, unknown>): Ob
     const keys = new Set([...Object.keys(a), ...Object.keys(b)])
 
     for (const key of keys) {
+        if (isForbiddenKey(key)) continue
         const hasA = Object.prototype.hasOwnProperty.call(a, key)
         const hasB = Object.prototype.hasOwnProperty.call(b, key)
 

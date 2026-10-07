@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-ecosystem-map'
 
 export interface EcosystemNode {
@@ -189,7 +190,7 @@ export class EcosystemMap extends HTMLElement {
                     const hitCircle = `<circle class="tc-ecosystem-map__node-hit" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" />`
 
                     if (node.href) {
-                        nodesSvg += `<a class="tc-ecosystem-map__node-link" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer" data-em-id="${nodeId}"${accentStyle}>${hitCircle}<circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></a>`
+                        nodesSvg += `<a class="tc-ecosystem-map__node-link" href="${esc(safeUrl(node.href))}" target="_blank" rel="noopener noreferrer" data-em-id="${nodeId}"${accentStyle}>${hitCircle}<circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></a>`
                     } else {
                         nodesSvg += `<g class="tc-ecosystem-map__node-group" role="button" tabindex="0" aria-label="${esc(node.name)}" data-em-id="${nodeId}"${accentStyle}>${hitCircle}<circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></g>`
                     }
@@ -215,7 +216,7 @@ export class EcosystemMap extends HTMLElement {
                 const items = ring.items
                     .map((node) =>
                         node.href
-                            ? `<a class="tc-ecosystem-map__node" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer">${esc(node.name)}</a>`
+                            ? `<a class="tc-ecosystem-map__node" href="${esc(safeUrl(node.href))}" target="_blank" rel="noopener noreferrer">${esc(node.name)}</a>`
                             : `<span class="tc-ecosystem-map__node">${esc(node.name)}</span>`,
                     )
                     .join('')

@@ -7,6 +7,7 @@ import { esc } from './internal/esc'
 import { closeIcon, chevronLeftIcon, chevronRightIcon } from './icons'
 import { lockBody, unlockBody } from './internal/scroll-lock'
 import { overlayStack } from './internal/overlay-stack'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-lightbox'
 
@@ -342,7 +343,7 @@ export class Lightbox extends HTMLElement {
 
         const imgEl = this.querySelector<HTMLImageElement>('.tc-lightbox__image')
         if (imgEl) {
-            imgEl.src = img.src
+            imgEl.src = safeImgSrc(img.src)
             imgEl.alt = img.alt ?? `Image ${this._index + 1} of ${count}`
         }
 
@@ -396,7 +397,7 @@ export class Lightbox extends HTMLElement {
                       const active = idx === this._index
                       const cls = `tc-lightbox__thumbnail${active ? ' tc-lightbox__thumbnail--active' : ''}`
                       const current = active ? ' aria-current="true"' : ''
-                      const src = esc(image.thumb ?? image.src)
+                      const src = esc(safeImgSrc(image.thumb ?? image.src))
                       const label = esc(`View image ${idx + 1}${image.alt ? `: ${image.alt}` : ''}`)
                       return (
                           `<button type="button" class="${cls}" data-idx="${idx}" aria-label="${label}"${current}>` +
@@ -417,7 +418,7 @@ export class Lightbox extends HTMLElement {
                 `<div class="tc-lightbox__stage">` +
                 arrowsPrev +
                 `<figure class="tc-lightbox__figure">` +
-                `<img class="tc-lightbox__image" src="${esc(img.src)}" alt="${esc(img.alt ?? `Image ${this._index + 1} of ${count}`)}" />` +
+                `<img class="tc-lightbox__image" src="${esc(safeImgSrc(img.src))}" alt="${esc(img.alt ?? `Image ${this._index + 1} of ${count}`)}" />` +
                 `<figcaption class="tc-lightbox__caption"${captionHidden}>${captionText}</figcaption>` +
                 `</figure>` +
                 arrowsNext +

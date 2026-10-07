@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-cookbook-grid'
 
 const COLUMNS = [2, 3] as const
@@ -125,7 +126,7 @@ export class CookbookGrid extends HTMLElement {
         if (recipe.href) {
             return (
                 `<a class="tc-cookbook-grid-item tc-cookbook-grid-item--linked" ` +
-                `href="${esc(recipe.href)}" aria-label="${esc(recipe.title)}">${inner}</a>`
+                `href="${esc(safeUrl(recipe.href))}" aria-label="${esc(recipe.title)}">${inner}</a>`
             )
         }
         return `<article class="tc-cookbook-grid-item">${inner}</article>`

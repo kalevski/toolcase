@@ -123,7 +123,7 @@ sites:
       branch: main
       auth:
         method: github-token
-        token_env: GITHUB_TOKEN        # or token_file: /run/secrets/gh_token
+        token_env: NP_SECRET_GITHUB_TOKEN   # or token_file: /var/lib/nginxpilot/git-credentials/gh.token
 ```
 
 Get the token however you log in to GitHub:
@@ -170,7 +170,7 @@ sites:
       interval: 10m
       auth:
         method: bearer            # bearer | basic | header | none
-        token_env: BLOG_ARTIFACT_TOKEN
+        token_env: NP_SECRET_BLOG_ARTIFACT_TOKEN
       checksum_url: https://ci.example.com/artifacts/blog/latest.zip.sha256  # optional
       # strip_components: 1       # explicit; a single shared root dir is auto-stripped
       limits:
@@ -186,7 +186,34 @@ A release refused by a limit leaves the live release serving, and `GET /status` 
 
 ### Secrets
 
-Inline secrets are a **parse-time error** — only `*_env` / `*_file` references are accepted, so config files stay safe to commit. Secret files must be `0600`/`0640` and owned by the daemon user or root, or the daemon refuses to start. systemd `LoadCredential` works via `*_file` + `$CREDENTIALS_DIRECTORY`.
+Inline secrets are a **parse-time error** — only `*_env` / `*_file` references are accepted, so config files stay safe to commit. Secret files must be `0600`/`0640` and owned by the daemon user or root, or the daemon refuses to start.
+
+A source's references are also **confined**, because a fragment author could otherwise point `token_env`/`token_file` at any variable or file and have the value sent to the source URL: an `*_env` name must start with `NP_SECRET_` (`secrets.env_prefix`), and a `*_file` (symlinks resolved) must live under `<data_dir>/git-credentials/` (where `PUT /git-credentials/{name}` writes) or `secrets.dir` (default `<data_dir>/secrets`; `admin.token_file` is always refused). The admin token's own `admin.token_env` is not a source reference and may be any name.
+
+### Daemon-level restrictions
+
+These live in the main config only — a fragment cannot set them:
+
+```yaml
+proxy:
+  unix_socket_dirs: []        # dirs a `unix:` target may live under; empty = no unix: targets at all
+  deny_cidrs: []              # extra literal-IP ranges to refuse (built in: loopback, 0.0.0.0/8, link-local, the admin address)
+stream:
+  allowed_ports: []           # e.g. ["20000-29999", "5432"]; empty = any port
+secrets:
+  dir: ""                     # default <data_dir>/secrets
+  env_prefix: NP_SECRET_
+limits:                       # ceilings every source's own `limits` is clamped to
+  max_archive_size: 1GiB
+  max_uncompressed_size: 2GiB
+  max_entries: 200000
+  max_compression_ratio: 200
+  max_git_repo_size: 1GiB     # a larger bare clone is deleted and the sync fails
+php:
+  allow_shared_user: false    # an app with no app-<stem> host user fails instead of sharing a uid
+```
+
+Proxy `pass` and upstream/stream addresses never accept the daemon's own admin socket directory or `docker.sock`, a `localhost` name, a numeric-form host (`2130706433`) or `http://unix:…`. `advanced` snippets are parsed, not pasted: braces, comments and backslashes are refused and only `add_header`, `expires`, `rewrite`, `return` (3xx/4xx/5xx), `error_page`, `client_max_body_size` (≤ 1g), `gzip*`, `charset`, `charset_types`, `etag` and `access_log off` pass (a proxy may also set `proxy_read_timeout`, `proxy_send_timeout`, `proxy_connect_timeout`, `proxy_buffering` and `proxy_request_buffering`). A location `path` must match `^/[A-Za-z0-9._~/%:@!$&()*+,=-]*$`; `php.env` keys may not start with `PHP_`, `SCRIPT_`, `DOCUMENT_`, `HTTP_`, `PATH_`, `REQUEST_`, `QUERY_`, `CONTENT_`, `REMOTE_`, `SERVER_`, `GATEWAY_` or `REDIRECT_`, and values may not contain `$`.
 
 ### Reverse proxies and upstreams
 
@@ -614,7 +641,7 @@ Off by default: an existing managed deployment may already declare its own `defa
 
 ## Admin endpoint
 
-Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.token_env` / `admin.token_file` add bearer auth), plus a local Unix socket for the CLI.
+Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.token_env` / `admin.token_file` add bearer auth), plus a local Unix socket for the CLI. A **non-loopback `admin.listen` without a token is refused at startup**, a token from `admin.token_env` must be at least 32 characters, `GET /schema` needs the token like every other route, and 20 failed token attempts from one address within a minute earn a `429` for the next minute.
 
 ### The admin token
 
@@ -750,7 +777,7 @@ log_destinations:
 
   - name: audit-file
     type: file                     # local NDJSON with size-based self-rotation
-    path: /var/log/nginxpilot/access-5xx.ndjson
+    path: /var/lib/nginxpilot/logs/access-5xx.ndjson   # must be under <data_dir>/logs/
     filter: { status: [">=500"] }
 ```
 
@@ -775,7 +802,7 @@ Retries back off exponentially: `interval × 2^streak`, capped at 4× interval; 
 
 ## systemd
 
-`packaging/nginxpilot.service` ships `Type=notify`, `Restart=on-failure` and hardening (`ProtectSystem=strict`, `NoNewPrivileges`, `PrivateTmp`). Run as a dedicated `nginxpilot` user owning `data_dir`; the nginx worker user joins the `nginxpilot` group (dirs `0750`, files `0640`, umask `027`).
+`packaging/nginxpilot.service` ships `Type=notify`, `Restart=on-failure` and hardening (`ProtectSystem=strict` with `ReadWritePaths` for `data_dir`, the managed nginx config, the cert dir and certbot state, `NoNewPrivileges`, `PrivateTmp`, a syscall filter, an empty capability set and `MemoryDenyWriteExecute`). Edit `ReadWritePaths` if your managed-mode paths differ. Run as a dedicated `nginxpilot` user owning `data_dir`; the nginx worker user joins the `nginxpilot` group (dirs `0750`, files `0640`, umask `027`).
 
 SELinux (RHEL-family): `semanage fcontext -a -t httpd_sys_content_t '/var/lib/nginxpilot/sites(/.*)?' && restorecon -R /var/lib/nginxpilot/sites`.
 
@@ -823,7 +850,7 @@ nginxpilot is **config-file driven** (`config.yml`), so its env surface is tiny 
 | Variable | Default | Description |
 |---|---|---|
 | `NGINXPILOT_CONFIG` | `/etc/nginxpilot/config.yml` | Config path the entrypoint passes to `nginxpilot run`. |
-| _`auth.token_env` value_ | — | Per-source: name of the env var holding a git HTTPS/GitHub token (e.g. set `token_env: GH_TOKEN`, then pass `-e GH_TOKEN=…`). |
+| _`auth.token_env` value_ | — | Per-source: name of the env var holding a git HTTPS/GitHub token (it must start with `NP_SECRET_`, e.g. set `token_env: NP_SECRET_GH_TOKEN`, then pass `-e NP_SECRET_GH_TOKEN=…`). |
 | _`auth.key_env` value_ | — | Per-source: name of the env var holding an SSH private key (alternative to `key_file`). |
 | _`admin.token_env` value_ | — | Name of the env var holding the admin-API bearer token. With `admin.token_file` set it only seeds the hashed file on the first start (see [The admin token](#the-admin-token)). |
 | `TZ` | `UTC` | Timezone (image ships `tzdata`); affects release timestamps + logs. |

@@ -71,3 +71,22 @@ describe('KeyBuilder.stripNamespace', () => {
     })
 
 })
+
+describe('KeyBuilder.build — injective encoding', () => {
+
+    it('escapes % itself so an encoded separator cannot collide', () => {
+        const kb = makeBuilder()
+        expect(kb.build('a%3Ab')).toBe('ns:a%253Ab')
+        expect(kb.build('a%3Ab')).not.toBe(kb.build('a:b'))
+    })
+
+    it('never maps two different parts to the same key', () => {
+        const kb = makeBuilder('')
+        const seen = new Map<string, string>()
+        for (const part of ['a:b', 'a%3Ab', 'a%253Ab', '%', '%25', ':', '%3A', 'a']) {
+            const key = kb.build(part)
+            expect(seen.has(key)).toBe(false)
+            seen.set(key, part)
+        }
+    })
+})

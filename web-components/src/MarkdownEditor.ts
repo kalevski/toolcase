@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-markdown-editor'
 
@@ -76,7 +77,7 @@ function markdownToHtml(md: string): string {
         // Links — sanitise href to a safe scheme; quote-escape for the attribute
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, text: string, url: string) => {
             const trimmed = url.trim()
-            const safe = /^(https?:|mailto:|\/|#|\.)/i.test(trimmed) ? trimmed : '#'
+            const safe = safeUrl(trimmed) || '#'
             return `<a href="${safe.replace(/"/g, '&quot;')}" rel="noopener noreferrer" target="_blank">${text}</a>`
         })
         // Blockquote

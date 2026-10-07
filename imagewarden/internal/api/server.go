@@ -38,7 +38,12 @@ type Server struct {
 	limits    handlerLimits     // request-size / timeout caps for POST /v1/classify (classify_handler.go)
 	startedAt time.Time         // uptime base for GET /status; New sets it to time.Now()
 	log       *slog.Logger      // structured logger threaded from cmd/run
+	bodySlots chan struct{}     // bounds in-flight POST /v1/classify requests that hold a request body in memory
 }
+
+// maxInflightBodies caps how many POST /v1/classify requests may hold a request
+// body at once; the next one is answered 429 immediately.
+const maxInflightBodies = 8
 
 // New builds a Server with its dependencies wired.
 //
@@ -66,6 +71,7 @@ func New(svc *classify.Service, st *state.State, token, version string, maxBodyM
 		limits:    handlerLimits{MaxBodyMB: maxBodyMB, RequestTimeout: requestTimeout},
 		startedAt: time.Now(),
 		log:       log,
+		bodySlots: make(chan struct{}, maxInflightBodies),
 	}
 }
 
@@ -89,6 +95,9 @@ func (s *Server) Run(ctx context.Context, listen string) error {
 		Addr:              listen,
 		Handler:           s.routes(),
 		ReadHeaderTimeout: 5 * time.Second, // slowloris guard on the request line + headers
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       2 * time.Minute,
 	}
 
 	errCh := make(chan error, 1)

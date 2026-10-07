@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/nginxpilot
@@ -37,6 +36,9 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +77,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          provenance: true
+          sbom: true
           context: nginxpilot
           build-contexts: certbot-dns-zonewright=zonewright/certbot-dns-zonewright
           platforms: linux/amd64

@@ -9,10 +9,11 @@ export class KeyBuilder {
 
 	private encodePart(p: string | number): string {
 		const s = typeof p === 'string' ? p : String(p)
-		if (s.includes(this.separator)) {
-			return s.split(this.separator).join(encodeURIComponent(this.separator))
+		const escaped = s.includes('%') ? s.split('%').join('%25') : s
+		if (this.separator.length > 0 && escaped.includes(this.separator)) {
+			return escaped.split(this.separator).join(encodeURIComponent(this.separator))
 		}
-		return s
+		return escaped
 	}
 
 	build(part: string | number): string

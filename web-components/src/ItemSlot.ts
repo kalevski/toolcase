@@ -3,6 +3,7 @@ import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-item-slot'
 
@@ -148,7 +149,7 @@ export class ItemSlot extends HTMLElement {
     private _renderGlyph(iconStr: string, name: string): string {
         if (!iconStr && !name) return ''
         if (iconStr && isImageSrc(iconStr)) {
-            return `<img class="tc-item-slot__glyph" src="${esc(iconStr)}" alt="" />`
+            return `<img class="tc-item-slot__glyph" src="${esc(safeImgSrc(iconStr))}" alt="" />`
         }
         const text = iconStr || (name ? name.charAt(0).toUpperCase() : '?')
         return `<span class="tc-item-slot__glyph" aria-hidden="true">${esc(text)}</span>`

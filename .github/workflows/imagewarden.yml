@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  packages: write # only the docker job pushes; kept top-level as the other product workflows do
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/imagewarden
@@ -102,6 +101,9 @@ jobs:
   # from the same Dockerfile. QEMU provides the arm64 emulation.
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: build
     steps:
       - uses: actions/checkout@v4 # model/ is baked into the image (§9)
@@ -130,6 +132,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          provenance: true
+          sbom: true
           context: imagewarden
           platforms: linux/amd64,linux/arm64 # ORT stage is TARGETARCH-parameterized (§9, task 032)
           push: ${{ github.event_name == 'push' }}

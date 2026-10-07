@@ -2,6 +2,7 @@ import { setHostClass } from './internal/host-class'
 import { setAttr, syncOwnedNodes } from './internal/tc-element'
 import { esc } from './internal/esc'
 import { msg } from './messages'
+import { safeUrl } from './internal/safe-url'
 
 // tc-preview-frame — an aspect-locked embed with a loading state and a failure
 // state, because both of those are what the reader actually sees most of the time.
@@ -89,8 +90,10 @@ export class PreviewFrame extends HTMLElement {
     }
 
     /**
-     * The iframe's `sandbox`. Defaults to `allow-scripts allow-same-origin`,
-     * which is what a preview of the consumer's OWN build needs and nothing more.
+     * The iframe's `sandbox`. Defaults to `allow-scripts` (no
+     * `allow-same-origin`, so the framed document cannot reach this origin).
+     * Add `allow-same-origin` deliberately for a preview of the consumer's OWN build
+     * served from its own origin.
      *
      * Set it to `""` for a hard sandbox, or widen it deliberately. It is an
      * attribute rather than a hardcoded value because the right answer depends on
@@ -98,7 +101,7 @@ export class PreviewFrame extends HTMLElement {
      * or over-trusts it.
      */
     get sandbox(): string {
-        return this.getAttribute('sandbox') ?? 'allow-scripts allow-same-origin'
+        return this.getAttribute('sandbox') ?? 'allow-scripts'
     }
     set sandbox(v: string) {
         setAttr(this, 'sandbox', v)
@@ -112,7 +115,7 @@ export class PreviewFrame extends HTMLElement {
     /** Load again — the answer to a failed build that has since been fixed. */
     reload(): void {
         const frame = this.querySelector<HTMLIFrameElement>(':scope > .tc-preview-frame__frame')
-        const src = this.src
+        const src = safeUrl(this.src)
         if (!frame || !src) return
         this._setState('loading')
         frame.src = src
@@ -133,7 +136,7 @@ export class PreviewFrame extends HTMLElement {
             this.setAttribute('data-state', this.src ? 'loading' : 'idle')
         }
 
-        const src = this.src
+        const src = safeUrl(this.src)
         syncOwnedNodes(this, [
             {
                 cls: 'tc-preview-frame__frame',

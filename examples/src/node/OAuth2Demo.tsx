@@ -58,7 +58,7 @@ const serverCode = `// Everything below runs on the server — requires Node.js 
 
 import {
     oidcProvider, generateState, generatePKCE,
-    buildAuthorizeURL, verifyCallback,
+    buildAuthorizeURL, verifyCallback, generateNonce,
     exchangeCode, refreshToken, verifyIdToken,
     type OAuth2Tokens,
 } from '@toolcase/node'
@@ -77,10 +77,11 @@ const google = await oidcProvider({
 // Generate state + PKCE pair; persist them in session/KV before redirecting.
 const state = generateState()                   // crypto-random, base64url
 const { codeVerifier, codeChallenge } = generatePKCE()  // S256 by default
+const nonce = generateNonce()                   // bound to the ID token
 const redirectUri = 'https://app.example.com/auth/callback'
-await kv.set(\`oauth:\${state}\`, { state, codeVerifier, redirectUri }, { ttlMs: 10 * 60_000 })
+await kv.set(\`oauth:\${state}\`, { state, nonce, codeVerifier, redirectUri }, { ttlMs: 10 * 60_000 })
 
-reply.redirect(buildAuthorizeURL(google, { state, redirectUri, codeChallenge }))
+reply.redirect(buildAuthorizeURL(google, { state, nonce, redirectUri, codeChallenge }))
 
 // ── 3. Callback handler (/auth/callback?code=…&state=…) ──────────────────
 const ctx = await kv.get(\`oauth:\${req.query.state}\`)
@@ -99,7 +100,7 @@ const verified = await verifyIdToken(tokens.idToken!, {
     issuer:   google.issuer!,
     audience: google.clientId,
     jwksUri:  google.jwksUri!,
-})
+}, { nonce: ctx.nonce })
 // verified.payload → { sub, email, email_verified, iat, exp, ... }
 
 // ── 5. Refresh when the access token expires ──────────────────────────────

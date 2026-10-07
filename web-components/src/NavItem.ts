@@ -3,6 +3,7 @@ import { consumerText, observeContent } from './internal/content-observer'
 import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import { Tab as BsTab } from './internal/Tab'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-nav-item'
 
@@ -113,7 +114,7 @@ export class NavItem extends HTMLElement {
 
         const label = consumerText(this)
         const attrs = [
-            `href="${esc(href)}"`,
+            `href="${esc(safeUrl(href))}"`,
             'class="nav-link tc-hit-overlay"',
             target ? `target="${esc(target)}"` : '',
             toggleType ? `data-bs-toggle="${toggleType}"` : '',

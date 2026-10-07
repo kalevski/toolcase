@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-welcome-guide'
 
 export interface WelcomeGuideStep {
@@ -135,7 +136,7 @@ export class WelcomeGuide extends HTMLElement {
         // Left (dark hero) panel — title + messages over the gradient glow.
         const patternHtml =
             !loading && patternSrc
-                ? `<div class="tc-welcome-guide__background" aria-hidden="true"><img class="tc-welcome-guide__background-pattern" src="${esc(patternSrc)}" alt="${esc(patternAlt)}" loading="lazy" aria-hidden="true" /></div>`
+                ? `<div class="tc-welcome-guide__background" aria-hidden="true"><img class="tc-welcome-guide__background-pattern" src="${esc(safeImgSrc(patternSrc))}" alt="${esc(patternAlt)}" loading="lazy" aria-hidden="true" /></div>`
                 : ''
 
         const messagesHtml = this._messages

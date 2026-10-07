@@ -22,26 +22,26 @@ func mustFail(t *testing.T, cfg *Config, substr string) {
 
 func TestValidateForceSSLRequiresTLS(t *testing.T) {
 	cfg := baseCfg()
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", WebOptions: WebOptions{ForceSSL: true}}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", WebOptions: WebOptions{ForceSSL: true}}}
 	mustFail(t, cfg, "force_ssl requires tls")
 }
 
 func TestValidateHTTP2RequiresTLS(t *testing.T) {
 	cfg := baseCfg()
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", WebOptions: WebOptions{HTTP2: true}}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", WebOptions: WebOptions{HTTP2: true}}}
 	mustFail(t, cfg, "http2 requires tls")
 }
 
 func TestValidateTLSWantedButNoCertDir(t *testing.T) {
 	cfg := baseCfg()
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", WebOptions: WebOptions{TLS: TLSAuto}}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", WebOptions: WebOptions{TLS: TLSAuto}}}
 	mustFail(t, cfg, "neither tls.cert_dir nor tls.cert_dir_env")
 }
 
 func TestValidateTLSWithCertDirOK(t *testing.T) {
 	cfg := baseCfg()
 	cfg.Tls = Tls{CertDir: "/etc/certs"}
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", WebOptions: WebOptions{TLS: TLSAuto, ForceSSL: true, HTTP2: true, HSTS: HSTS{Enabled: true}}}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", WebOptions: WebOptions{TLS: TLSAuto, ForceSSL: true, HTTP2: true, HSTS: HSTS{Enabled: true}}}}
 	if err := Validate(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestValidateTLSWithCertDirOK(t *testing.T) {
 func TestValidateBadTLSMode(t *testing.T) {
 	cfg := baseCfg()
 	cfg.Tls = Tls{CertDir: "/etc/certs"}
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", WebOptions: WebOptions{TLS: "maybe"}}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", WebOptions: WebOptions{TLS: "maybe"}}}
 	mustFail(t, cfg, "must be off | auto | required")
 }
 

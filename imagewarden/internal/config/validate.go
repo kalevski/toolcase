@@ -5,6 +5,16 @@ import (
 	"net"
 )
 
+// MinTokenLen is the shortest bearer token the server accepts.
+const MinTokenLen = 32
+
+func CheckToken(token string) error {
+	if token != "" && len(token) < MinTokenLen {
+		return fmt.Errorf("api token must be at least %d characters (got %d)", MinTokenLen, len(token))
+	}
+	return nil
+}
+
 // Validate performs semantic checks after Load's syntactic decode (spec §6,
 // §5 Auth): thresholds in range, review no looser than block, positive
 // limits, a parseable listen address, and a token required on non-loopback

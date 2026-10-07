@@ -1,8 +1,10 @@
 """DNS Authenticator for zonewright."""
 
+import ipaddress
 import logging
+import os
 from typing import Any, Callable, Dict, Optional, Tuple
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import requests
 
@@ -16,6 +18,20 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_WAIT_TIMEOUT = 20
 CHALLENGE_TTL = 60
+ALLOW_INSECURE_ENV = "DNS_ZONEWRIGHT_ALLOW_INSECURE_HTTP"
+
+
+def _is_loopback_host(host: str) -> bool:
+    if host == "localhost" or host.endswith(".localhost"):
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def _truthy(value: Optional[str]) -> bool:
+    return (value or "").strip().lower() in ("1", "true", "yes", "on")
 
 
 class Authenticator(dns_common.DNSAuthenticator):
@@ -54,8 +70,20 @@ class Authenticator(dns_common.DNSAuthenticator):
         if not (url.startswith("https://") or url.startswith("http://")):
             raise errors.PluginError(
                 f"{credentials.confobj.filename}: dns_zonewright_url must start "
-                "with https:// (or http:// on a private network)"
+                "with https:// (or http:// to a loopback address)"
             )
+        if url.startswith("http://"):
+            host = urlparse(url).hostname or ""
+            allowed = _truthy(credentials.conf("allow-insecure-http")) or _truthy(
+                os.environ.get(ALLOW_INSECURE_ENV)
+            )
+            if not _is_loopback_host(host) and not allowed:
+                raise errors.PluginError(
+                    f"{credentials.confobj.filename}: dns_zonewright_url is plain http:// to "
+                    f"{host or 'an unknown host'}, which would send the API token in clear text. "
+                    "Use https://, or set dns_zonewright_allow_insecure_http = true "
+                    f"(or {ALLOW_INSECURE_ENV}=1) for a trusted private network."
+                )
         timeout = credentials.conf("wait-timeout")
         if timeout:
             try:

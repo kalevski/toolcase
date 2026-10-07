@@ -39,6 +39,23 @@ describe('HttpServer — fastify options', () => {
         expect(lastFastifyCall?.trustProxy).toBe(true)
     })
 
+    it('trustProxy accepts a number, string or list of addresses', async () => {
+        for (const value of [1, '10.0.0.0/8', ['10.0.0.1', '10.0.0.2']]) {
+            const server = new HttpServer({ port: 3000, trustProxy: value })
+            await server.init()
+            expect(lastFastifyCall?.trustProxy).toEqual(value)
+        }
+    })
+
+    it('bodyLimit defaults to 1 MiB and is overridable', async () => {
+        const server = new HttpServer({ port: 3000 })
+        await server.init()
+        expect(lastFastifyCall?.bodyLimit).toBe(1_048_576)
+        const other = new HttpServer({ port: 3000, bodyLimitBytes: 2048 })
+        await other.init()
+        expect(lastFastifyCall?.bodyLimit).toBe(2048)
+    })
+
     it('requestTimeout defaults to 30 000 ms', async () => {
         const server = new HttpServer({ port: 3000 })
         await server.init()
@@ -51,10 +68,10 @@ describe('HttpServer — fastify options', () => {
         expect(lastFastifyCall?.requestTimeout).toBe(5_000)
     })
 
-    it('connectionTimeout defaults to 0', async () => {
+    it('connectionTimeout defaults to 30 000 ms', async () => {
         const server = new HttpServer({ port: 3000 })
         await server.init()
-        expect(lastFastifyCall?.connectionTimeout).toBe(0)
+        expect(lastFastifyCall?.connectionTimeout).toBe(30_000)
     })
 
     it('connectionTimeoutMs is forwarded as connectionTimeout', async () => {

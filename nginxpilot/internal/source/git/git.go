@@ -153,7 +153,7 @@ func (s *Syncer) ensureCache(ctx context.Context, cache string) error {
 	_, err := s.git(ctx, cache, "fetch", "--depth=1", "--force", "--prune", "origin",
 		"+refs/heads/"+s.branch+":refs/heads/"+s.branch)
 	if err == nil {
-		return nil
+		return s.enforceRepoSize(cache)
 	}
 	if ctx.Err() != nil {
 		return err
@@ -175,9 +175,48 @@ func (s *Syncer) clone(ctx context.Context, cache string) error {
 	_, err := s.git(ctx, filepath.Dir(cache), "clone", "--bare", "--depth=1",
 		"--single-branch", "--branch", s.branch, "--", s.url, cache)
 	if err != nil {
+		_ = os.RemoveAll(cache)
 		return fmt.Errorf("clone %s: %w", s.url, err)
 	}
+	return s.enforceRepoSize(cache)
+}
+
+// enforceRepoSize measures the bare cache and deletes it when it exceeds
+// limits.max_git_repo_size: a shallow clone still carries the whole tip, and one
+// repository must not be able to fill the disk.
+func (s *Syncer) enforceRepoSize(cache string) error {
+	max := int64(s.limits.MaxGitRepoSize)
+	if max <= 0 {
+		return nil
+	}
+	size, err := dirSize(cache)
+	if err != nil {
+		return fmt.Errorf("measure clone: %w", err)
+	}
+	if size > max {
+		_ = os.RemoveAll(cache)
+		return &source.LimitError{Limit: "max_git_repo_size", Max: max, Msg: fmt.Sprintf("limit exceeded: max_git_repo_size (%s)", s.limits.MaxGitRepoSize)}
+	}
 	return nil
+}
+
+// dirSize sums the sizes of the regular files under dir.
+func dirSize(dir string) (int64, error) {
+	var total int64
+	err := filepath.WalkDir(dir, func(_ string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.Type().IsRegular() {
+			info, err := d.Info()
+			if err != nil {
+				return err
+			}
+			total += info.Size()
+		}
+		return nil
+	})
+	return total, err
 }
 
 // extract materializes the tree at sha into stagingDir via
@@ -354,7 +393,7 @@ func (s *Syncer) gitEnv() ([]string, error) {
 			shellQuote(keyPath), shellQuote(kh), strict)
 		env = append(env, "GIT_SSH_COMMAND="+sshCmd)
 	case config.AuthHTTPSToken:
-		token, err := config.ResolveSecret(s.auth.TokenEnv, s.auth.TokenFile)
+		token, err := s.auth.Resolve(s.auth.TokenEnv, s.auth.TokenFile)
 		if err != nil {
 			return nil, fmt.Errorf("resolve git token: %w", err)
 		}
@@ -366,7 +405,7 @@ func (s *Syncer) gitEnv() ([]string, error) {
 		// which PATs also accept. The token is injected as an
 		// Authorization header via GIT_CONFIG_* so it never lands in
 		// argv or on disk (matches https-token, spec §4.1).
-		token, err := config.ResolveSecret(s.auth.TokenEnv, s.auth.TokenFile)
+		token, err := s.auth.Resolve(s.auth.TokenEnv, s.auth.TokenFile)
 		if err != nil {
 			return nil, fmt.Errorf("resolve git token: %w", err)
 		}
@@ -401,11 +440,15 @@ func (s *Syncer) materializeKey() (func(), error) {
 		return noop, nil
 	}
 	if s.auth.KeyFile != "" {
-		s.keyPath = s.auth.KeyFile
+		keyFile, err := s.auth.ResolveKeyFile()
+		if err != nil {
+			return nil, fmt.Errorf("resolve ssh key: %w", err)
+		}
+		s.keyPath = keyFile
 		return noop, nil
 	}
 
-	key, err := config.ResolveSecret(s.auth.KeyEnv, "")
+	key, err := s.auth.Resolve(s.auth.KeyEnv, "")
 	if err != nil {
 		return nil, fmt.Errorf("resolve ssh key: %w", err)
 	}

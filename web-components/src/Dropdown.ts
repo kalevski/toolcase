@@ -3,6 +3,8 @@ import { adoptChildren } from './internal/adopt-children'
 import { Dropdown as BsDropdown } from './internal/Dropdown'
 import { setAttr } from './internal/tc-element'
 
+const AUTO_CLOSE_VALUES: ReadonlySet<string> = new Set(['true', 'false', 'inside', 'outside'])
+
 const TAG_NAME = 'tc-dropdown'
 
 export type DropdownVariant =
@@ -127,11 +129,12 @@ export class Dropdown extends HTMLElement {
 
     private render(): void {
         const label = this.getAttribute('label') ?? ''
-        const variant = this.getAttribute('variant') ?? 'primary'
+        const variant = (this.getAttribute('variant') ?? 'primary').replace(/[^A-Za-z0-9_-]/g, '')
         const isSplit = this.hasAttribute('split')
         const direction = (this.getAttribute('direction') as DropdownDirection) || 'down'
         const dirClass = DIRECTION_CLASS[direction] ?? 'dropdown'
-        const autoClose = this.getAttribute('auto-close') ?? 'true'
+        const autoCloseAttr = this.getAttribute('auto-close')
+        const autoClose = autoCloseAttr !== null && AUTO_CLOSE_VALUES.has(autoCloseAttr) ? autoCloseAttr : 'true'
 
         const outerClass = isSplit ? `btn-group ${dirClass}` : dirClass
 

@@ -17,10 +17,11 @@ export interface HttpServerOptions {
 	host?: string
 	prefix?: string
 	cors?: FastifyCorsOptions | false
-	trustProxy?: boolean
+	trustProxy?: boolean | number | string | string[]
 	requestTimeoutMs?: number
 	connectionTimeoutMs?: number
 	keepAliveTimeoutMs?: number
+	bodyLimitBytes?: number
 	healthCheck?: HealthCheck
 	logger?: Logger
 }
@@ -64,8 +65,9 @@ export class HttpServer {
 		this.server = fastify({
 			trustProxy: this.options.trustProxy ?? false,
 			requestTimeout: this.options.requestTimeoutMs ?? 30_000,
-			connectionTimeout: this.options.connectionTimeoutMs ?? 0,
+			connectionTimeout: this.options.connectionTimeoutMs ?? 30_000,
 			keepAliveTimeout: this.options.keepAliveTimeoutMs ?? 72_000,
+			bodyLimit: this.options.bodyLimitBytes ?? 1_048_576,
 		})
 
 		if (this.options.cors !== false) {

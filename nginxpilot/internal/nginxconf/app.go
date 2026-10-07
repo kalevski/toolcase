@@ -73,6 +73,8 @@ func AppVhost(cfg *config.Config, app *config.App, opts Options) (string, error)
 	fmt.Fprintf(&b, "\n    root %s;\n", root)
 	fmt.Fprintf(&b, "    index %s index.html;\n", index)
 	fmt.Fprintf(&b, "    client_max_body_size %s;\n", nginxSize(php.MaxBodySizeOrDefault()))
+	b.WriteString("    add_header X-Content-Type-Options nosniff always;\n")
+	b.WriteString("    disable_symlinks if_not_owner from=$document_root;\n")
 
 	// Deny rules come BEFORE the executable location so a longer regex match
 	// cannot be shadowed. Dotfiles first: .env, .git leftovers, editor files.

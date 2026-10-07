@@ -43,6 +43,14 @@ const MaxPHPEnv = 100
 // php cannot read from $_SERVER is a value the application never sees.
 var phpEnvKey = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
+// phpEnvReservedPrefixes name the CGI and php-engine variables an app may not
+// set: they are emitted after the built-in fastcgi_params and would override
+// SCRIPT_FILENAME, DOCUMENT_ROOT, PHP_VALUE and the rest.
+var phpEnvReservedPrefixes = []string{
+	"PHP_", "SCRIPT_", "DOCUMENT_", "HTTP_", "PATH_", "REQUEST_", "QUERY_",
+	"CONTENT_", "REMOTE_", "SERVER_", "GATEWAY_", "REDIRECT_",
+}
+
 // MaxPersistentPaths caps the declared persistent list. The bound exists so a
 // fragment cannot make the deploy walk unbounded work; it is far above what a
 // real application declares (WordPress needs three).
@@ -120,6 +128,10 @@ type PHP struct {
 	// SocketOwner is the user that must be able to connect to the pool socket —
 	// nginx's worker user.
 	SocketOwner string `yaml:"socket_owner" json:"socket_owner,omitempty"`
+	// AllowSharedUser lets an app without its own app-<stem> host user fall
+	// back to RunAs. Off by default: a shared uid lets one app read another's
+	// files, so a missing per-app user fails the app instead.
+	AllowSharedUser bool `yaml:"allow_shared_user" json:"allow_shared_user,omitempty"`
 
 	TestCmd   []string `yaml:"test_cmd" json:"test_cmd,omitempty"`
 	ReloadCmd []string `yaml:"reload_cmd" json:"reload_cmd,omitempty"`
@@ -329,8 +341,14 @@ func validateApp(app *App, php PHP) error {
 		if !phpEnvKey.MatchString(k) {
 			return fmt.Errorf("php.env %q: must match [A-Za-z_][A-Za-z0-9_]*", k)
 		}
-		if strings.ContainsAny(v, "\n\r") {
-			return fmt.Errorf("php.env %q: value must not contain a newline", k)
+		upper := strings.ToUpper(k)
+		for _, prefix := range phpEnvReservedPrefixes {
+			if strings.HasPrefix(upper, prefix) {
+				return fmt.Errorf("php.env %q: the %s prefix is reserved for the CGI and php engine", k, prefix)
+			}
+		}
+		if strings.ContainsAny(v, "\n\r$") {
+			return fmt.Errorf("php.env %q: value must not contain a newline or '$'", k)
 		}
 	}
 

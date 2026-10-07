@@ -234,19 +234,19 @@ func (s *Syncer) applyAuth(req *http.Request) error {
 	case config.AuthNone:
 		return nil
 	case config.AuthBearer:
-		token, err := config.ResolveSecret(s.auth.TokenEnv, s.auth.TokenFile)
+		token, err := s.auth.Resolve(s.auth.TokenEnv, s.auth.TokenFile)
 		if err != nil {
 			return fmt.Errorf("resolve bearer token: %w", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 	case config.AuthBasic:
-		password, err := config.ResolveSecret(s.auth.PasswordEnv, s.auth.PasswordFile)
+		password, err := s.auth.Resolve(s.auth.PasswordEnv, s.auth.PasswordFile)
 		if err != nil {
 			return fmt.Errorf("resolve basic password: %w", err)
 		}
 		req.SetBasicAuth(s.auth.Username, password)
 	case config.AuthHeader:
-		value, err := config.ResolveSecret(s.auth.ValueEnv, s.auth.ValueFile)
+		value, err := s.auth.Resolve(s.auth.ValueEnv, s.auth.ValueFile)
 		if err != nil {
 			return fmt.Errorf("resolve header value: %w", err)
 		}

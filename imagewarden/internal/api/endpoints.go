@@ -17,8 +17,8 @@ type endpoint struct {
 func endpoints() []endpoint {
 	return []endpoint{
 		{"GET", "/healthz", false, func(s *Server) http.HandlerFunc { return s.handleHealthz }},
-		{"GET", "/schema", false, func(s *Server) http.HandlerFunc { return s.handleSchema }},
-		{"GET", "/version", false, func(s *Server) http.HandlerFunc { return s.handleVersion }},
+		{"GET", "/schema", true, func(s *Server) http.HandlerFunc { return s.handleSchema }},
+		{"GET", "/version", true, func(s *Server) http.HandlerFunc { return s.handleVersion }},
 		{"GET", "/status", true, func(s *Server) http.HandlerFunc { return s.handleStatus }},
 		{"POST", "/v1/classify", true, func(s *Server) http.HandlerFunc { return s.handleClassify }},
 		{"GET", "/metrics", true, func(s *Server) http.HandlerFunc { return s.handleMetrics }},

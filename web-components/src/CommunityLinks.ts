@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-community-links'
 
@@ -177,7 +178,7 @@ export class CommunityLinks extends HTMLElement {
         const gridHtml = this._links
             .map((link) => {
                 const label = esc(link.label)
-                const href = esc(link.href)
+                const href = esc(safeUrl(link.href))
                 const iconHtml = link.icon ? resolvePlatformIcon(link.icon) : ''
                 const descHtml = link.description
                     ? `<span class="tc-community-links-item__desc">${esc(link.description)}</span>`

@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { deriveInitials } from './internal/initials'
 import { esc } from './internal/esc'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-contributor-wall'
 
 export interface Contributor {
@@ -100,14 +101,14 @@ export class ContributorWall extends HTMLElement {
 
         let inner: string
         if (c.avatarUrl) {
-            inner = `<img class="tc-contributor-wall-item__img" src="${esc(c.avatarUrl)}" alt="" loading="lazy">`
+            inner = `<img class="tc-contributor-wall-item__img" src="${esc(safeImgSrc(c.avatarUrl))}" alt="" loading="lazy">`
         } else {
             inner = `<span class="tc-contributor-wall-item__initials" aria-hidden="true">${esc(deriveInitials(c.name, '?'))}</span>`
         }
 
         if (c.profileUrl) {
             return (
-                `<a class="tc-contributor-wall-item" href="${esc(c.profileUrl)}" ` +
+                `<a class="tc-contributor-wall-item" href="${esc(safeUrl(c.profileUrl))}" ` +
                 `target="_blank" rel="noopener noreferrer" role="listitem" ` +
                 `aria-label="${accessibleLabel}" title="${accessibleLabel}">${inner}</a>`
             )

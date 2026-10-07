@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-manufacturer-tile'
 
@@ -65,7 +66,7 @@ export class ManufacturerTile extends HTMLElement {
 
         const markHtml = logoSrc
             ? `<span class="tc-manufacturer-tile-mark">` +
-              `<img class="tc-manufacturer-tile-logo" src="${esc(logoSrc)}" alt="" loading="lazy" />` +
+              `<img class="tc-manufacturer-tile-logo" src="${esc(safeImgSrc(logoSrc))}" alt="" loading="lazy" />` +
               `</span>`
             : `<span class="tc-manufacturer-tile-mark tc-manufacturer-tile-mark--monogram" aria-hidden="true">` +
               esc(this._monogram(name)) +
@@ -84,7 +85,7 @@ export class ManufacturerTile extends HTMLElement {
         patchHtml(
             this,
             href
-                ? `<a class="${cls}" href="${esc(href)}"` +
+                ? `<a class="${cls}" href="${esc(safeUrl(href))}"` +
                       (active ? ' aria-current="true"' : '') +
                       `>${markHtml}${bodyHtml}</a>`
                 : `<span class="${cls}">${markHtml}${bodyHtml}</span>`,

@@ -43,11 +43,12 @@ dns_zonewright_url = https://ns1.example.net:9053
 dns_zonewright_token = <the acme-scoped token>
 # dns_zonewright_ca_bundle = /etc/zonewright/api-ca.pem   # self-signed API certificate
 # dns_zonewright_wait_timeout = 20                        # seconds to wait for every server (default 20)
+# dns_zonewright_allow_insecure_http = true               # plain http:// to a non-loopback host (trusted network only)
 ```
 
 | key | required | meaning |
 | --- | --- | --- |
-| `dns_zonewright_url` | yes | zonewright's admin API. `https://` (or `http://` only on a private network) |
+| `dns_zonewright_url` | yes | zonewright's admin API. `https://`; `http://` is accepted only to a loopback address, or with `dns_zonewright_allow_insecure_http = true` (or `DNS_ZONEWRIGHT_ALLOW_INSECURE_HTTP=1`) |
 | `dns_zonewright_token` | yes | an `acme`-scoped token (the admin token works but is far more than needed) |
 | `dns_zonewright_ca_bundle` | no | a PEM CA file to verify a self-signed API certificate |
 | `dns_zonewright_wait_timeout` | no | how long zonewright may wait for every server to confirm (default 20 s). If a server lags past it, the plugin logs a warning and relies on the propagation delay. |

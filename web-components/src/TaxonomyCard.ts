@@ -61,6 +61,8 @@
 //   This also keeps the generated React typings honest: scripts/gen-react-types.mjs
 //   types an attribute as `boolean` only when its getter returns `hasAttribute`.
 
+import { safeUrl } from './internal/safe-url'
+
 const TAG_NAME = 'tc-taxonomy-card'
 
 /** Detail of `tc-taxonomy-card-activate`. */
@@ -396,7 +398,7 @@ export class TaxonomyCard extends HTMLElement {
         const target = link ?? heading
         if (target && target.textContent !== this.heading) target.textContent = this.heading
         if (heading) heading.hidden = this.heading === ''
-        if (link instanceof HTMLAnchorElement) link.href = this.href ?? ''
+        if (link instanceof HTMLAnchorElement) link.href = safeUrl(this.href)
         if (link) {
             const spoken = this.spoken
             if (spoken) link.setAttribute('aria-label', spoken)

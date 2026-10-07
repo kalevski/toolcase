@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { VARIANTS_FULL } from './internal/variants'
 import { setHostClass } from './internal/host-class'
+import { safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-list-group-item'
 
 export type ListGroupItemVariant =
@@ -109,7 +110,7 @@ export class ListGroupItem extends HTMLElement {
             const disabledAttr = disabled ? ' tabindex="-1"' : ''
             patchHtml(
                 this,
-                `<a href="${esc(href)}" class="tc-lgi-content tc-lgi-hit"${disabledAttr}${nameAttr}></a>`,
+                `<a href="${esc(safeUrl(href))}" class="tc-lgi-content tc-lgi-hit"${disabledAttr}${nameAttr}></a>`,
             )
         } else if (action) {
             const disabledAttr = disabled ? ' disabled' : ''

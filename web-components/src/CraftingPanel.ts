@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-crafting-panel'
 
 export interface CraftingItem {
@@ -150,7 +151,7 @@ export class CraftingPanel extends HTMLElement {
     // a short glyph/initials label derived from the icon string or the item name.
     private _iconTile(cls: string, iconStr: string | undefined, fallbackName: string): string {
         if (iconStr && isImageSrc(iconStr)) {
-            return `<span class="${cls}"><img src="${esc(iconStr)}" alt="" /></span>`
+            return `<span class="${cls}"><img src="${esc(safeImgSrc(iconStr))}" alt="" /></span>`
         }
         const glyph = iconStr || (fallbackName ? fallbackName.charAt(0).toUpperCase() : '?')
         return `<span class="${cls}" aria-hidden="true">${esc(glyph)}</span>`

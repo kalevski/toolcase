@@ -227,6 +227,28 @@ class AuthenticatorTest(test_util.TempDirTestCase, dns_test_common.BaseAuthentic
             self.auth.perform([self.achall])
 
     @test_util.patch_display_util()
+    def test_refuses_plain_http_to_a_remote_host(self, _unused_mock_get_utility):
+        dns_test_common.write(
+            {"zonewright_url": "http://ns1.example.net:9053", "zonewright_token": TOKEN},
+            self.config.zonewright_credentials,
+        )
+        with self.assertRaisesRegex(errors.PluginError, "clear text"):
+            self.auth.perform([self.achall])
+
+    @test_util.patch_display_util()
+    def test_plain_http_allowed_with_opt_in(self, _unused_mock_get_utility):
+        dns_test_common.write(
+            {
+                "zonewright_url": "http://10.0.0.5:9053",
+                "zonewright_token": TOKEN,
+                "zonewright_allow_insecure_http": "true",
+            },
+            self.config.zonewright_credentials,
+        )
+        auth = Authenticator(self.config, "zonewright")
+        auth._setup_credentials()
+
+    @test_util.patch_display_util()
     def test_missing_token(self, _unused_mock_get_utility):
         dns_test_common.write({"zonewright_url": self.fake.url}, self.config.zonewright_credentials)
         with self.assertRaises(errors.PluginError):

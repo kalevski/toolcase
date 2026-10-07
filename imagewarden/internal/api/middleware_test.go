@@ -64,7 +64,9 @@ func logLines(t *testing.T, buf *bytes.Buffer) []map[string]any {
 func TestObserveLogsEveryRequest(t *testing.T) {
 	s, st, buf := newObserveServer(t, &stubClassifier{})
 
-	rr := serve(s, httptest.NewRequest("GET", "/version", nil))
+	req := httptest.NewRequest("GET", "/version", nil)
+	req.Header.Set("Authorization", "Bearer "+e2eToken)
+	rr := serve(s, req)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body=%s)", rr.Code, rr.Body)
 	}

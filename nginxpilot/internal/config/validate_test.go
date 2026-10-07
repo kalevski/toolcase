@@ -290,7 +290,7 @@ func TestValidateGitHTTPSTokenRequiresUsername(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "https://github.com/example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthHTTPSToken, TokenEnv: "MY_TOKEN"},
+			Auth:   Auth{Method: AuthHTTPSToken, TokenEnv: "NP_SECRET_MY_TOKEN"},
 		},
 		File: "test",
 	}}
@@ -329,7 +329,7 @@ func TestValidateGitHTTPSTokenOK(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "https://github.com/example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthHTTPSToken, Username: "git", TokenEnv: "MY_TOKEN"},
+			Auth:   Auth{Method: AuthHTTPSToken, Username: "git", TokenEnv: "NP_SECRET_MY_TOKEN"},
 		},
 		File: "test",
 	}}
@@ -346,7 +346,7 @@ func TestValidateGitGitHubTokenOK(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "https://github.com/example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "GH_TOKEN"},
+			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "NP_SECRET_GH_TOKEN"},
 		},
 		File: "test",
 	}}
@@ -363,7 +363,7 @@ func TestValidateGitGitHubTokenRejectsUsername(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "https://github.com/example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthGitHubToken, Username: "git", TokenEnv: "GH_TOKEN"},
+			Auth:   Auth{Method: AuthGitHubToken, Username: "git", TokenEnv: "NP_SECRET_GH_TOKEN"},
 		},
 		File: "test",
 	}}
@@ -405,7 +405,7 @@ func TestValidateGitGitHubTokenRejectsSSHURL(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "git@github.com:example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "GH_TOKEN"},
+			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "NP_SECRET_GH_TOKEN"},
 		},
 		File: "test",
 	}}
@@ -428,7 +428,7 @@ func TestValidateGitSSHKeyEnvOK(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "git@github.com:example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "SSH_KEY"},
+			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "NP_SECRET_SSH_KEY"},
 		},
 		File: "test",
 	}}
@@ -466,7 +466,7 @@ func TestValidateGitSSHKeyEnvAndFileExclusive(t *testing.T) {
 			Type:   SourceGit,
 			URL:    "git@github.com:example/repo.git",
 			Branch: "main",
-			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "SSH_KEY", KeyFile: "/etc/keys/id"},
+			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "NP_SECRET_SSH_KEY", KeyFile: "/etc/keys/id"},
 		},
 		File: "test",
 	}}
@@ -721,7 +721,7 @@ func TestValidateProxyDomainCollidesWithSite(t *testing.T) {
 		Source: Source{Type: SourceHTTPZip, URL: "https://x/a.zip"},
 		File:   "site.yml",
 	}}
-	cfg.Proxies = []Proxy{{Domain: "example.com", Pass: "http://127.0.0.1:9000", File: "proxy.yml"}}
+	cfg.Proxies = []Proxy{{Domain: "example.com", Pass: "http://10.0.0.1:9000", File: "proxy.yml"}}
 	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "duplicate domain") {
 		t.Fatalf("expected duplicate domain error, got: %v", err)
 	}
@@ -748,7 +748,7 @@ func TestValidateProxyLocationPathDefaulted(t *testing.T) {
 	cfg := minValidConfig()
 	cfg.Proxies = []Proxy{{
 		Domain:    "api.example.com",
-		Locations: []ProxyLocation{{Pass: "http://127.0.0.1:9000"}}, // empty path → "/"
+		Locations: []ProxyLocation{{Pass: "http://10.0.0.1:9000"}}, // empty path → "/"
 		File:      "test",
 	}}
 	if err := Validate(&cfg); err != nil {
@@ -790,7 +790,7 @@ func TestValidateAppSourceRejectsAuthTheTypeCannotUse(t *testing.T) {
 		Type:   SourceGit,
 		URL:    "https://git.example.com/acme/shop.git",
 		Branch: "main",
-		Auth:   Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "PW"},
+		Auth:   Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "NP_SECRET_PW"},
 	})
 
 	err := Validate(&cfg)
@@ -806,11 +806,11 @@ func TestValidateAppSourceAcceptsEveryGitAuthMethod(t *testing.T) {
 	for _, src := range []Source{
 		{Type: SourceGit, URL: "https://git.example.com/acme/shop.git", Branch: "main"},
 		{Type: SourceGit, URL: "https://git.example.com/acme/shop.git", Branch: "main",
-			Auth: Auth{Method: AuthHTTPSToken, Username: "acme", TokenEnv: "TOKEN"}},
+			Auth: Auth{Method: AuthHTTPSToken, Username: "acme", TokenEnv: "NP_SECRET_TOKEN"}},
 		{Type: SourceGit, URL: "https://github.com/acme/shop.git", Branch: "main",
-			Auth: Auth{Method: AuthGitHubToken, TokenEnv: "TOKEN"}},
+			Auth: Auth{Method: AuthGitHubToken, TokenEnv: "NP_SECRET_TOKEN"}},
 		{Type: SourceGit, URL: "git@git.example.com:acme/shop.git", Branch: "main",
-			Auth: Auth{Method: AuthSSHKey, KeyEnv: "KEY"}},
+			Auth: Auth{Method: AuthSSHKey, KeyEnv: "NP_SECRET_KEY"}},
 	} {
 		cfg := appConfig(src)
 		if err := Validate(&cfg); err != nil {
@@ -823,11 +823,11 @@ func TestValidateAppSourceAcceptsEveryHTTPZipAuthMethod(t *testing.T) {
 	for _, src := range []Source{
 		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip"},
 		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
-			Auth: Auth{Method: AuthBearer, TokenEnv: "TOKEN"}},
+			Auth: Auth{Method: AuthBearer, TokenEnv: "NP_SECRET_TOKEN"}},
 		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
-			Auth: Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "PW"}},
+			Auth: Auth{Method: AuthBasic, Username: "acme", PasswordEnv: "NP_SECRET_PW"}},
 		{Type: SourceHTTPZip, URL: "https://files.example.com/shop.zip",
-			Auth: Auth{Method: AuthHeader, Name: "X-Key", ValueEnv: "VALUE"}},
+			Auth: Auth{Method: AuthHeader, Name: "X-Key", ValueEnv: "NP_SECRET_VALUE"}},
 	} {
 		cfg := appConfig(src)
 		if err := Validate(&cfg); err != nil {

@@ -34,7 +34,7 @@ func newEnv(t *testing.T) *env {
 	w.JMAPPublic = "https://mail.public.invalid"
 	t.Cleanup(pl.Close)
 	t.Cleanup(jm.Close)
-	key := base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{3}, 32))
+	key := base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789ABCDEF"))
 	cfg, _, err := config.Load(func(k string) (string, bool) {
 		m := map[string]string{
 			"WEBMAIL_LISTEN": "127.0.0.1:0", "WEBMAIL_ADMIN_LISTEN": "127.0.0.1:0", "WEBMAIL_PUBLIC_URL": origin,

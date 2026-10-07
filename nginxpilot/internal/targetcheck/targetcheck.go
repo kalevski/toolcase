@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/netip"
 	"path"
 	"regexp"
 	"sort"
@@ -70,11 +71,137 @@ var charsetRe = regexp.MustCompile(`^[A-Za-z0-9.:/\[\]_-]+$`)
 // still shell/nginx-inert thanks to charsetRe.
 var labelRe = regexp.MustCompile(`^[A-Za-z0-9_]([A-Za-z0-9_-]*[A-Za-z0-9_])?$`)
 
+// Policy is the operator-controlled part of target validation: which unix
+// sockets may be proxied to, and which literal IPs may not. A hostname cannot
+// be judged here (nginx resolves it at runtime), so only literal IPs and the
+// name "localhost" are denied.
+type Policy struct {
+	// UnixDirs are the directories a unix: target's socket may live under.
+	// Empty means no unix: target is accepted at all.
+	UnixDirs []string
+	// DenyNets are the literal-IP ranges a target may not point into.
+	DenyNets []netip.Prefix
+	// DenyPaths are path fragments no unix: socket path may contain, on top of
+	// the always-denied built-ins (docker.sock, /run/nginxpilot).
+	DenyPaths []string
+	// AdminAddr is the daemon's own admin listen address; a literal-IP target
+	// on that port is refused when the address is a specific IP (or wildcard).
+	AdminAddr netip.AddrPort
+}
+
+// DefaultDenyCIDRs are denied when the operator configures nothing: loopback,
+// the unspecified address (nginx connects it to localhost) and link-local
+// (cloud metadata lives at 169.254.169.254).
+var DefaultDenyCIDRs = []string{"127.0.0.0/8", "0.0.0.0/8", "::1/128", "::/128", "169.254.0.0/16", "fe80::/10"}
+
+// builtinDenyPaths are never allowed inside a unix: socket path, whatever the
+// allowlist says: the daemon's own admin socket directory and the Docker API.
+var builtinDenyPaths = []string{"docker.sock", "/run/nginxpilot", "/var/run/nginxpilot"}
+
+// DefaultPolicy is the policy ParsePass / ParseAddr apply: no unix sockets,
+// DefaultDenyCIDRs.
+func DefaultPolicy() Policy {
+	var p Policy
+	for _, c := range DefaultDenyCIDRs {
+		p.DenyNets = append(p.DenyNets, netip.MustParsePrefix(c))
+	}
+	return p
+}
+
+// ParseCIDRs parses CIDR or bare-IP strings into prefixes.
+func ParseCIDRs(in []string) ([]netip.Prefix, error) {
+	var out []netip.Prefix
+	for _, c := range in {
+		if pfx, err := netip.ParsePrefix(c); err == nil {
+			out = append(out, pfx.Masked())
+			continue
+		}
+		a, err := netip.ParseAddr(c)
+		if err != nil {
+			return nil, fmt.Errorf("%q is not an IP or a CIDR", c)
+		}
+		out = append(out, netip.PrefixFrom(a, a.BitLen()))
+	}
+	return out, nil
+}
+
+// checkHostAllowed applies the literal-IP / localhost rules to a parsed host.
+func (p Policy) checkTarget(t Target) error {
+	if t.IsUnix {
+		return p.checkUnix(t.Unix)
+	}
+	host := strings.ToLower(strings.TrimSuffix(t.Host, "."))
+	if host == "localhost" || strings.HasSuffix(host, ".localhost") {
+		return fmt.Errorf("%q is not allowed as a backend (loopback)", t.Host)
+	}
+	if t.IsIP {
+		ip, err := netip.ParseAddr(t.Host)
+		if err != nil {
+			return fmt.Errorf("%q is not a valid IP", t.Host)
+		}
+		ip = ip.Unmap()
+		for _, n := range p.DenyNets {
+			if n.Contains(ip) {
+				return fmt.Errorf("%s is in a denied range (%s)", t.Host, n)
+			}
+		}
+		if p.AdminAddr.IsValid() {
+			port, _ := strconv.Atoi(t.portOrDefault())
+			if uint16(port) == p.AdminAddr.Port() && (p.AdminAddr.Addr().IsUnspecified() || p.AdminAddr.Addr().Unmap() == ip) {
+				return fmt.Errorf("%s is the daemon's own admin endpoint", t.Addr())
+			}
+		}
+		return nil
+	}
+	return nil
+}
+
+func (t Target) portOrDefault() string {
+	_, port, err := net.SplitHostPort(t.Addr())
+	if err != nil {
+		return "0"
+	}
+	return port
+}
+
+func (p Policy) checkUnix(sock string) error {
+	clean := path.Clean(sock)
+	lower := strings.ToLower(clean)
+	for _, d := range append(append([]string(nil), builtinDenyPaths...), p.DenyPaths...) {
+		if d != "" && strings.Contains(lower, strings.ToLower(d)) {
+			return fmt.Errorf("unix socket %s is not allowed (reserved path)", sock)
+		}
+	}
+	for _, d := range p.UnixDirs {
+		dir := path.Clean(d)
+		if dir != "/" && strings.HasPrefix(clean, dir+"/") {
+			return nil
+		}
+	}
+	return fmt.Errorf("unix: targets are not allowed here (proxy.unix_socket_dirs does not include %s)", path.Dir(clean))
+}
+
 // ParsePass validates a proxy pass URL string strictly: http(s) scheme, a
 // valid hostname / IPv4 / [IPv6] host, an optional 1..65535 port, an optional
 // clean absolute path — and nothing else (no userinfo, query, fragment, or
-// nginx metacharacters anywhere).
+// nginx metacharacters anywhere). It applies DefaultPolicy.
 func ParsePass(raw string) (Target, error) {
+	return ParsePassPolicy(raw, DefaultPolicy())
+}
+
+// ParsePassPolicy is ParsePass under an explicit Policy.
+func ParsePassPolicy(raw string, pol Policy) (Target, error) {
+	t, err := parsePass(raw)
+	if err != nil {
+		return Target{}, err
+	}
+	if err := pol.checkTarget(t); err != nil {
+		return Target{}, err
+	}
+	return t, nil
+}
+
+func parsePass(raw string) (Target, error) {
 	if raw == "" {
 		return Target{}, fmt.Errorf("target is empty")
 	}
@@ -108,6 +235,9 @@ func ParsePass(raw string) (Target, error) {
 			return Target{}, fmt.Errorf("path %q must be a clean absolute path", urlPath)
 		}
 	}
+	if strings.EqualFold(host, "unix") {
+		return Target{}, fmt.Errorf("the unix: socket form of a proxy target is not allowed")
+	}
 	t := Target{Scheme: scheme, Host: host, Port: port, Path: urlPath}
 	t.IsIP = net.ParseIP(host) != nil
 	if !t.IsIP {
@@ -119,8 +249,25 @@ func ParsePass(raw string) (Target, error) {
 }
 
 // ParseAddr validates a host:port / host / unix:/path address as used by
-// upstream servers and stream targets (no scheme, no URL path).
+// upstream servers and stream targets (no scheme, no URL path). It applies
+// DefaultPolicy.
 func ParseAddr(raw string) (Target, error) {
+	return ParseAddrPolicy(raw, DefaultPolicy())
+}
+
+// ParseAddrPolicy is ParseAddr under an explicit Policy.
+func ParseAddrPolicy(raw string, pol Policy) (Target, error) {
+	t, err := parseAddr(raw)
+	if err != nil {
+		return Target{}, err
+	}
+	if err := pol.checkTarget(t); err != nil {
+		return Target{}, err
+	}
+	return t, nil
+}
+
+func parseAddr(raw string) (Target, error) {
 	if raw == "" {
 		return Target{}, fmt.Errorf("address is empty")
 	}
@@ -204,6 +351,12 @@ func checkHostname(host string) error {
 	h := strings.TrimSuffix(host, ".")
 	if h == "" || len(h) > 253 {
 		return fmt.Errorf("%q is not a valid hostname", host)
+	}
+	// libc reads "2130706433", "0x7f.1" and "017700000001" as IPv4 literals, so
+	// a host whose last label is numeric or hex-prefixed is an IP in disguise.
+	last := h[strings.LastIndexByte(h, '.')+1:]
+	if numericLabel(last) {
+		return fmt.Errorf("%q looks like a numeric IP form; write the address in dotted-quad form", host)
 	}
 	for _, label := range strings.Split(h, ".") {
 		if len(label) == 0 || len(label) > 63 || !labelRe.MatchString(label) {
@@ -300,4 +453,27 @@ func (c *Checker) CheckReachable(ctx context.Context, t Target) error {
 	}
 	_ = conn.Close()
 	return nil
+}
+
+// numericLabel reports whether a label is all decimal digits or a 0x-prefixed
+// hex number — the forms libc's inet_aton accepts as an IPv4 component.
+func numericLabel(l string) bool {
+	if l == "" {
+		return false
+	}
+	if rest, ok := strings.CutPrefix(strings.ToLower(l), "0x"); ok {
+		l = rest
+		for _, c := range l {
+			if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
+				return false
+			}
+		}
+		return true
+	}
+	for _, c := range l {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return true
 }

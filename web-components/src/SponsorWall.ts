@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-sponsor-wall'
 
 export type SponsorTierSize = 'xl' | 'lg' | 'md' | 'sm'
@@ -56,11 +57,11 @@ export class SponsorWall extends HTMLElement {
     }
 
     private _logoHtml(logo: SponsorLogo): string {
-        const img = `<img class="tc-sponsor-logo" src="${esc(logo.src)}" alt="${esc(logo.alt)}" loading="lazy">`
+        const img = `<img class="tc-sponsor-logo" src="${esc(safeImgSrc(logo.src))}" alt="${esc(logo.alt)}" loading="lazy">`
         if (logo.href) {
             return (
                 `<a class="tc-sponsor-logo-wrap tc-sponsor-logo-wrap--linked" ` +
-                `href="${esc(logo.href)}" target="_blank" rel="noopener noreferrer">` +
+                `href="${esc(safeUrl(logo.href))}" target="_blank" rel="noopener noreferrer">` +
                 `${img}` +
                 `</a>`
             )

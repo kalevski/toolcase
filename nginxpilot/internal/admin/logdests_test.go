@@ -10,13 +10,17 @@ import (
 	"testing"
 )
 
-const validLogDestFragment = `log_destinations:
+const logDestFragmentTmpl = `log_destinations:
   - name: audit-file
     type: file
-    path: /var/log/nginxpilot/access-5xx.ndjson
+    path: @DATA@/logs/access-5xx.ndjson
     filter:
       status: [">=500"]
 `
+
+func validLogDestFragment(env sitesEnv) string {
+	return strings.ReplaceAll(logDestFragmentTmpl, "@DATA@", env.cfg.DataDir)
+}
 
 func logDestReq(env sitesEnv, method, path, body string) *httptest.ResponseRecorder {
 	var req *http.Request
@@ -32,7 +36,7 @@ func logDestReq(env sitesEnv, method, path, body string) *httptest.ResponseRecor
 
 func TestCreateLogDestWritesFragmentAndReloads(t *testing.T) {
 	env := newSitesEnv(t, "")
-	rec := logDestReq(env, http.MethodPost, "/log-destinations", validLogDestFragment)
+	rec := logDestReq(env, http.MethodPost, "/log-destinations", validLogDestFragment(env))
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("want 201, got %d (%s)", rec.Code, rec.Body.String())
 	}
@@ -40,7 +44,7 @@ func TestCreateLogDestWritesFragmentAndReloads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fragment not written: %v", err)
 	}
-	if string(written) != validLogDestFragment {
+	if string(written) != validLogDestFragment(env) {
 		t.Errorf("on-disk fragment differs from request body:\n%s", written)
 	}
 	if *env.reloads != 1 {
@@ -50,7 +54,7 @@ func TestCreateLogDestWritesFragmentAndReloads(t *testing.T) {
 
 func TestCreateLogDestRejectsBadName(t *testing.T) {
 	env := newSitesEnv(t, "")
-	bad := strings.Replace(validLogDestFragment, "audit-file", "../../etc/cron.d/pwn", 1)
+	bad := strings.Replace(validLogDestFragment(env), "audit-file", "../../etc/cron.d/pwn", 1)
 	rec := logDestReq(env, http.MethodPost, "/log-destinations", bad)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d (%s)", rec.Code, rec.Body.String())
@@ -71,7 +75,7 @@ func TestCreateLogDestRejectsInvalidDestination(t *testing.T) {
     type: http
     url: http://collector.example.com/ingest
 `,
-		"two destinations": validLogDestFragment + `  - name: second
+		"two destinations": validLogDestFragment(env) + `  - name: second
     type: stdout
 `,
 		"wrong kind": validFragment,
@@ -135,7 +139,7 @@ func TestCreateLogDestStoresInlineCredentials(t *testing.T) {
 
 func TestDeleteLogDest(t *testing.T) {
 	env := newSitesEnv(t, "")
-	if rec := logDestReq(env, http.MethodPost, "/log-destinations", validLogDestFragment); rec.Code != http.StatusCreated {
+	if rec := logDestReq(env, http.MethodPost, "/log-destinations", validLogDestFragment(env)); rec.Code != http.StatusCreated {
 		t.Fatalf("setup write failed: %d", rec.Code)
 	}
 	rec := logDestReq(env, http.MethodDelete, "/log-destinations/audit-file", "")
@@ -199,7 +203,7 @@ func TestTestLogDestCandidate(t *testing.T) {
 	}
 
 	// A valid file candidate delivers the synthetic entry → 200 {ok:true}.
-	dir := t.TempDir()
+	dir := filepath.Join(env.cfg.DataDir, "logs")
 	rec = logDestReq(env, http.MethodPost, "/log-destinations/test", `log_destinations:
   - name: t
     type: file

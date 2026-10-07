@@ -2,6 +2,7 @@ import { setHostClass } from './internal/host-class'
 import { syncOwnedNodes } from './internal/tc-element'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 
 // tc-sign-in-gate — the member wall, as a page body.
 //
@@ -109,7 +110,7 @@ export class SignInGate extends HTMLElement {
 
         const action = label
             ? href
-                ? `<a class="tc-sign-in-gate__button" href="${esc(href)}">${esc(label)}</a>`
+                ? `<a class="tc-sign-in-gate__button" href="${esc(safeUrl(href))}">${esc(label)}</a>`
                 : `<button type="button" class="tc-sign-in-gate__button">${esc(label)}</button>`
             : null
 

@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-team-list'
 
@@ -52,7 +53,7 @@ export class TeamList extends HTMLElement {
 
         let avatar: string
         if (member.avatarUrl) {
-            avatar = `<img class="tc-team-list-avatar tc-team-list-avatar--img" src="${esc(member.avatarUrl)}" alt="${name}">`
+            avatar = `<img class="tc-team-list-avatar tc-team-list-avatar--img" src="${esc(safeImgSrc(member.avatarUrl))}" alt="${name}">`
         } else {
             const initials = esc(
                 member.initials ? member.initials : deriveInitials(member.name ?? ''),

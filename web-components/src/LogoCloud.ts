@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-logo-cloud'
 
 export interface LogoCloudLogo {
@@ -77,12 +78,12 @@ export class LogoCloud extends HTMLElement {
                 if (logo.width != null) {
                     widthStyle = ` style="width:${esc(String(logo.width))}px"`
                 }
-                const imgHtml = `<img class="tc-logo-cloud-img" src="${esc(logo.src)}" alt="${esc(logo.alt)}"${widthStyle} loading="lazy">`
+                const imgHtml = `<img class="tc-logo-cloud-img" src="${esc(safeImgSrc(logo.src))}" alt="${esc(logo.alt)}"${widthStyle} loading="lazy">`
 
                 if (logo.href) {
                     return (
                         `<a class="tc-logo-cloud-cell tc-logo-cloud-cell--linked" ` +
-                        `href="${esc(logo.href)}" target="_blank" rel="noopener noreferrer">` +
+                        `href="${esc(safeUrl(logo.href))}" target="_blank" rel="noopener noreferrer">` +
                         `${imgHtml}` +
                         `<span class="visually-hidden">(opens in new tab)</span>` +
                         `</a>`

@@ -2,6 +2,7 @@ import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-pinned-feature-showcase'
 
@@ -185,7 +186,7 @@ export class PinnedFeatureShowcase extends HTMLElement {
         // Render the image only when no media slot content is provided
         const mediaInnerHtml =
             !hasMediaSlot && imageSrc
-                ? `<img class="tc-pinned-feature-showcase-image" src="${esc(imageSrc)}" alt="${esc(imageAlt)}" loading="lazy">`
+                ? `<img class="tc-pinned-feature-showcase-image" src="${esc(safeImgSrc(imageSrc))}" alt="${esc(imageAlt)}" loading="lazy">`
                 : ''
 
         const itemsHtml = this._items

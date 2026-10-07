@@ -3,6 +3,7 @@ import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-callout-quote'
 
@@ -75,7 +76,7 @@ export class CalloutQuote extends HTMLElement {
             let sourceHtml = ''
             if (source) {
                 if (sourceHref) {
-                    sourceHtml = `<a href="${esc(sourceHref)}" target="_blank" rel="noopener noreferrer" class="tc-callout-quote__source">${esc(source)}</a>`
+                    sourceHtml = `<a href="${esc(safeUrl(sourceHref))}" target="_blank" rel="noopener noreferrer" class="tc-callout-quote__source">${esc(source)}</a>`
                 } else {
                     sourceHtml = `<span class="tc-callout-quote__source">${esc(source)}</span>`
                 }

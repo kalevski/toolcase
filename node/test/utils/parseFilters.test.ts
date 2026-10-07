@@ -176,3 +176,15 @@ describe('parseFilters', () => {
         })
     })
 })
+
+describe('parseFilters — like escaping', () => {
+    it('escapes %, _ and backslash in like/ilike values by default', () => {
+        const out = parseFilters<Row>({ email: { like: '50%_off\\x', ilike: '%a' } }, { allowedFields: ['email'] })
+        expect(out.email).toEqual({ like: '50\\%\\_off\\\\x', ilike: '\\%a' })
+    })
+
+    it('keeps raw wildcards when rawLikeWildcards is set', () => {
+        const out = parseFilters<Row>({ email: { like: 'a%' } }, { allowedFields: ['email'], rawLikeWildcards: true })
+        expect(out.email).toEqual({ like: 'a%' })
+    })
+})

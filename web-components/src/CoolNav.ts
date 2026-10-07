@@ -3,6 +3,7 @@ import { esc } from './internal/esc'
 import { Menu } from 'lucide-static'
 import { icon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-cool-nav'
 
@@ -306,7 +307,7 @@ export class CoolNav extends HTMLElement {
                 const activeCls = item.active ? ' tc-cool-nav-link--active' : ''
                 return (
                     `<li class="tc-cool-nav-item">` +
-                    `<a class="tc-cool-nav-link${activeCls}" href="${esc(item.href)}"${activeAttr}>${esc(item.label)}</a>` +
+                    `<a class="tc-cool-nav-link${activeCls}" href="${esc(safeUrl(item.href))}"${activeAttr}>${esc(item.label)}</a>` +
                     `</li>`
                 )
             })
@@ -315,7 +316,7 @@ export class CoolNav extends HTMLElement {
         // Login CTA
         let loginHtml = ''
         if (loginHref) {
-            loginHtml = `<a class="btn btn-${esc(loginVariant)} tc-cool-nav-login" href="${esc(loginHref)}">${esc(loginLabel)}</a>`
+            loginHtml = `<a class="btn btn-${esc(loginVariant)} tc-cool-nav-login" href="${esc(safeUrl(loginHref))}">${esc(loginLabel)}</a>`
         } else if (loginLabel) {
             loginHtml = `<button class="btn btn-${esc(loginVariant)} tc-cool-nav-login" type="button">${esc(loginLabel)}</button>`
         }

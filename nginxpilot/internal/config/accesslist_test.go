@@ -14,7 +14,7 @@ func validList() AccessList {
 func TestValidateAccessListOK(t *testing.T) {
 	cfg := baseCfg()
 	cfg.AccessLists = []AccessList{validList()}
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", AccessList: "office"}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", AccessList: "office"}}
 	if err := Validate(cfg); err != nil {
 		t.Fatalf("expected valid, got %v", err)
 	}
@@ -72,7 +72,7 @@ func TestValidateAccessListRules(t *testing.T) {
 
 func TestValidateAccessListRefs(t *testing.T) {
 	cfg := baseCfg()
-	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://127.0.0.1:1", AccessList: "ghost"}}
+	cfg.Proxies = []Proxy{{Domain: "a.example.com", Pass: "http://10.0.0.1:1", AccessList: "ghost"}}
 	mustFail(t, cfg, `access_list "ghost" is not declared`)
 
 	cfg = baseCfg()

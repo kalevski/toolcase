@@ -38,7 +38,12 @@ func Apply(ctx context.Context, cfg *config.Config) (ApplyResult, error) {
 		return res, nil
 	}
 
-	files := RenderAll(cfg)
+	files, failed := RenderAllChecked(cfg)
+	defer func() {
+		for name, reason := range failed {
+			res.Disabled[name] = reason
+		}
+	}()
 	if err := os.MkdirAll(cfg.PHP.PoolDir, 0o750); err != nil {
 		return res, fmt.Errorf("create pool dir: %w", err)
 	}

@@ -3,6 +3,7 @@ import { bindOnce, patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-image'
 
@@ -108,7 +109,7 @@ class TcImage extends HTMLElement {
         const imgStyle = `object-fit:${objectFit}`
         const skeletonRole = state === 'loading' ? ' role="status"' : ''
         // Omit src when null to avoid spurious browser error events for empty src.
-        const srcAttr = src != null ? ` src="${this._esc(src)}"` : ''
+        const srcAttr = src != null ? ` src="${this._esc(safeImgSrc(src))}"` : ''
 
         // THE HOST IS THE FRAME. The skeleton, the image and the default fallback
         // glyph are element-owned and prepended; a fallback the consumer slotted

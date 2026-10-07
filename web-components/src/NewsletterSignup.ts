@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-newsletter-signup'
 
@@ -221,7 +222,7 @@ export class NewsletterSignup extends HTMLElement {
                 : esc(ctaLabel)
 
             const privacyHtml = privacyHref
-                ? `<a href="${esc(privacyHref)}" class="tc-newsletter-signup-privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a>`
+                ? `<a href="${esc(safeUrl(privacyHref))}" class="tc-newsletter-signup-privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a>`
                 : ''
 
             bodyHtml = `

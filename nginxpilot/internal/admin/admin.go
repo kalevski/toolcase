@@ -24,10 +24,10 @@
 //
 // Each write/delete validates the candidate merged config before touching disk,
 // so an invalid fragment never lands in sites.d/ and the running config is the
-// last known-good. Loopback only by default; an optional bearer token
-// (admin.token_env / admin.token_file) guards the TCP listener. The same routes
-// are also served on a local Unix socket (admin.socket) with no token, which is
-// what the in-container CLI uses.
+// last known-good. Loopback only by default; a bearer token
+// (admin.token_env / admin.token_file) guards the TCP listener and is mandatory
+// when it is not loopback. The same routes are also served on a local Unix
+// socket (admin.socket) with no token, which is what the in-container CLI uses.
 package admin
 
 import (
@@ -38,6 +38,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -56,6 +57,8 @@ type Server struct {
 	reload func() error
 	// jobs tracks async certbot issuances (POST /certs runs off the request path).
 	jobs *certJobStore
+	// limiter throttles failed bearer-token attempts on the TCP listener.
+	limiter *authLimiter
 	// Version is reported on GET /status so a control plane can show it.
 	Version string
 }
@@ -69,7 +72,7 @@ type Server struct {
 // and reports an error when the on-disk config fails to load/validate (in which
 // case the running config is kept). It may be nil, which disables POST /reload.
 func New(mgr *manager.Manager, token admintoken.Hash, log *slog.Logger, reload func() error) *Server {
-	s := &Server{mgr: mgr, token: token, log: log, reload: reload, jobs: newCertJobStore()}
+	s := &Server{mgr: mgr, token: token, log: log, reload: reload, jobs: newCertJobStore(), limiter: newAuthLimiter()}
 	if dataDir := mgr.Config().DataDir; dataDir != "" {
 		s.jobs = openCertJobStore(filepath.Join(dataDir, "acme", "jobs.json"), log, s.certInfoFor)
 	}
@@ -86,7 +89,8 @@ func (s *Server) Run(ctx context.Context, listen, socket string) error {
 	if listen == "" {
 		s.log.Info("admin endpoint disabled")
 	} else {
-		srv := &http.Server{Addr: listen, Handler: s.routes(true), ReadHeaderTimeout: 5 * time.Second}
+		srv := newHTTPServer(s.routes(true))
+		srv.Addr = listen
 		servers = append(servers, srv)
 		go func() { errCh <- srv.ListenAndServe() }()
 		s.log.Info("admin endpoint listening", "addr", listen)
@@ -97,7 +101,7 @@ func (s *Server) Run(ctx context.Context, listen, socket string) error {
 		if err != nil {
 			s.log.Warn("admin socket unavailable; the local CLI cannot reach the daemon", "socket", socket, "error", err)
 		} else {
-			srv := &http.Server{Handler: s.routes(false), ReadHeaderTimeout: 5 * time.Second}
+			srv := newHTTPServer(s.routes(false))
 			servers = append(servers, srv)
 			go func() { errCh <- srv.Serve(ln) }()
 			s.log.Info("admin socket listening", "socket", socket)
@@ -121,12 +125,35 @@ func (s *Server) Run(ctx context.Context, listen, socket string) error {
 	}
 }
 
+// newHTTPServer builds an admin http.Server with the same bounds zonewright
+// uses: slowloris-proof header and body reads, a write deadline that also covers
+// the handler (a certbot issuance runs off the request path), a capped idle
+// time and a capped header size.
+func newHTTPServer(h http.Handler) *http.Server {
+	return &http.Server{
+		Handler:           h,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      3 * time.Minute,
+		IdleTimeout:       2 * time.Minute,
+		MaxHeaderBytes:    64 << 10,
+	}
+}
+
 // listenSocket binds the admin Unix socket: a stale file from a previous run is
-// removed, the directory is created 0750 and the socket itself chmod'ed 0600,
-// so only the daemon user (and root) can connect.
+// removed, a missing directory is created 0700 and the socket itself chmod'ed
+// 0600, so only the daemon user (and root) can connect. The socket takes no
+// token — the CLI holds only the token's hash — so its reach is the file mode;
+// target validation separately refuses any proxy or upstream pointed at it.
 func listenSocket(path string) (net.Listener, error) {
-	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
-		return nil, err
+	dir := filepath.Dir(path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return nil, err
+		}
+		if err := os.Chmod(dir, 0o700); err != nil {
+			return nil, err
+		}
 	}
 	if info, err := os.Lstat(path); err == nil && info.Mode()&os.ModeSocket != 0 {
 		_ = os.Remove(path)
@@ -156,7 +183,7 @@ type endpoint struct {
 func endpoints() []endpoint {
 	return []endpoint{
 		{"GET", "/healthz", false, func(s *Server) http.HandlerFunc { return s.handleHealthz }},
-		{"GET", "/schema", false, func(s *Server) http.HandlerFunc { return s.handleSchema }},
+		{"GET", "/schema", true, func(s *Server) http.HandlerFunc { return s.handleSchema }},
 		{"GET", "/status", true, func(s *Server) http.HandlerFunc { return s.handleStatus }},
 		{"POST", "/sync/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleSync }},
 		{"GET", "/vhost/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleVhost }},
@@ -237,17 +264,27 @@ func (s *Server) routes(authenticated bool) http.Handler {
 	return mux
 }
 
-// auth enforces the optional bearer token against its stored hash.
+// auth enforces the optional bearer token against its stored hash. Failed
+// attempts are counted per client address: past the limit the client gets a 429
+// until the lock-out expires.
 func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 	if s.token == nil {
 		return next
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		key := clientKey(r)
+		if blocked, retry := s.limiter.blocked(key); blocked {
+			w.Header().Set("Retry-After", strconv.Itoa(retry))
+			http.Error(w, "too many failed attempts", http.StatusTooManyRequests)
+			return
+		}
 		got := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 		if !s.token.Matches(got) {
+			s.limiter.fail(key)
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
+		s.limiter.succeed(key)
 		next(w, r)
 	}
 }

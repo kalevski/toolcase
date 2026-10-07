@@ -42,12 +42,16 @@ func StaticVhost(cfg *config.Config, site *config.Site, opts Options) (string, e
 	}
 
 	fmt.Fprintf(&b, "\n    root %s;\n    index index.html;\n", root)
+	b.WriteString("    add_header X-Content-Type-Options nosniff always;\n")
+	b.WriteString("    disable_symlinks if_not_owner from=$document_root;\n")
+	b.WriteString("\n    location ~ /\\.(?!well-known) { deny all; return 404; }\n")
 	if site.NotFound != "" {
 		fmt.Fprintf(&b, "    error_page 404 %s;\n", site.NotFound)
 	}
 	if site.CacheAssets {
 		b.WriteString("\n    location ~* \\.(?:css|js|mjs|map|woff2?|ttf|otf|eot|ico|gif|jpe?g|png|webp|avif|svg|mp4|webm)$ {\n")
 		b.WriteString("        add_header Cache-Control \"public, max-age=31536000, immutable\";\n")
+		b.WriteString("        add_header X-Content-Type-Options nosniff always;\n")
 		b.WriteString("        try_files $uri =404;\n    }\n")
 	}
 	b.WriteString("\n    location / {\n")

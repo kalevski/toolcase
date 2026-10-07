@@ -236,3 +236,18 @@ describe('diff + patch round-trip', () => {
     })
 
 })
+
+describe('forbidden keys', () => {
+    it('patch skips __proto__ delta keys', () => {
+        const delta = JSON.parse('{"__proto__":[{"polluted":true}],"a":[1]}')
+        const out = patch({}, delta) as any
+        expect(({} as any).polluted).toBeUndefined()
+        expect(out.polluted).toBeUndefined()
+        expect(out.a).toBe(1)
+    })
+
+    it('diff ignores __proto__ own keys', () => {
+        const d = diff(JSON.parse('{"__proto__":{"x":1},"a":1}'), { a: 2 }) as any
+        expect(Object.keys(d)).toEqual(['a'])
+    })
+})

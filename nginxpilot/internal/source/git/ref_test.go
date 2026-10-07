@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -164,5 +165,39 @@ func TestPinIsNotPartOfFingerprint(t *testing.T) {
 	b.Ref = strings.Repeat("b", 40)
 	if a.Fingerprint() != b.Fingerprint() {
 		t.Fatal("the pin changed the fingerprint")
+	}
+}
+
+// TestCloneOverRepoSizeCapIsDeleted: a clone bigger than max_git_repo_size
+// fails as a LimitError and the cache is removed, so it cannot fill the disk.
+func TestCloneOverRepoSizeCapIsDeleted(t *testing.T) {
+	origin, _, _ := originRepo(t)
+	noise := make([]byte, 512<<10)
+	_, _ = rand.New(rand.NewSource(1)).Read(noise)
+	if err := os.WriteFile(filepath.Join(origin, "noise.bin"), noise, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{{"add", "."}, {"commit", "-q", "-m", "noise"}} {
+		cmd := exec.Command("git", args...)
+		cmd.Dir = origin
+		cmd.Env = append(os.Environ(), "GIT_CONFIG_GLOBAL=/dev/null", "GIT_CONFIG_NOSYSTEM=1",
+			"GIT_AUTHOR_NAME=t", "GIT_AUTHOR_EMAIL=t@t", "GIT_COMMITTER_NAME=t", "GIT_COMMITTER_EMAIL=t@t")
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	dataDir := t.TempDir()
+	s := New("example.test", config.Source{
+		Type: config.SourceGit, URL: "file://" + origin, Branch: "main",
+		Limits: config.Limits{MaxGitRepoSize: 64 << 10},
+	}, dataDir, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	_, err := s.Sync(context.Background(), &state.SiteState{}, t.TempDir())
+	var limit *source.LimitError
+	if !errors.As(err, &limit) || limit.Limit != "max_git_repo_size" {
+		t.Fatalf("want a max_git_repo_size LimitError, got %v", err)
+	}
+	if _, err := os.Stat(s.cacheDir()); !os.IsNotExist(err) {
+		t.Fatalf("oversized clone was kept: %v", err)
 	}
 }

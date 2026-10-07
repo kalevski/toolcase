@@ -1,3 +1,5 @@
+import { isForbiddenKey, hasOwn } from './forbiddenKeys'
+
 type PrimitiveTypeName =
     | 'string'
     | 'boolean'
@@ -333,11 +335,13 @@ class JSONSchema<const S extends Schema = Schema> {
                     const record = data as Record<string, unknown>
                     const result: Record<string, unknown> = {}
                     for (const key of Object.keys(record)) {
+                        if (isForbiddenKey(key)) continue
                         result[key] = record[key]
                     }
                     const props = resolved.properties ?? {}
                     for (const key of Object.keys(props)) {
-                        if (key in record) {
+                        if (isForbiddenKey(key)) continue
+                        if (hasOwn(record, key)) {
                             result[key] = this.applyCoercion(props[key], record[key])
                         }
                     }

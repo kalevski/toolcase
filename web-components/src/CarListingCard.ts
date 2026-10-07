@@ -4,6 +4,7 @@ import { lucideByName } from './internal/lucide'
 import { icon } from './icons'
 import { Heart } from 'lucide-static'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-car-listing-card'
 
@@ -183,7 +184,7 @@ export class CarListingCard extends HTMLElement {
         if (!name) return ''
         const avatarSrc = this.getAttribute('seller-avatar-src')
         const avatarHtml = avatarSrc
-            ? `<img class="tc-car-listing-card-seller-avatar" src="${esc(avatarSrc)}" alt="" loading="lazy" />`
+            ? `<img class="tc-car-listing-card-seller-avatar" src="${esc(safeImgSrc(avatarSrc))}" alt="" loading="lazy" />`
             : `<span class="tc-car-listing-card-seller-avatar tc-car-listing-card-seller-avatar--placeholder"></span>`
         return (
             `<div class="tc-car-listing-card-seller">` +
@@ -207,7 +208,7 @@ export class CarListingCard extends HTMLElement {
         const mediaHtml =
             `<div class="tc-car-listing-card-media">` +
             (imageSrc
-                ? `<img class="tc-car-listing-card-img" src="${esc(imageSrc)}" alt="${esc(imageAlt)}" loading="lazy" />`
+                ? `<img class="tc-car-listing-card-img" src="${esc(safeImgSrc(imageSrc))}" alt="${esc(imageAlt)}" loading="lazy" />`
                 : `<div class="tc-car-listing-card-img tc-car-listing-card-img--placeholder"></div>`) +
             (category
                 ? `<span class="tc-car-listing-card-badge badge text-bg-secondary">${esc(category)}</span>`
@@ -219,7 +220,7 @@ export class CarListingCard extends HTMLElement {
             `</div>`
 
         const titleHtml = href
-            ? `<a class="tc-car-listing-card-title" href="${esc(href)}">${esc(titleText)}</a>`
+            ? `<a class="tc-car-listing-card-title" href="${esc(safeUrl(href))}">${esc(titleText)}</a>`
             : `<span class="tc-car-listing-card-title">${esc(titleText)}</span>`
 
         const priceHtml =

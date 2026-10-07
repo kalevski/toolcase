@@ -95,6 +95,17 @@ type classifyResp struct {
 func (s *Server) handleClassify(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
+	if s.bodySlots != nil {
+		select {
+		case s.bodySlots <- struct{}{}:
+			defer func() { <-s.bodySlots }()
+		default:
+			w.Header().Set("Retry-After", "1")
+			writeErr(w, http.StatusTooManyRequests, codeBusy, "too many requests in flight")
+			return
+		}
+	}
+
 	// Cap the body once. MaxBytesReader replaces r.Body, so the multipart
 	// parser is bounded too, and it writes a Connection: close on overflow —
 	// that's expected.

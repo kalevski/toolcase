@@ -9,8 +9,8 @@ export interface VerifyCallbackInput {
 /**
  * Constant-time comparison of CSRF `state` values returned by the authorization server.
  *
- * IMPORTANT: always pass `ctx.nonce` through to `verifyIdToken` as well — omitting it
- * silently skips the nonce check and leaves the flow vulnerable to replay attacks.
+ * IMPORTANT: always pass `ctx.nonce` through to `verifyIdToken` as well — it rejects a
+ * missing nonce unless `skipNonceCheck: true` is set explicitly.
  *
  * @throws {OAuth2CallbackError} when lengths differ or values do not match
  */

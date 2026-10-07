@@ -10,9 +10,13 @@ function messageToString(m: any): string {
     return String(m)
 }
 
+function escapeLine(v: string): string {
+    return v.replace(/\r/g, '\\r').replace(/\n/g, '\\n')
+}
+
 export const textFormatter: LogFormatter = (level, scope, time, _fields, messages) => {
-    const body = messages.map(messageToString).join(' ')
-    return `${level.toUpperCase()} [${new Date(time).toISOString()}] | ${scope}: ${body}`
+    const body = escapeLine(messages.map(messageToString).join(' '))
+    return `${level.toUpperCase()} [${new Date(time).toISOString()}] | ${escapeLine(scope)}: ${body}`
 }
 
 function safeWalk(value: any): any {
@@ -25,7 +29,9 @@ function safeWalk(value: any): any {
             seen.add(v)
             if (Array.isArray(v)) return v.map(walk)
             const out: Record<string, any> = {}
-            for (const k of Object.keys(v)) out[k] = walk(v[k])
+            for (const k of Object.keys(v)) {
+                Object.defineProperty(out, k, { value: walk(v[k]), enumerable: true, writable: true, configurable: true })
+            }
             return out
         }
         return v
@@ -45,7 +51,7 @@ export const jsonFormatter: LogFormatter = (level, scope, time, fields, messages
 
 function logfmtEscape(v: string): string {
     if (v === '') return '""'
-    if (/[\s"=]/.test(v)) return `"${v}"`
+    if (/[\s"=\\]/.test(v)) return `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r/g, '\\r').replace(/\n/g, '\\n')}"`
     return v
 }
 
@@ -62,7 +68,7 @@ export const logfmtFormatter: LogFormatter = (level, scope, time, fields, messag
         `ts=${new Date(time).toISOString()}`,
     ]
     for (const [k, v] of Object.entries(fields)) {
-        pairs.push(`${k}=${logfmtEscape(String(v))}`)
+        pairs.push(`${k.replace(/[\s="\\]/g, '_')}=${logfmtEscape(String(v))}`)
     }
     const msg = messages.map(messageToLogfmt).join(' ')
     pairs.push(`msg=${logfmtEscape(msg)}`)

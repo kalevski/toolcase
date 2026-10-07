@@ -76,7 +76,7 @@ func TestValidateLogDestinations(t *testing.T) {
 			*d = LogDestination{Name: "f", Type: LogDestFile, Path: "rel/x.ndjson"}
 		}, wantSub: "must be absolute"},
 		{name: "valid file destination", mutate: func(d *LogDestination) {
-			*d = LogDestination{Name: "f", Type: LogDestFile, Path: "/var/log/np/x.ndjson"}
+			*d = LogDestination{Name: "f", Type: LogDestFile, Path: "/var/lib/nginxpilot/logs/x.ndjson"}
 		}},
 		{name: "stdout rejects push fields", mutate: func(d *LogDestination) {
 			*d = LogDestination{Name: "s", Type: LogDestStdout, URL: "https://x"}

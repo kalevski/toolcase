@@ -2,6 +2,7 @@ import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { MessageSquare, Clock } from 'lucide-static'
 import { icon } from './icons'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-good-first-issues'
 
@@ -162,7 +163,7 @@ export class GoodFirstIssues extends HTMLElement {
         return [
             `<li class="tc-good-first-issues-item" role="listitem">`,
             `<div class="tc-good-first-issues-item-head">`,
-            `<a class="tc-good-first-issues-item-link" href="${esc(issue.url)}" data-issue-index="${i}" target="_blank" rel="noopener noreferrer">${esc(issue.title)}</a>`,
+            `<a class="tc-good-first-issues-item-link" href="${esc(safeUrl(issue.url))}" data-issue-index="${i}" target="_blank" rel="noopener noreferrer">${esc(issue.title)}</a>`,
             repoHtml,
             `</div>`,
             labelsRow,

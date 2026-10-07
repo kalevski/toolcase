@@ -205,3 +205,34 @@ func TestAppPHPEnvQuotesSpecials(t *testing.T) {
 		t.Errorf("value not escaped in:\n%s", out)
 	}
 }
+
+func TestStaticAndAppVhostsHardening(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		PHP:     config.PHP{Enabled: true, PoolDir: "/etc/php/pool.d", SocketDir: "/run/php"},
+		Sites:   []config.Site{{Domain: "example.com", CacheAssets: true}},
+		Apps:    []config.App{{Domain: "shop.example.com", Runtime: config.RuntimePHP}},
+	}
+	site, err := StaticVhost(cfg, &cfg.Sites[0], Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"add_header X-Content-Type-Options nosniff always;",
+		"disable_symlinks if_not_owner from=$document_root;",
+		`location ~ /\.(?!well-known) { deny all; return 404; }`,
+	} {
+		if !strings.Contains(site, want) {
+			t.Errorf("static vhost missing %q\n%s", want, site)
+		}
+	}
+	app, err := AppVhost(cfg, &cfg.Apps[0], Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"add_header X-Content-Type-Options nosniff always;", "disable_symlinks if_not_owner from=$document_root;"} {
+		if !strings.Contains(app, want) {
+			t.Errorf("app vhost missing %q\n%s", want, app)
+		}
+	}
+}

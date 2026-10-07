@@ -1,4 +1,5 @@
 import type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
+import { isForbiddenKey, hasOwn } from './forbiddenKeys'
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
     return v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -47,6 +48,7 @@ function patch(target: unknown, delta: Delta | null): unknown {
     const obj = (isPlainObject(target) ? { ...target } : {}) as Record<string, unknown>
 
     for (const key of Object.keys(od)) {
+        if (isForbiddenKey(key)) continue
         const change = od[key]
         if (isEdit(change)) {
             if (change.length === 1) {
@@ -57,7 +59,7 @@ function patch(target: unknown, delta: Delta | null): unknown {
                 obj[key] = change[1]
             }
         } else {
-            obj[key] = patch(obj[key], change as Delta)
+            obj[key] = patch(hasOwn(obj, key) ? obj[key] : undefined, change as Delta)
         }
     }
 

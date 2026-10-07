@@ -1,6 +1,7 @@
 import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 // tc-bead-trail — a breadcrumb that shows DEPTH as beads and the path as names.
 //
@@ -156,7 +157,7 @@ export class BeadTrail extends HTMLElement {
                 }
                 const body = esc(crumb.label)
                 return crumb.href
-                    ? `${lead}<a class="tc-bead-trail__crumb" href="${esc(crumb.href)}">${body}</a>`
+                    ? `${lead}<a class="tc-bead-trail__crumb" href="${esc(safeUrl(crumb.href))}">${body}</a>`
                     : `${lead}<span class="tc-bead-trail__crumb">${body}</span>`
             })
             .join('')

@@ -34,11 +34,28 @@ export interface OIDCDiscoveryDocument {
 	grant_types_supported?: readonly string[]
 }
 
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+
+function isSecureUrl(raw: string, allowInsecure: boolean | undefined): boolean {
+	let url: URL
+	try {
+		url = new URL(raw)
+	} catch {
+		return false
+	}
+	if (url.protocol === 'https:') return true
+	if (allowInsecure) return url.protocol === 'http:'
+	return url.protocol === 'http:' && LOOPBACK_HOSTS.has(url.hostname)
+}
+
 const DISCOVERY_TTL_MS = 24 * 60 * 60 * 1000
 
 let discoveryCache = new Cache<OIDCDiscoveryDocument>((issuer: string) => fetchDiscovery(issuer, {}), DISCOVERY_TTL_MS)
 
-async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDiscoveryDocument> {
+async function fetchDiscovery(issuer: string, opts: HttpOptions, allowInsecure?: boolean): Promise<OIDCDiscoveryDocument> {
+	if (!isSecureUrl(issuer, allowInsecure)) {
+		throw new OAuth2ProtocolError(`discovery issuer must use https: ${issuer}`)
+	}
 	const base = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer
 	const url = `${base}/.well-known/openid-configuration`
 	let response: Response
@@ -65,16 +82,27 @@ async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDi
 	if (parsed.issuer !== base && parsed.issuer !== issuer) {
 		throw new OAuth2ProtocolError(`discovery issuer mismatch: requested ${issuer}, got ${parsed.issuer}`)
 	}
+	for (const field of ['authorization_endpoint', 'token_endpoint', 'jwks_uri'] as const) {
+		if (!isSecureUrl(parsed[field], allowInsecure)) {
+			throw new OAuth2ProtocolError(`discovery ${field} must use https`)
+		}
+	}
 	return parsed as OIDCDiscoveryDocument
 }
 
-export async function fetchOIDCDiscovery(issuer: string, opts: HttpOptions & { cacheTtlMs?: number } = {}): Promise<OIDCDiscoveryDocument> {
-	const { cacheTtlMs, ...fetchOpts } = opts
+export async function fetchOIDCDiscovery(issuer: string, opts: HttpOptions & { cacheTtlMs?: number; allowInsecure?: boolean } = {}): Promise<OIDCDiscoveryDocument> {
+	const { cacheTtlMs, allowInsecure, ...fetchOpts } = opts
+	if (!isSecureUrl(issuer, allowInsecure)) {
+		throw new OAuth2ProtocolError(`discovery issuer must use https: ${issuer}`)
+	}
 	// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
 	// are caller-specific and cannot be keyed into a shared cache without a race or
 	// confused-deputy / SSRF hazard.
 	if (cacheTtlMs === 0 || fetchOpts.fetchImpl !== undefined || fetchOpts.headers !== undefined) {
-		return fetchDiscovery(issuer, fetchOpts)
+		return fetchDiscovery(issuer, fetchOpts, allowInsecure)
+	}
+	if (allowInsecure) {
+		return fetchDiscovery(issuer, fetchOpts, allowInsecure)
 	}
 	if (typeof cacheTtlMs === 'number' && cacheTtlMs > 0) {
 		discoveryCache.setMS(cacheTtlMs)
@@ -140,6 +168,9 @@ export interface VerifyIdTokenOptions {
 	jwksCacheMs?: number
 	allowedAlgorithms?: readonly string[]
 	http?: HttpOptions
+	clientId?: string
+	skipNonceCheck?: boolean
+	allowInsecure?: boolean
 }
 
 export interface OIDCVerifyContext {
@@ -170,46 +201,91 @@ export interface VerifiedIDToken {
 
 const DEFAULT_ALG_LIST: readonly string[] = ['RS256', 'ES256', 'EdDSA']
 
+const JWKS_FORCED_REFETCH_MIN_MS = 10_000
+
+const lastForcedJwksRefetch = new Map<string, number>()
+
+async function resolveJwks(options: VerifyIdTokenOptions, forceRefresh: boolean): Promise<any> {
+	if (options.jwks) return options.jwks
+	if (!options.jwksUri) {
+		throw new OIDCVerificationError('verifyIdToken: jwksUri or jwks is required')
+	}
+	const httpOpts = options.http ?? {}
+	// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
+	// are caller-specific and cannot be keyed into a shared cache without a confused-deputy
+	// / SSRF hazard or leaking one caller's keys to another.
+	if (httpOpts.fetchImpl !== undefined || httpOpts.headers !== undefined) {
+		return createJwksGetter(options.jwksUri, httpOpts)
+	}
+	if (forceRefresh) jwksCache.invalidate(options.jwksUri)
+	if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
+		jwksCache.setMS(options.jwksCacheMs)
+	}
+	const jwks = await jwksCache.get(options.jwksUri)
+	if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
+	return jwks
+}
+
+function canRefetchJwks(options: VerifyIdTokenOptions): boolean {
+	if (options.jwks || !options.jwksUri) return false
+	const httpOpts = options.http ?? {}
+	if (httpOpts.fetchImpl !== undefined || httpOpts.headers !== undefined) return false
+	const last = lastForcedJwksRefetch.get(options.jwksUri)
+	const now = Date.now()
+	if (last !== undefined && now - last < JWKS_FORCED_REFETCH_MIN_MS) return false
+	lastForcedJwksRefetch.set(options.jwksUri, now)
+	return true
+}
+
 export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptions, ctx: OIDCVerifyContext = {}): Promise<VerifiedIDToken> {
 	const j = await loadJose()
-	let jwks: any
-	if (options.jwks) {
-		jwks = options.jwks
-	} else {
-		if (!options.jwksUri) {
-			throw new OIDCVerificationError('verifyIdToken: jwksUri or jwks is required')
-		}
-		const httpOpts = options.http ?? {}
-		// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
-		// are caller-specific and cannot be keyed into a shared cache without a confused-deputy
-		// / SSRF hazard or leaking one caller's keys to another.
-		if (httpOpts.fetchImpl !== undefined || httpOpts.headers !== undefined) {
-			jwks = await createJwksGetter(options.jwksUri, httpOpts)
-		} else {
-			if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
-				jwksCache.setMS(options.jwksCacheMs)
-			}
-			jwks = await jwksCache.get(options.jwksUri)
-			if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
-		}
+	if (ctx.nonce === undefined && options.skipNonceCheck !== true) {
+		throw new OIDCVerificationError('verifyIdToken: ctx.nonce is required (pass skipNonceCheck: true to opt out explicitly)')
+	}
+	if (!isSecureUrl(options.issuer, options.allowInsecure)) {
+		throw new OIDCVerificationError('verifyIdToken: issuer must use https')
+	}
+	if (options.jwksUri !== undefined && !isSecureUrl(options.jwksUri, options.allowInsecure)) {
+		throw new OIDCVerificationError('verifyIdToken: jwksUri must use https')
 	}
 	const algorithms = options.allowedAlgorithms ? [...options.allowedAlgorithms] : [...DEFAULT_ALG_LIST]
 	const SYM = /^(HS\d{3}|none)$/i
 	if (algorithms.some(a => SYM.test(a))) {
 		throw new OIDCVerificationError('symmetric/none algorithms are not allowed for ID tokens')
 	}
+	const verifyOptions = {
+		issuer: options.issuer,
+		audience: options.audience as any,
+		algorithms,
+		clockTolerance: options.clockToleranceSeconds ?? 30,
+		requiredClaims: ['exp', 'iat', 'sub']
+	}
 	let verifyResult: { payload: any; protectedHeader: any }
 	try {
-		verifyResult = await j.jwtVerify(idToken, jwks as any, {
-			issuer: options.issuer,
-			audience: options.audience as any,
-			algorithms,
-			clockTolerance: options.clockToleranceSeconds ?? 30
-		})
+		try {
+			verifyResult = await j.jwtVerify(idToken, await resolveJwks(options, false) as any, verifyOptions)
+		} catch (error) {
+			if ((error as { code?: string }).code === 'ERR_JWKS_NO_MATCHING_KEY' && canRefetchJwks(options)) {
+				verifyResult = await j.jwtVerify(idToken, await resolveJwks(options, true) as any, verifyOptions)
+			} else {
+				throw error
+			}
+		}
 	} catch (error) {
+		if (error instanceof OIDCVerificationError) throw error
 		throw new OIDCVerificationError(`signature/claims verification failed: ${(error as Error).message}`)
 	}
 	const { payload, protectedHeader } = verifyResult
+	const expectedClientId = options.clientId ?? (typeof options.audience === 'string' ? options.audience : undefined)
+	if (payload.azp !== undefined && typeof payload.azp !== 'string') {
+		throw new OIDCVerificationError('azp must be a string')
+	}
+	if (Array.isArray(payload.aud) && payload.aud.length > 1 && payload.azp === undefined) {
+		throw new OIDCVerificationError('azp required when aud has multiple values')
+	}
+	if (payload.azp !== undefined && expectedClientId !== undefined && payload.azp !== expectedClientId) {
+		throw new OIDCVerificationError('azp mismatch')
+	}
 	if (ctx.nonce !== undefined) {
 		if (typeof payload.nonce !== 'string' || !timingSafeStringEqual(payload.nonce, ctx.nonce)) {
 			throw new OIDCVerificationError('nonce mismatch')
@@ -287,10 +363,11 @@ export interface OidcProviderInput {
 	defaultScope?: readonly string[]
 	id?: string
 	fetchImpl?: typeof fetch
+	allowInsecure?: boolean
 }
 
 export async function oidcProvider(opts: OidcProviderInput): Promise<OAuth2ProviderConfig> {
-	const discovery = await fetchOIDCDiscovery(opts.issuer, { fetchImpl: opts.fetchImpl })
+	const discovery = await fetchOIDCDiscovery(opts.issuer, { fetchImpl: opts.fetchImpl, allowInsecure: opts.allowInsecure })
 	return defineOAuth2Provider({
 		id: opts.id,
 		authorizationEndpoint: discovery.authorization_endpoint,

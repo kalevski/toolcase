@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-character-select'
 
@@ -140,7 +141,7 @@ export class CharacterSelect extends HTMLElement {
         if (portrait && isImageSrc(portrait)) {
             return (
                 `<span class="tc-character-select-portrait">` +
-                `<img src="${esc(portrait)}" alt="" />` +
+                `<img src="${esc(safeImgSrc(portrait))}" alt="" />` +
                 `</span>`
             )
         }

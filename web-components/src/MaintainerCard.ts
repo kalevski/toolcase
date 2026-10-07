@@ -2,6 +2,7 @@ import { patchHtml, bindOnce } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-maintainer-card'
 
@@ -102,7 +103,7 @@ export class MaintainerCard extends HTMLElement {
 
         const avatarHtml =
             `<div class="tc-maintainer-card__avatar-wrap">` +
-            `<img class="tc-maintainer-card__avatar" src="${esc(avatarUrl)}" alt="${esc(name)}">` +
+            `<img class="tc-maintainer-card__avatar" src="${esc(safeImgSrc(avatarUrl))}" alt="${esc(name)}">` +
             `</div>`
 
         const nameHtml = `<h3 class="tc-maintainer-card__name">${esc(name)}</h3>`
@@ -124,7 +125,7 @@ export class MaintainerCard extends HTMLElement {
                       .map((link) => {
                           const svgHtml = link.icon ? lucideByName(link.icon) : ''
                           return (
-                              `<a class="tc-maintainer-card__link" href="${esc(link.href)}" ` +
+                              `<a class="tc-maintainer-card__link" href="${esc(safeUrl(link.href))}" ` +
                               `role="listitem" target="_blank" rel="noopener noreferrer" ` +
                               `aria-label="${esc(link.label)}">${svgHtml}</a>`
                           )
@@ -138,7 +139,7 @@ export class MaintainerCard extends HTMLElement {
             `<span class="tc-maintainer-card__sponsor-label">${esc(sponsorLabel)}</span>`
 
         const sponsorHtml = sponsorHref
-            ? `<a class="tc-maintainer-card__sponsor" href="${esc(sponsorHref)}" ` +
+            ? `<a class="tc-maintainer-card__sponsor" href="${esc(safeUrl(sponsorHref))}" ` +
               `target="_blank" rel="noopener noreferrer">${sponsorInner}</a>`
             : `<button class="tc-maintainer-card__sponsor" type="button">${sponsorInner}</button>`
 

@@ -6,6 +6,14 @@ import { wireScrollEdges } from './internal/scroll-edges'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 import { setAttr } from './internal/tc-element'
 
+const CSS_LENGTH = /^(?:auto|\d+(?:\.\d+)?(?:px|rem|em|%|ch|vw))$/
+
+function safeCssLength(value: string | undefined | null): string {
+    if (!value) return ''
+    const trimmed = String(value).trim()
+    return CSS_LENGTH.test(trimmed) ? trimmed : ''
+}
+
 const TAG_NAME = 'tc-table'
 
 const chevronUpIcon = icon(ChevronUp, 'tc-table-sort-icon')
@@ -286,8 +294,10 @@ export class Table extends HTMLElement {
 
     private _thStyle(col: TableColumn): string {
         const parts: string[] = []
-        if (col.width) parts.push(`width: ${esc(col.width)}`)
-        if (col.minWidth) parts.push(`min-width: ${esc(col.minWidth)}`)
+        const width = safeCssLength(col.width)
+        if (width) parts.push(`width: ${width}`)
+        const minWidth = safeCssLength(col.minWidth)
+        if (minWidth) parts.push(`min-width: ${minWidth}`)
         parts.push(`text-align: ${this._align(col)}`)
         return ` style="${parts.join('; ')}"`
     }

@@ -2,6 +2,7 @@ import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-github-stars-card'
 
@@ -229,7 +230,7 @@ export class GithubStarsCard extends HTMLElement {
 
         const slugHtml =
             owner && repo
-                ? `<a class="tc-github-stars-card-slug" href="${esc(repoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(owner)}/${esc(repo)} on GitHub">${esc(owner)}/${esc(repo)}</a>`
+                ? `<a class="tc-github-stars-card-slug" href="${esc(safeUrl(repoUrl))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(owner)}/${esc(repo)} on GitHub">${esc(owner)}/${esc(repo)}</a>`
                 : `<span class="tc-github-stars-card-slug">${esc(owner || '–')}/${esc(repo || '–')}</span>`
 
         const statCells: string[] = []
@@ -288,7 +289,7 @@ export class GithubStarsCard extends HTMLElement {
 
         const ctaUrl = owner && repo ? `${repoUrl}` : '#'
         const ctaHtml = [
-            `<a class="tc-github-stars-card-cta" href="${esc(ctaUrl)}" target="_blank" rel="noopener noreferrer"`,
+            `<a class="tc-github-stars-card-cta" href="${esc(safeUrl(ctaUrl))}" target="_blank" rel="noopener noreferrer"`,
             ` aria-label="${esc(ctaLabel)} — ${esc(owner)}/${esc(repo)}"`,
             '>',
             `${esc(ctaLabel)}`,

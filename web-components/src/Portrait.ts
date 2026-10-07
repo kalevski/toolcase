@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { setHostClass } from './internal/host-class'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-portrait'
 
 function looksLikeUrl(s: string): boolean {
@@ -98,7 +99,7 @@ export class Portrait extends HTMLElement {
 
         let bodyContent: string
         if (glyph && looksLikeUrl(glyph)) {
-            bodyContent = `<img class="tc-portrait__img" src="${esc(glyph)}" alt="" aria-hidden="true">`
+            bodyContent = `<img class="tc-portrait__img" src="${esc(safeImgSrc(glyph))}" alt="" aria-hidden="true">`
         } else {
             bodyContent = `<span class="tc-portrait__glyph" aria-hidden="true">${esc(glyph)}</span>`
         }

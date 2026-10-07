@@ -64,7 +64,11 @@ func (c *Client) Resolve(advertised string) (string, error) {
 		return "", err
 	}
 	if !u.IsAbs() {
-		return base.ResolveReference(u).String(), nil
+		resolved := base.ResolveReference(u)
+		if !strings.EqualFold(resolved.Scheme, base.Scheme) || !strings.EqualFold(resolved.Host, base.Host) {
+			return "", fmt.Errorf("jmap: advertised URL leaves the configured base: %q", advertised)
+		}
+		return resolved.String(), nil
 	}
 	if !rerootable(u) {
 		return "", fmt.Errorf("jmap: advertised URL has no path: %q", advertised)

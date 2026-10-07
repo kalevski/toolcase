@@ -177,3 +177,15 @@ func TestExpandTemplate(t *testing.T) {
 		t.Fatalf("%q != %q", got, want)
 	}
 }
+
+func TestResolveRefusesSchemeRelativeAndForeignHosts(t *testing.T) {
+	c := New("http://jmap.internal:8080", 0)
+	for _, in := range []string{"//evil.example/jmap/", "///evil.example/x", "http:/other.example/x"} {
+		if got, err := c.Resolve(in); err == nil && !strings.HasPrefix(got, "http://jmap.internal:8080/") {
+			t.Fatalf("%q resolved to %q", in, got)
+		}
+	}
+	if _, err := c.Resolve("//evil.example/jmap/"); err == nil {
+		t.Fatal("scheme-relative URL must be refused")
+	}
+}

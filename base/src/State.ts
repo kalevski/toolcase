@@ -1,4 +1,5 @@
 import Broadcast from './Broadcast'
+import { isForbiddenKey, hasOwn } from './forbiddenKeys'
 
 class State<T extends Record<string, any> = Record<string, any>> extends Broadcast {
 
@@ -40,9 +41,10 @@ class State<T extends Record<string, any> = Record<string, any>> extends Broadca
 
     private setProperties(target: Record<string, any>, source: Record<string, any>, properties: string[] = ['state'], emit: boolean = true): void {
         for (const key of Object.keys(source)) {
+            if (isForbiddenKey(key)) continue
             const propertyList = [...properties, key]
             this.emitEvent(propertyList, source[key], emit)
-            if (typeof target[key] === 'undefined') {
+            if (!hasOwn(target, key) || typeof target[key] === 'undefined') {
                 target[key] = source[key]
                 continue
             }

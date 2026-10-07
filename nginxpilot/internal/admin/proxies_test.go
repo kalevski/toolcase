@@ -11,7 +11,7 @@ import (
 
 const validProxyInline = `proxies:
   - domain: api.example.com
-    pass: http://127.0.0.1:9000
+    pass: http://10.0.0.1:9000
 `
 
 func TestCreateProxyInlinePassWritesFragmentAndReloads(t *testing.T) {
@@ -140,7 +140,7 @@ func TestSiteAndProxyUseDistinctFragmentFiles(t *testing.T) {
 	}
 	// example.com is now a site; a proxy needs a different domain (shared
 	// namespace), so this also exercises the namespacing of the filenames.
-	proxy := "proxies:\n  - domain: gw.example.com\n    pass: http://127.0.0.1:9000\n"
+	proxy := "proxies:\n  - domain: gw.example.com\n    pass: http://10.0.0.1:9000\n"
 	if rec := do(env, http.MethodPost, "/proxies", proxy, ""); rec.Code != http.StatusCreated {
 		t.Fatalf("seed proxy: want 201, got %d (%s)", rec.Code, rec.Body.String())
 	}

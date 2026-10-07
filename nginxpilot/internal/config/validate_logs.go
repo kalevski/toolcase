@@ -34,7 +34,7 @@ var statusLabelSources = map[string]bool{"$status": true, "$status_class": true}
 // before anything lands on disk. cfg supplies the wildcard-vhost context for
 // the $host label guardrail (G15).
 func ValidateLogDestinationStandalone(cfg *Config, d *LogDestination) error {
-	if err := validateLogDestination(d, anyWildcardVhost(cfg)); err != nil {
+	if err := validateLogDestination(d, anyWildcardVhost(cfg), cfg.logDir()); err != nil {
 		return fmt.Errorf("log_destination %q: %w", d.Name, err)
 	}
 	return nil
@@ -61,7 +61,7 @@ func validateLogs(cfg *Config) error {
 	names := map[string]string{} // name -> file
 	for i := range cfg.LogDestinations {
 		d := &cfg.LogDestinations[i]
-		if err := validateLogDestination(d, hasWildcardVhost); err != nil {
+		if err := validateLogDestination(d, hasWildcardVhost, cfg.logDir()); err != nil {
 			return fmt.Errorf("log_destination %q (%s): %w", d.Name, d.File, err)
 		}
 		if prev, dup := names[d.Name]; dup {
@@ -93,7 +93,7 @@ func anyWildcardVhost(cfg *Config) bool {
 	return false
 }
 
-func validateLogDestination(d *LogDestination, hasWildcardVhost bool) error {
+func validateLogDestination(d *LogDestination, hasWildcardVhost bool, logDir string) error {
 	if d.Name == "" {
 		return fmt.Errorf("name is required")
 	}
@@ -132,6 +132,9 @@ func validateLogDestination(d *LogDestination, hasWildcardVhost bool) error {
 		}
 		if !filepath.IsAbs(d.Path) {
 			return fmt.Errorf("path %q must be absolute", d.Path)
+		}
+		if err := confineLogPath(d.Path, logDir); err != nil {
+			return err
 		}
 		if d.MaxFiles < 0 {
 			return fmt.Errorf("max_files must be >= 0")
@@ -317,6 +320,26 @@ func validateLogLabels(labels map[string]string, hasWildcardVhost bool) error {
 	}
 	if extras > MaxExtraLogLabels {
 		return fmt.Errorf("labels: at most %d extra static labels (got %d)", MaxExtraLogLabels, extras)
+	}
+	return nil
+}
+
+// logDir is the only place a file log destination may write: <data_dir>/logs.
+func (cfg *Config) logDir() string {
+	return filepath.Join(cfg.dataDirOrDefault(), "logs")
+}
+
+// confineLogPath requires path to lie strictly under dir, after cleaning and
+// resolving whatever part of it already exists on disk.
+func confineLogPath(path, dir string) error {
+	if strings.Contains(path, "..") {
+		return fmt.Errorf("path %q must not contain ..", path)
+	}
+	clean := filepath.Clean(path)
+	root := resolveLoose(dir)
+	if !strings.HasPrefix(clean, filepath.Clean(dir)+string(filepath.Separator)) ||
+		!strings.HasPrefix(resolveLoose(clean), root+string(filepath.Separator)) {
+		return fmt.Errorf("path %q must be inside %s (the log directory)", path, dir)
 	}
 	return nil
 }

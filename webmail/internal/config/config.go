@@ -59,6 +59,15 @@ type Config struct {
 }
 
 // Secure reports whether the public URL is https (cookies, HSTS).
+func weakKey(key []byte) bool {
+	for _, b := range key {
+		if b != key[0] {
+			return false
+		}
+	}
+	return true
+}
+
 func (c *Config) Secure() bool { return strings.HasPrefix(c.PublicURL, "https://") }
 
 // MaxUploadBytes is the upload cap in bytes.
@@ -374,6 +383,8 @@ func (l *loader) parse() {
 			l.fail(VarSessionKey, "is not valid base64 (generate one with: openssl rand -base64 32)")
 		case len(key) != SessionKeyLen:
 			l.fail(VarSessionKey, "decodes to %d bytes, want %d (generate one with: openssl rand -base64 32)", len(key), SessionKeyLen)
+		case c.Secure() && weakKey(key):
+			l.fail(VarSessionKey, "is a placeholder key (all one repeated byte); generate one with: openssl rand -base64 32")
 		default:
 			c.SessionKey = key
 		}

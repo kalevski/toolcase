@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { VARIANTS_FULL } from './internal/variants'
 import { setHostClass } from './internal/host-class'
 import { setAttr } from './internal/tc-element'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-card'
 
 export type CardVariant =
@@ -73,7 +74,7 @@ export class Card extends HTMLElement {
         setHostClass(this, `card${variant ? ` text-bg-${variant}` : ''}`)
 
         const imgHtml = img
-            ? `<img src="${escAttr(img)}" class="card-img-${imgPosition}" alt="">`
+            ? `<img src="${escAttr(safeImgSrc(img))}" class="card-img-${imgPosition}" alt="">`
             : ''
         const titleHtml = title ? `<h5 class="card-title">${escAttr(title)}</h5>` : ''
         const subtitleHtml = subtitle

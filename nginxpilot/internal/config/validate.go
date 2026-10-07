@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"net/netip"
 	"path"
 	"regexp"
@@ -21,6 +22,11 @@ const MinInterval = 30 * time.Second
 // generated `upstream <name>` / `proxy_pass http://<name>` are unambiguous.
 var upstreamNameRe = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
+// locationPathRe is the charset of a proxy location path, rendered verbatim as
+// `location <path> {`: nothing nginx would read as a quote, separator, brace,
+// escape or regex modifier (the path must also start with "/").
+var locationPathRe = regexp.MustCompile(`^/[A-Za-z0-9._~/%:@!$&()*+,=-]*$`)
+
 // Validate checks the merged configuration. It normalizes domains to their
 // punycode/ASCII form in place.
 func Validate(cfg *Config) error {
@@ -28,6 +34,9 @@ func Validate(cfg *Config) error {
 	case "debug", "info", "warn", "error":
 	default:
 		return fmt.Errorf("log_level %q: must be debug|info|warn|error", cfg.LogLevel)
+	}
+	if err := validateAdmin(cfg.Admin); err != nil {
+		return err
 	}
 	if cfg.Defaults.Interval > 0 && time.Duration(cfg.Defaults.Interval) < MinInterval {
 		return fmt.Errorf("defaults.interval %s: minimum is %s", cfg.Defaults.Interval, MinInterval)
@@ -52,7 +61,7 @@ func Validate(cfg *Config) error {
 		if err := validateSite(site); err != nil {
 			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
 		}
-		if err := validateWebOptions(&site.WebOptions); err != nil {
+		if err := validateWebOptions(&site.WebOptions, AdvancedSite); err != nil {
 			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
 		}
 		if prev, dup := seen[site.Domain]; dup {
@@ -69,13 +78,17 @@ func Validate(cfg *Config) error {
 		if err := validateApp(app, cfg.PHP); err != nil {
 			return fmt.Errorf("app %q (%s): %w", app.Domain, app.File, err)
 		}
-		if err := validateWebOptions(&app.WebOptions); err != nil {
+		if err := validateWebOptions(&app.WebOptions, AdvancedSite); err != nil {
 			return fmt.Errorf("app %q (%s): %w", app.Domain, app.File, err)
 		}
 		if prev, dup := seen[app.Domain]; dup {
 			return fmt.Errorf("duplicate domain %q declared in %s and %s", app.Domain, prev, app.File)
 		}
 		seen[app.Domain] = app.File
+	}
+
+	if err := validateSourcePolicies(cfg); err != nil {
+		return err
 	}
 
 	upstreams, err := validateUpstreams(cfg)
@@ -111,6 +124,33 @@ func Validate(cfg *Config) error {
 		return err
 	}
 	return nil
+}
+
+// validateAdmin refuses an admin endpoint that is reachable off the host with
+// no token: it rewrites certificates, credentials and every vhost.
+func validateAdmin(a Admin) error {
+	listen := a.ListenAddr()
+	if listen == "" || a.TokenEnv != "" || a.TokenFile != "" {
+		return nil
+	}
+	if !LoopbackListen(listen) {
+		return fmt.Errorf("admin.listen %q is not a loopback address: set admin.token_env or admin.token_file (a token of at least 32 characters), or listen on 127.0.0.1", listen)
+	}
+	return nil
+}
+
+// LoopbackListen reports whether a listen address binds only the loopback
+// interface. An empty host (":9090"), a wildcard or an unparseable name is not.
+func LoopbackListen(addr string) bool {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return false
+	}
+	if host == "localhost" {
+		return true
+	}
+	ip, err := netip.ParseAddr(host)
+	return err == nil && ip.IsLoopback()
 }
 
 // NormalizeDomain validates a domain and rewrites it to its punycode/ASCII
@@ -295,6 +335,10 @@ func validateAccessListRefs(cfg *Config, lists map[string]bool) error {
 // validateUpstreams checks every upstream and returns the set of declared
 // names (post-validation) for proxy reference resolution.
 func validateUpstreams(cfg *Config) (map[string]bool, error) {
+	pol, err := cfg.targetPolicy()
+	if err != nil {
+		return nil, err
+	}
 	names := map[string]string{} // name -> file
 	for i := range cfg.Upstreams {
 		u := &cfg.Upstreams[i]
@@ -325,7 +369,7 @@ func validateUpstreams(cfg *Config) (map[string]bool, error) {
 			if s.Address == "" {
 				return nil, fmt.Errorf("upstream %q: server[%d].address is required", u.Name, j)
 			}
-			if _, err := targetcheck.ParseAddr(s.Address); err != nil {
+			if _, err := targetcheck.ParseAddrPolicy(s.Address, pol); err != nil {
 				return nil, fmt.Errorf("upstream %q: server address %q: %v", u.Name, s.Address, err)
 			}
 			if s.Weight < 0 {
@@ -346,6 +390,10 @@ func validateUpstreams(cfg *Config) (map[string]bool, error) {
 // validateProxies checks reverse-proxy entities, resolving upstream references
 // against declared names and guarding the shared domain namespace.
 func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]string) error {
+	pol, err := cfg.targetPolicy()
+	if err != nil {
+		return err
+	}
 	for i := range cfg.Proxies {
 		p := &cfg.Proxies[i]
 		ascii, err := normalizeWildcardDomain(p.Domain)
@@ -358,11 +406,11 @@ func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]str
 			return fmt.Errorf("proxy %q: listen %d must be 1..65535", p.Domain, p.Listen)
 		}
 
-		if err := validateProxyTargets(p, upstreams); err != nil {
+		if err := validateProxyTargets(p, upstreams, pol); err != nil {
 			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
 		}
 
-		if err := validateWebOptions(&p.WebOptions); err != nil {
+		if err := validateWebOptions(&p.WebOptions, AdvancedProxy); err != nil {
 			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
 		}
 		if err := validateCache(p.Cache); err != nil {
@@ -379,8 +427,8 @@ func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]str
 
 // validateProxyTargets enforces the upstream/pass exactly-one rule at the
 // proxy and location levels, with locations inheriting the proxy default.
-func validateProxyTargets(p *Proxy, upstreams map[string]bool) error {
-	if err := checkTarget("", p.Upstream, p.Pass, upstreams, true); err != nil {
+func validateProxyTargets(p *Proxy, upstreams map[string]bool, pol targetcheck.Policy) error {
+	if err := checkTarget("", p.Upstream, p.Pass, upstreams, true, pol); err != nil {
 		return err
 	}
 	for j := range p.Locations {
@@ -391,12 +439,18 @@ func validateProxyTargets(p *Proxy, upstreams map[string]bool) error {
 		if !strings.HasPrefix(loc.Path, "/") {
 			return fmt.Errorf("location[%d] path %q must start with /", j, loc.Path)
 		}
+		if !locationPathRe.MatchString(loc.Path) || strings.Contains(loc.Path, "..") {
+			return fmt.Errorf("location[%d] path %q may only contain letters, digits and . _ ~ / %% : @ ! $ & ( ) * + , = - (no spaces, quotes, ; { } or backslashes) and no ..", j, loc.Path)
+		}
+		if err := ValidateAdvanced(loc.Advanced, AdvancedProxy); err != nil {
+			return fmt.Errorf("location[%d]: %w", j, err)
+		}
 		// A location may inherit the proxy default; resolve the effective pair.
 		up, pass := loc.Upstream, loc.Pass
 		if up == "" && pass == "" {
 			up, pass = p.Upstream, p.Pass
 		}
-		if err := checkTarget(fmt.Sprintf("location %q ", loc.Path), up, pass, upstreams, false); err != nil {
+		if err := checkTarget(fmt.Sprintf("location %q ", loc.Path), up, pass, upstreams, false, pol); err != nil {
 			return err
 		}
 	}
@@ -443,7 +497,7 @@ func checkResolve(p *Proxy, loc ProxyLocation) error {
 // checkTarget validates a single (upstream, pass) pair. optional allows the
 // pair to be empty (a proxy default that locations override); when false
 // exactly one of the two must be set.
-func checkTarget(prefix, upstream, pass string, upstreams map[string]bool, optional bool) error {
+func checkTarget(prefix, upstream, pass string, upstreams map[string]bool, optional bool, pol targetcheck.Policy) error {
 	switch {
 	case upstream != "" && pass != "":
 		return fmt.Errorf("%supstream and pass are mutually exclusive", prefix)
@@ -455,7 +509,7 @@ func checkTarget(prefix, upstream, pass string, upstreams map[string]bool, optio
 		// Strict lexical validation (targetcheck Tier 1): the string is written
 		// verbatim into the rendered proxy_pass, so it must never carry nginx
 		// metacharacters — a syntactically valid injection would pass nginx -t.
-		if _, err := targetcheck.ParsePass(pass); err != nil {
+		if _, err := targetcheck.ParsePassPolicy(pass, pol); err != nil {
 			return fmt.Errorf("%spass %q: %v", prefix, pass, err)
 		}
 	default:
@@ -526,7 +580,7 @@ func validateRedirects(cfg *Config, seen map[string]string) error {
 		if r.ForceSSL {
 			return fmt.Errorf("redirect %q: force_ssl is not supported on a redirect (the redirect IS the redirect; use tls: auto|required to also answer https)", r.Domain)
 		}
-		if err := validateWebOptions(&r.WebOptions); err != nil {
+		if err := validateWebOptions(&r.WebOptions, AdvancedSite); err != nil {
 			return fmt.Errorf("redirect %q (%s): %w", r.Domain, r.File, err)
 		}
 
@@ -558,7 +612,7 @@ func validateDeadHosts(cfg *Config, seen map[string]string) error {
 		default:
 			return fmt.Errorf("dead_host %q: code %d must be 404 | 410 | 444 | 503", d.Domain, d.Code)
 		}
-		if err := validateWebOptions(&d.WebOptions); err != nil {
+		if err := validateWebOptions(&d.WebOptions, AdvancedSite); err != nil {
 			return fmt.Errorf("dead_host %q (%s): %w", d.Domain, d.File, err)
 		}
 

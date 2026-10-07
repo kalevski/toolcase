@@ -26,7 +26,8 @@ import (
 
 const prefix = "sha256:"
 
-// MinLength is the shortest token `token set` accepts.
+// MinLength is the shortest token `token set` accepts, and the shortest one
+// Resolve will take from admin.token_env at startup.
 const MinLength = 32
 
 // Hash is a stored token hash; nil means no auth is configured.
@@ -89,6 +90,9 @@ func Resolve(tokenEnv, tokenFile string) (Resolution, error) {
 		if envValue == "" {
 			return Resolution{}, fmt.Errorf("environment variable %s is not set or empty", tokenEnv)
 		}
+		if len(envValue) < MinLength {
+			return Resolution{}, fmt.Errorf("environment variable %s holds a token shorter than %d characters", tokenEnv, MinLength)
+		}
 		sum := sha256.Sum256([]byte(envValue))
 		return Resolution{Hash: sum[:]}, nil
 	}
@@ -113,6 +117,9 @@ func Resolve(tokenEnv, tokenFile string) (Resolution, error) {
 			return Resolution{}, fmt.Errorf("admin.token_file %s does not exist; run `nginxpilot token set` or set admin.token_env to seed it", tokenFile)
 		}
 		return Resolution{}, fmt.Errorf("admin.token_file %s does not exist and %s is empty, so there is nothing to seed it from", tokenFile, tokenEnv)
+	}
+	if len(envValue) < MinLength {
+		return Resolution{}, fmt.Errorf("environment variable %s holds a token shorter than %d characters", tokenEnv, MinLength)
 	}
 	if err := Store(tokenFile, envValue); err != nil {
 		return Resolution{}, fmt.Errorf("seed admin.token_file: %w", err)

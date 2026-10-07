@@ -1,6 +1,7 @@
 import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-card-options'
 
@@ -171,7 +172,7 @@ export class CardOptions extends HTMLElement {
                         if (iconSvg)
                             mediaHtml = `<span class="tc-card-options-icon">${iconSvg}</span>`
                     } else if (opt.image) {
-                        mediaHtml = `<img class="tc-card-options-image" src="${esc(opt.image)}" alt="" aria-hidden="true">`
+                        mediaHtml = `<img class="tc-card-options-image" src="${esc(safeImgSrc(opt.image))}" alt="" aria-hidden="true">`
                     }
 
                     const descHtml = opt.description

@@ -1,6 +1,7 @@
 import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-user-panel'
 
@@ -315,7 +316,7 @@ export class UserPanel extends HTMLElement {
         const hasMenu = this._hasMenu()
 
         const avatarHtml = avatarSrc
-            ? `<img class="tc-user-panel-avatar tc-user-panel-avatar--img" src="${esc(avatarSrc)}" alt="${esc(username)}" />`
+            ? `<img class="tc-user-panel-avatar tc-user-panel-avatar--img" src="${esc(safeImgSrc(avatarSrc))}" alt="${esc(username)}" />`
             : `<span class="tc-user-panel-avatar" role="img" aria-label="${esc(username)}">${esc(initials)}</span>`
 
         const infoAttrs = hasMenu

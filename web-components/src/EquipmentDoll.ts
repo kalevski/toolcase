@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-equipment-doll'
 
 // A single equipped item. Pared down from the game-components InventoryItem to
@@ -176,7 +177,7 @@ export class EquipmentDoll extends HTMLElement {
         const name = item.name ?? item.id
         let glyphMarkup: string
         if (icon && isImageSrc(icon)) {
-            glyphMarkup = `<img class="tc-equipment-doll__icon" src="${esc(icon)}" alt="" />`
+            glyphMarkup = `<img class="tc-equipment-doll__icon" src="${esc(safeImgSrc(icon))}" alt="" />`
         } else {
             const glyph = icon || (name ? name.charAt(0).toUpperCase() : '?')
             glyphMarkup = `<span class="tc-equipment-doll__icon" aria-hidden="true">${esc(glyph)}</span>`

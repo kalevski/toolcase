@@ -73,3 +73,21 @@ describe('State', () => {
         expect(state.get().user.name).toBe('Alice')
     })
 })
+
+describe('State prototype pollution', () => {
+    it('ignores __proto__, constructor and prototype keys at every level', () => {
+        const state = new State<any>({})
+        state.set(JSON.parse('{"__proto__":{"isAdmin":true},"a":{"__proto__":{"polluted":true},"b":1}}'))
+        state.set(JSON.parse('{"constructor":{"prototype":{"x":1}}}'))
+        expect(({} as any).isAdmin).toBeUndefined()
+        expect(({} as any).polluted).toBeUndefined()
+        expect(({} as any).x).toBeUndefined()
+        expect(state.get().a.b).toBe(1)
+    })
+
+    it('does not merge into inherited objects of an existing state', () => {
+        const state = new State<any>({})
+        state.set(JSON.parse('{"toString":{"__proto__":{"y":1}}}'))
+        expect(({} as any).y).toBeUndefined()
+    })
+})

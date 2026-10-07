@@ -1,18 +1,38 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeUrl, safeImgSrc } from './internal/safe-url'
 const TAG_NAME = 'tc-video-embed'
 
 const DEFAULT_ASPECT = 16 / 9
 
 export type VideoProvider = 'youtube' | 'vimeo' | 'loom' | 'native'
 
-// Provider detection from the source URL. Anything that isn't a known embed
-// host is treated as a native media file (rendered into a <video>).
+const PROVIDER_HOSTS: Record<string, VideoProvider> = {
+    'youtube.com': 'youtube',
+    'www.youtube.com': 'youtube',
+    'm.youtube.com': 'youtube',
+    'music.youtube.com': 'youtube',
+    'youtube-nocookie.com': 'youtube',
+    'www.youtube-nocookie.com': 'youtube',
+    'youtu.be': 'youtube',
+    'vimeo.com': 'vimeo',
+    'www.vimeo.com': 'vimeo',
+    'player.vimeo.com': 'vimeo',
+    'loom.com': 'loom',
+    'www.loom.com': 'loom',
+}
+
+// Provider detection from the source URL. The parsed host must be an allowlisted
+// embed host; anything else is treated as a native media file (rendered into a
+// <video>). A URL that merely mentions a provider in its path or query is not one.
 function detectProvider(src: string): VideoProvider {
-    if (/(?:youtube\.com|youtu\.be)/i.test(src)) return 'youtube'
-    if (/vimeo\.com/i.test(src)) return 'vimeo'
-    if (/loom\.com/i.test(src)) return 'loom'
-    return 'native'
+    try {
+        const url = new URL(src)
+        if (url.protocol !== 'https:' && url.protocol !== 'http:') return 'native'
+        return PROVIDER_HOSTS[url.hostname.toLowerCase()] ?? 'native'
+    } catch {
+        return 'native'
+    }
 }
 
 // Robustly extract a YouTube video id from the various URL forms:
@@ -191,13 +211,14 @@ export class VideoEmbed extends HTMLElement {
         } else {
             const provider = detectProvider(src)
             if (provider === 'native') {
-                const posterAttr = this.poster ? ` poster="${esc(this.poster)}"` : ''
+                const poster = safeImgSrc(this.poster)
+                const posterAttr = poster ? ` poster="${esc(poster)}"` : ''
                 const titleAttr = title ? ` title="${esc(title)}"` : ''
                 // Autoplay requires muted under browser policy.
                 const wantMuted = muted || autoplay
                 media =
                     `<video class="tc-video-embed-media tc-video-embed-video"` +
-                    ` src="${esc(src)}"${posterAttr}` +
+                    ` src="${esc(safeUrl(src))}"${posterAttr}` +
                     (controls ? ' controls' : '') +
                     (autoplay ? ' autoplay' : '') +
                     (loop ? ' loop' : '') +
@@ -216,16 +237,17 @@ export class VideoEmbed extends HTMLElement {
                 // be an embed URL the provider understands).
                 const embedSrc = id
                     ? buildEmbedUrl(provider, id, { autoplay, loop, muted, controls })
-                    : src
+                    : safeUrl(src)
                 const titleAttr = title ? esc(title) : 'Video'
-                media =
-                    `<iframe class="tc-video-embed-media tc-video-embed-iframe"` +
-                    ` src="${esc(embedSrc)}"` +
-                    ` title="${titleAttr}"` +
-                    ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"' +
-                    ' allowfullscreen' +
-                    ' loading="lazy"' +
-                    '></iframe>'
+                media = embedSrc
+                    ? `<iframe class="tc-video-embed-media tc-video-embed-iframe"` +
+                      ` src="${esc(embedSrc)}"` +
+                      ` title="${titleAttr}"` +
+                      ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"' +
+                      ' allowfullscreen' +
+                      ' loading="lazy"' +
+                      '></iframe>'
+                    : ''
             }
         }
 

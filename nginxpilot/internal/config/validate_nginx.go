@@ -181,7 +181,10 @@ func (cfg *Config) anyResourceWantsTLS() bool {
 // validateWebOptions enforces the per-host toggle rules shared by sites and
 // proxies. force_ssl / http2 / hsts are meaningful only with TLS, so they are a
 // clear error without it (rather than silently redirecting to a dead https).
-func validateWebOptions(w *WebOptions) error {
+func validateWebOptions(w *WebOptions, scope AdvancedScope) error {
+	if err := ValidateAdvanced(w.Advanced, scope); err != nil {
+		return err
+	}
 	switch w.TLSMode() {
 	case TLSOff, TLSAuto, TLSRequired:
 	default:
@@ -218,6 +221,10 @@ func validateCache(c Cache) error {
 // declared names for stream reference resolution. Stream and http upstream
 // namespaces are separate — a name may exist in both without collision.
 func validateStreamUpstreams(cfg *Config) (map[string]bool, error) {
+	pol, err := cfg.targetPolicy()
+	if err != nil {
+		return nil, err
+	}
 	names := map[string]string{} // name -> file
 	for i := range cfg.StreamUpstreams {
 		u := &cfg.StreamUpstreams[i]
@@ -245,7 +252,7 @@ func validateStreamUpstreams(cfg *Config) (map[string]bool, error) {
 			if s.Address == "" {
 				return nil, fmt.Errorf("stream_upstream %q: server[%d].address is required", u.Name, j)
 			}
-			if _, err := targetcheck.ParseAddr(s.Address); err != nil {
+			if _, err := targetcheck.ParseAddrPolicy(s.Address, pol); err != nil {
 				return nil, fmt.Errorf("stream_upstream %q: server address %q: %v", u.Name, s.Address, err)
 			}
 			if s.Weight < 0 {
@@ -267,6 +274,14 @@ func validateStreamUpstreams(cfg *Config) (map[string]bool, error) {
 // protocol, exactly-one backend, stream-upstream references, and listen
 // port+protocol uniqueness across streams.
 func validateStreams(cfg *Config, streamUpstreams map[string]bool) error {
+	pol, err := cfg.targetPolicy()
+	if err != nil {
+		return err
+	}
+	allowedPorts, err := parsePortRanges(cfg.Stream.AllowedPorts)
+	if err != nil {
+		return err
+	}
 	names := map[string]string{}     // name -> file
 	listeners := map[string]string{} // "port/proto" -> name
 	for i := range cfg.Streams {
@@ -284,6 +299,9 @@ func validateStreams(cfg *Config, streamUpstreams map[string]bool) error {
 
 		if s.Listen < 1 || s.Listen > 65535 {
 			return fmt.Errorf("stream %q: listen %d must be 1..65535", s.Name, s.Listen)
+		}
+		if len(allowedPorts) > 0 && !portAllowed(allowedPorts, s.Listen) {
+			return fmt.Errorf("stream %q: listen %d is outside stream.allowed_ports", s.Name, s.Listen)
 		}
 		switch s.ProtocolOrTCP() {
 		case ProtocolTCP, ProtocolUDP:
@@ -306,7 +324,7 @@ func validateStreams(cfg *Config, streamUpstreams map[string]bool) error {
 		case s.Pass != "":
 			// inline host:port — strict lexical validation (targetcheck Tier 1);
 			// nginx -t remains the semantic gate at apply time.
-			if _, err := targetcheck.ParseAddr(s.Pass); err != nil {
+			if _, err := targetcheck.ParseAddrPolicy(s.Pass, pol); err != nil {
 				return fmt.Errorf("stream %q: pass %q: %v", s.Name, s.Pass, err)
 			}
 		default:

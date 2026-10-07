@@ -424,6 +424,8 @@ var reDataImage = regexp.MustCompile(`^data:image/(png|jpe?g|gif|webp|bmp);base6
 
 func dataImageOK(d string) bool { return len(d) <= 3<<20 && reDataImage.MatchString(d) }
 
+var urlEscaper = strings.NewReplacer("(", "%28", ")", "%29", "'", "%27")
+
 // classifyURL sorts an image/background URL into remote http(s), safe inline
 // data:image, cid: (returning the content id), or bad.
 func classifyURL(raw string) (string, urlKind) {
@@ -442,7 +444,7 @@ func classifyURL(raw string) (string, urlKind) {
 			c = "https:" + c
 		}
 		if u, err := url.Parse(c); err == nil && u.Host != "" {
-			return u.String(), urlRemote
+			return urlEscaper.Replace(u.String()), urlRemote
 		}
 	}
 	return "", urlBad

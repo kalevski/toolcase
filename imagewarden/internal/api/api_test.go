@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -401,11 +402,16 @@ func TestE2EHealthz(t *testing.T) {
 	}
 }
 
-// TestE2EVersion: GET /version is unauthenticated and returns {name,version}.
+// TestE2EVersion: GET /version needs the bearer token and returns {name,version}.
 func TestE2EVersion(t *testing.T) {
 	s, _ := newE2EServer(&stubClassifier{}, 10, 2, 100*time.Millisecond, time.Second)
 
-	rr := serve(s, httptest.NewRequest("GET", "/version", nil))
+	if rr := serve(s, httptest.NewRequest("GET", "/version", nil)); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated /version = %d, want 401", rr.Code)
+	}
+	vreq := httptest.NewRequest("GET", "/version", nil)
+	vreq.Header.Set("Authorization", "Bearer "+e2eToken)
+	rr := serve(s, vreq)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body=%s)", rr.Code, rr.Body)
 	}
@@ -462,11 +468,16 @@ func TestE2EMetricsRequiresAuth(t *testing.T) {
 	}
 }
 
-// TestE2ESchemaUnauthenticated: GET /schema needs no token and returns 200 JSON.
-func TestE2ESchemaUnauthenticated(t *testing.T) {
+// TestE2ESchemaRequiresAuth: GET /schema is 401 without the token and returns 200 JSON with it.
+func TestE2ESchemaRequiresAuth(t *testing.T) {
 	s, _ := newE2EServer(&stubClassifier{}, 10, 2, 100*time.Millisecond, time.Second)
 
-	rr := serve(s, httptest.NewRequest("GET", "/schema", nil))
+	if rr := serve(s, httptest.NewRequest("GET", "/schema", nil)); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated /schema = %d, want 401", rr.Code)
+	}
+	sreq := httptest.NewRequest("GET", "/schema", nil)
+	sreq.Header.Set("Authorization", "Bearer "+e2eToken)
+	rr := serve(s, sreq)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body=%s)", rr.Code, rr.Body)
 	}
@@ -484,3 +495,19 @@ var (
 	_ classifyService   = (*classify.Service)(nil)
 	_ modelInfoProvider = (*classify.Service)(nil)
 )
+
+// TestE2EClassifyBodySlotsFull: when every in-flight body slot is taken the next
+// POST /v1/classify is answered 429 busy without reading its body.
+func TestE2EClassifyBodySlotsFull(t *testing.T) {
+	s, _ := newE2EServer(&stubClassifier{}, 10, 2, 100*time.Millisecond, time.Second)
+	for i := 0; i < cap(s.bodySlots); i++ {
+		s.bodySlots <- struct{}{}
+	}
+	req := httptest.NewRequest("POST", "/v1/classify", strings.NewReader("x"))
+	req.Header.Set("Authorization", "Bearer "+e2eToken)
+	rr := serve(s, req)
+	if rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("status = %d, want 429 (body=%s)", rr.Code, rr.Body)
+	}
+	assertErrBody(t, rr.Body.Bytes(), codeBusy)
+}

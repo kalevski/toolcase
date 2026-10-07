@@ -62,6 +62,15 @@ type Config struct {
 	Nginx Nginx `yaml:"nginx"`
 	Tls   Tls   `yaml:"tls"`
 
+	// Proxy, Stream, Secrets and Limits are daemon-level restrictions that a
+	// fragment (and so a control plane or tenant) cannot change: where proxy
+	// targets may point, which ports a stream may open, which env vars and
+	// files a source may reference, and the ceiling on source limits.
+	Proxy   ProxyPolicy   `yaml:"proxy"`
+	Stream  StreamPolicy  `yaml:"stream"`
+	Secrets SecretsPolicy `yaml:"secrets"`
+	Limits  Limits        `yaml:"limits"`
+
 	// Acme configures certbot-driven certificate issuance (opt-in). When
 	// disabled (default) the issue/renew/delete cert endpoints return 501.
 	Acme Acme `yaml:"acme"`
@@ -658,6 +667,9 @@ type Auth struct {
 	Password string `yaml:"password" json:"-"`
 	Value    string `yaml:"value" json:"-"`
 	Key      string `yaml:"key" json:"-"`
+
+	// policy confines the *_env / *_file references above; set by Validate.
+	policy *SecretPolicy
 }
 
 // MethodOrNone returns the effective auth method.
@@ -674,6 +686,9 @@ type Limits struct {
 	MaxUncompressedSize ByteSize `yaml:"max_uncompressed_size" json:"max_uncompressed_size,omitempty"`
 	MaxEntries          int      `yaml:"max_entries" json:"max_entries,omitempty"`
 	MaxCompressionRatio int      `yaml:"max_compression_ratio" json:"max_compression_ratio,omitempty"`
+	// MaxGitRepoSize caps the bare clone of a git source (the whole repo, not
+	// the served tree); an oversized clone is deleted.
+	MaxGitRepoSize ByteSize `yaml:"max_git_repo_size" json:"max_git_repo_size,omitempty"`
 }
 
 // Defaults from the spec (section 4.2).
@@ -698,6 +713,9 @@ func (l Limits) Effective() Limits {
 	}
 	if out.MaxCompressionRatio <= 0 {
 		out.MaxCompressionRatio = DefaultMaxCompressionRatio
+	}
+	if out.MaxGitRepoSize <= 0 {
+		out.MaxGitRepoSize = DefaultMaxGitRepoSize
 	}
 	return out
 }

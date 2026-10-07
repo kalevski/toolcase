@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-pricing-card'
 
@@ -197,7 +198,7 @@ export class PricingCard extends HTMLElement {
 
         const actionHtml =
             action.href && !action.disabled
-                ? `<a class="${btnClass}${disabledClass}" href="${esc(action.href)}"${disabledAttr}>${actionLabel}</a>`
+                ? `<a class="${btnClass}${disabledClass}" href="${esc(safeUrl(action.href))}"${disabledAttr}>${actionLabel}</a>`
                 : `<button class="${btnClass}${disabledClass}" type="button"${disabledAttr}>${actionLabel}</button>`
 
         patchHtml(

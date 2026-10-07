@@ -189,7 +189,7 @@ ACME="$(curl -s -X POST -H "Authorization: Bearer $ZW_ADMIN" "$ZW_API/tokens" \
     --data-binary '{"name":"np-e2e","scope":"acme","zones":["example.test"]}' |
     sed -n 's/^  "token": "\(zwt_[0-9a-f]*\)",*$/\1/p')"
 check "acme token for the nginxpilot node" "${ACME:0:4}" "zwt_"
-creds="{\"credentials\":\"dns_zonewright_url = http://zw:9053\\ndns_zonewright_token = $ACME\\n\"}"
+creds="{\"credentials\":\"dns_zonewright_url = http://zw:9053\\ndns_zonewright_allow_insecure_http = true\\ndns_zonewright_token = $ACME\\n\"}"
 check "zonewright credentials stored on nginxpilot" "$(npcode PUT /acme/credentials/zonewright/e2e "$creds")" 201
 
 echo "== /status reports what the daemon can issue"

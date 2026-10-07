@@ -15,6 +15,7 @@ export interface ParseFiltersOptions<T extends object> {
 	allowedFields?: ReadonlyArray<keyof T & string>
 	coerceFields?: Partial<Record<keyof T & string, CoerceType>>
 	reservedKeys?: ReadonlyArray<string>
+	rawLikeWildcards?: boolean
 }
 
 const DEFAULT_RESERVED: ReadonlyArray<string> = ['offset', 'limit', 'sort', 'cursor']
@@ -64,7 +65,7 @@ export function parseFilters<T extends object = Record<string, unknown>>(
 				if (!FILTER_OP_SET.has(op)) {
 					throw new ValidationError(`Unknown filter op: ${key}[${op}]`)
 				}
-				const coerced = coerceOpValue(opValue, op as FilterOp, coerceType, key)
+				const coerced = coerceOpValue(opValue, op as FilterOp, coerceType, key, options.rawLikeWildcards === true)
 				if (coerced === DROP) continue
 				condition[op] = coerced
 				any = true
@@ -100,6 +101,7 @@ function coerceOpValue(
 	op: FilterOp,
 	coerceType: CoerceType | undefined,
 	key: string,
+	rawLikeWildcards: boolean,
 ): unknown {
 	if (BOOLEAN_OPS.has(op)) {
 		if (parseBoolean(raw) === true) return true
@@ -113,7 +115,7 @@ function coerceOpValue(
 		if (typeof raw !== 'string') {
 			throw new ValidationError(`Filter ${key}[${op}] must be string`)
 		}
-		return raw
+		return rawLikeWildcards ? raw : raw.replace(/[\\%_]/g, '\\$&')
 	}
 	return coerceLeaf(raw, coerceType, key, op)
 }

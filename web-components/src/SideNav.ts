@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-side-nav'
 
@@ -162,7 +163,7 @@ export class SideNav extends HTMLElement {
                         if (item.href && !item.disabled) {
                             const target = item.target ? ` target="${esc(item.target)}"` : ''
                             const rel = item.rel ? ` rel="${esc(item.rel)}"` : ''
-                            control = `<a class="${cls}" href="${esc(item.href)}"${target}${rel}${ariaCurrent} ${dataAttrs}>${inner}</a>`
+                            control = `<a class="${cls}" href="${esc(safeUrl(item.href))}"${target}${rel}${ariaCurrent} ${dataAttrs}>${inner}</a>`
                         } else if (item.disabled) {
                             control = `<button type="button" class="${cls}" disabled aria-disabled="true"${ariaCurrent} ${dataAttrs}>${inner}</button>`
                         } else {

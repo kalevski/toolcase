@@ -5,6 +5,7 @@ import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-link'
 
@@ -94,7 +95,7 @@ export class Link extends HTMLElement {
         const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
         patchHtml(
             this,
-            `<a href="${esc(href)}" class="tc-link-hit"${externalAttrs}${nameAttr}></a>`,
+            `<a href="${esc(safeUrl(href))}" class="tc-link-hit"${externalAttrs}${nameAttr}></a>`,
             { region: 'hit' },
         )
         patchHtml(this, externalHtml, { region: 'external', at: 'end' })

@@ -2,6 +2,7 @@ import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-social-links'
 
@@ -115,7 +116,7 @@ export class SocialLinks extends HTMLElement {
             this._links
                 .map((link) => {
                     const label = esc(link.label ?? link.kind)
-                    const href = esc(link.href)
+                    const href = esc(safeUrl(link.href))
                     const svgHtml = this._resolveIcon(link.kind)
                     return `<a class="tc-social-link" href="${href}" role="listitem" target="_blank" rel="noopener noreferrer" aria-label="${label}">${svgHtml}</a>`
                 })

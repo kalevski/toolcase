@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-page-footer'
 
@@ -159,7 +160,7 @@ export class PageFooter extends HTMLElement {
               (this._cta.description
                   ? `<p class="tc-page-footer-cta-desc">${esc(this._cta.description)}</p>`
                   : '') +
-              `<a class="tc-page-footer-cta-btn" href="${esc(this._cta.href)}">${esc(this._cta.label)}</a>` +
+              `<a class="tc-page-footer-cta-btn" href="${esc(safeUrl(this._cta.href))}">${esc(this._cta.label)}</a>` +
               `</div>`
             : ''
 
@@ -177,7 +178,7 @@ export class PageFooter extends HTMLElement {
                       .map((link) => {
                           const iconHtml = lucideByName(link.icon)
                           const label = esc(link.label ?? link.icon)
-                          const href = esc(link.href)
+                          const href = esc(safeUrl(link.href))
                           return (
                               `<a class="tc-page-footer-social-link" href="${href}"` +
                               ` role="listitem" target="_blank" rel="noopener noreferrer"` +
@@ -203,7 +204,7 @@ export class PageFooter extends HTMLElement {
                 const linksHtml = menu.links
                     .map(
                         (link) =>
-                            `<li><a class="tc-page-footer-menu-link" href="${esc(link.href)}">${esc(link.label)}</a></li>`,
+                            `<li><a class="tc-page-footer-menu-link" href="${esc(safeUrl(link.href))}">${esc(link.label)}</a></li>`,
                     )
                     .join('')
                 return (
@@ -222,7 +223,7 @@ export class PageFooter extends HTMLElement {
                   this._legalLinks
                       .map(
                           (link) =>
-                              `<a class="tc-page-footer-legal-link" href="${esc(link.href)}">${esc(link.label)}</a>`,
+                              `<a class="tc-page-footer-legal-link" href="${esc(safeUrl(link.href))}">${esc(link.label)}</a>`,
                       )
                       .join('') +
                   `</nav>`

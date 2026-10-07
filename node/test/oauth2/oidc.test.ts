@@ -29,6 +29,7 @@ const signToken = async (claims: Record<string, unknown>) => {
 	return await new SignJWT(claims)
 		.setProtectedHeader({ alg: 'RS256', kid })
 		.setIssuer(ISSUER)
+		.setSubject('user-1')
 		.setAudience(AUDIENCE)
 		.setIssuedAt()
 		.setExpirationTime('5m')
@@ -58,19 +59,19 @@ describe('verifyIdToken', () => {
 
 	it('verifies a valid token', async () => {
 		const token = await signToken({})
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true })
 		expect(verified.payload.iss).toBe(ISSUER)
 		expect(verified.payload.aud).toBe(AUDIENCE)
 	})
 
 	it('rejects on issuer mismatch', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: 'https://wrong', audience: AUDIENCE, jwks: localJwks })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: 'https://wrong', audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects on audience mismatch', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: 'other', jwks: localJwks })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: 'other', jwks: localJwks, skipNonceCheck: true })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects expired token', async () => {
@@ -80,39 +81,39 @@ describe('verifyIdToken', () => {
 			.setIssuedAt(Math.floor(Date.now() / 1000) - 3600)
 			.setExpirationTime(Math.floor(Date.now() / 1000) - 100)
 			.sign(privateKey)
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects disallowed alg', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['ES256'] })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true, allowedAlgorithms: ['ES256'] })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects symmetric algorithm HS256 before any verification', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['HS256'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true, allowedAlgorithms: ['HS256'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
 	})
 
 	it('rejects none algorithm before any verification', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['none'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true, allowedAlgorithms: ['none'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
 	})
 
 	it('accepts RS256 in allowedAlgorithms', async () => {
 		const token = await signToken({})
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['RS256'] })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true, allowedAlgorithms: ['RS256'] })
 		expect(verified.payload.iss).toBe(ISSUER)
 	})
 
 	it('matches nonce', async () => {
 		const token = await signToken({ nonce: 'n1' })
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: 'n1' })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { nonce: 'n1' })
 		expect(verified.payload.nonce).toBe('n1')
 	})
 
 	it('rejects nonce mismatch', async () => {
 		const token = await signToken({ nonce: 'n1' })
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: 'wrong' })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { nonce: 'wrong' })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('checks at_hash', async () => {
@@ -120,18 +121,18 @@ describe('verifyIdToken', () => {
 		const digest = createHash('sha256').update(accessToken).digest()
 		const at_hash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 		const token = await signToken({ at_hash })
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { accessToken })
 		expect(verified.payload.at_hash).toBe(at_hash)
 	})
 
 	it('rejects bad at_hash', async () => {
 		const token = await signToken({ at_hash: 'wrong' })
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { accessToken: 'at-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects when accessToken provided but at_hash absent', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toThrow('at_hash required but absent')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { accessToken: 'at-test' })).rejects.toThrow('at_hash required but absent')
 	})
 
 	it('checks c_hash', async () => {
@@ -139,18 +140,18 @@ describe('verifyIdToken', () => {
 		const digest = createHash('sha256').update(authorizationCode).digest()
 		const c_hash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 		const token = await signToken({ c_hash })
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { authorizationCode })
 		expect(verified.payload.c_hash).toBe(c_hash)
 	})
 
 	it('rejects bad c_hash', async () => {
 		const token = await signToken({ c_hash: 'wrong' })
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { authorizationCode: 'code-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('rejects when authorizationCode provided but c_hash absent', async () => {
 		const token = await signToken({})
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toThrow('c_hash required but absent')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { authorizationCode: 'code-test' })).rejects.toThrow('c_hash required but absent')
 	})
 
 	it('rejects at_hash that has the correct length but wrong value (timing-safe comparison)', async () => {
@@ -164,7 +165,7 @@ describe('verifyIdToken', () => {
 		const wrongHash = wrongChar + correctHash.slice(1)
 		expect(wrongHash.length).toBe(correctHash.length)
 		const token = await signToken({ at_hash: wrongHash })
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken })).rejects.toThrow('at_hash mismatch')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { accessToken })).rejects.toThrow('at_hash mismatch')
 	})
 
 	it('rejects nonce with same length but different value (timing-safe comparison)', async () => {
@@ -172,20 +173,20 @@ describe('verifyIdToken', () => {
 		const wrongNonce = 'aaaaaaaaaaaaaaab'
 		expect(nonce.length).toBe(wrongNonce.length)
 		const token = await signToken({ nonce })
-		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: wrongNonce })).rejects.toThrow('nonce mismatch')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { nonce: wrongNonce })).rejects.toThrow('nonce mismatch')
 	})
 
 	it('enforces requiredAmr', async () => {
 		const token = await signToken({ amr: ['pwd', 'mfa'] })
-		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { requiredAmr: ['mfa'] })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { requiredAmr: ['mfa'] })
 		expect(verified.payload.amr).toContain('mfa')
 		const noMfa = await signToken({ amr: ['pwd'] })
-		await expect(verifyIdToken(noMfa, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { requiredAmr: ['mfa'] })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(noMfa, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { requiredAmr: ['mfa'] })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('enforces max_age via auth_time', async () => {
 		const oldToken = await signToken({ auth_time: Math.floor(Date.now() / 1000) - 3600 })
-		await expect(verifyIdToken(oldToken, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { maxAgeSeconds: 60 })).rejects.toBeInstanceOf(OIDCVerificationError)
+		await expect(verifyIdToken(oldToken, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, skipNonceCheck: true }, { maxAgeSeconds: 60 })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
 	it('invokes custom fetchImpl from http options when jwksUri is used', async () => {
@@ -196,7 +197,7 @@ describe('verifyIdToken', () => {
 		const result = await verifyIdToken(token, {
 			issuer: ISSUER,
 			audience: AUDIENCE,
-			jwksUri: `${ISSUER}/jwks`,
+			jwksUri: `${ISSUER}/jwks`, skipNonceCheck: true,
 			http: { fetchImpl: customFetch }
 		})
 		expect(customFetch).toHaveBeenCalled()
@@ -210,8 +211,8 @@ describe('verifyIdToken', () => {
 		const token = await signToken({})
 		clearJwksCache()
 		await Promise.all([
-			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch1 } }),
-			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch2 } })
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, skipNonceCheck: true, http: { fetchImpl: customFetch1 } }),
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, skipNonceCheck: true, http: { fetchImpl: customFetch2 } })
 		])
 		expect(customFetch1).toHaveBeenCalled()
 		expect(customFetch2).toHaveBeenCalled()
@@ -231,11 +232,76 @@ describe('verifyIdToken', () => {
 			verifyIdToken(token, {
 				issuer: ISSUER,
 				audience: AUDIENCE,
-				jwksUri: `${ISSUER}/jwks`,
+				jwksUri: `${ISSUER}/jwks`, skipNonceCheck: true,
 				http: { fetchImpl: slowFetch, timeoutMs: 50 }
 			})
 		).rejects.toThrow()
 		expect(slowFetch).toHaveBeenCalled()
+	})
+})
+
+describe('verifyIdToken hardening', () => {
+
+	const base = { issuer: ISSUER, audience: AUDIENCE, get jwks() { return localJwks } }
+
+	it('requires a nonce unless skipNonceCheck is set', async () => {
+		const token = await signToken({ nonce: 'n1' })
+		await expect(verifyIdToken(token, base)).rejects.toThrow('ctx.nonce is required')
+		await expect(verifyIdToken(token, { ...base, skipNonceCheck: true })).resolves.toBeTruthy()
+	})
+
+	it('rejects tokens without sub', async () => {
+		const token = await new SignJWT({ nonce: 'n' })
+			.setProtectedHeader({ alg: 'RS256', kid })
+			.setIssuer(ISSUER).setAudience(AUDIENCE).setIssuedAt().setExpirationTime('5m')
+			.sign(privateKey)
+		await expect(verifyIdToken(token, base, { nonce: 'n' })).rejects.toBeInstanceOf(OIDCVerificationError)
+	})
+
+	it('rejects tokens without exp or iat', async () => {
+		const noExp = await new SignJWT({ nonce: 'n' })
+			.setProtectedHeader({ alg: 'RS256', kid })
+			.setIssuer(ISSUER).setAudience(AUDIENCE).setSubject('s').setIssuedAt()
+			.sign(privateKey)
+		await expect(verifyIdToken(noExp, base, { nonce: 'n' })).rejects.toBeInstanceOf(OIDCVerificationError)
+		const noIat = await new SignJWT({ nonce: 'n' })
+			.setProtectedHeader({ alg: 'RS256', kid })
+			.setIssuer(ISSUER).setAudience(AUDIENCE).setSubject('s').setExpirationTime('5m')
+			.sign(privateKey)
+		await expect(verifyIdToken(noIat, base, { nonce: 'n' })).rejects.toBeInstanceOf(OIDCVerificationError)
+	})
+
+	it('validates azp when aud is an array', async () => {
+		const sign = (claims: Record<string, unknown>) => new SignJWT(claims)
+			.setProtectedHeader({ alg: 'RS256', kid })
+			.setIssuer(ISSUER).setSubject('s').setAudience([AUDIENCE, 'other']).setIssuedAt().setExpirationTime('5m')
+			.sign(privateKey)
+		await expect(verifyIdToken(await sign({ nonce: 'n' }), base, { nonce: 'n' })).rejects.toThrow('azp required')
+		await expect(verifyIdToken(await sign({ nonce: 'n', azp: 'other' }), base, { nonce: 'n' })).rejects.toThrow('azp mismatch')
+		await expect(verifyIdToken(await sign({ nonce: 'n', azp: AUDIENCE }), base, { nonce: 'n' })).resolves.toBeTruthy()
+	})
+
+	it('refetches the JWKS once when the kid is unknown', async () => {
+		const stale = mockJwksFetch({ keys: [] })
+		const fresh = mockJwksFetch({ keys: [publicJwk] })
+		const calls: any[] = [stale, fresh]
+		let i = 0
+		vi.stubGlobal('fetch', vi.fn((...args: any[]) => calls[Math.min(i++, 1)](...args)))
+		const token = await signToken({ nonce: 'n' })
+		const result = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: 'https://idp.test/refetch-jwks' }, { nonce: 'n' })
+		expect(result.kid).toBe('k1')
+		expect(i).toBe(2)
+	})
+
+	it('rejects non-https issuer and jwksUri unless allowInsecure or loopback', async () => {
+		const token = await signToken({ nonce: 'n' })
+		await expect(verifyIdToken(token, { issuer: 'http://idp.test', audience: AUDIENCE, jwks: localJwks }, { nonce: 'n' })).rejects.toThrow('issuer must use https')
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: 'http://idp.test/jwks' }, { nonce: 'n' })).rejects.toThrow('jwksUri must use https')
+		await expect(verifyIdToken(token, { issuer: 'http://idp.test', audience: AUDIENCE, jwks: localJwks, allowInsecure: true }, { nonce: 'n' })).rejects.toThrow('signature/claims')
+	})
+
+	it('rejects non-https discovery issuer', async () => {
+		await expect(fetchOIDCDiscovery('http://idp.test', { cacheTtlMs: 0 })).rejects.toBeInstanceOf(OAuth2ProtocolError)
 	})
 })
 

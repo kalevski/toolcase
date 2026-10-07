@@ -109,6 +109,39 @@ func safeFilename(s string) string {
 	return s
 }
 
+const (
+	streamChunkDeadline = 60 * time.Second
+	uploadDeadline      = 15 * time.Minute
+)
+
+func extendDeadlines(w http.ResponseWriter, read, write time.Duration) {
+	rc := http.NewResponseController(w)
+	now := time.Now()
+	if read > 0 {
+		_ = rc.SetReadDeadline(now.Add(read))
+	}
+	if write > 0 {
+		_ = rc.SetWriteDeadline(now.Add(write))
+	}
+}
+
+func copyWithDeadline(w http.ResponseWriter, src io.Reader) {
+	rc := http.NewResponseController(w)
+	buf := make([]byte, 32<<10)
+	for {
+		n, err := src.Read(buf)
+		if n > 0 {
+			_ = rc.SetWriteDeadline(time.Now().Add(streamChunkDeadline))
+			if _, werr := w.Write(buf[:n]); werr != nil {
+				return
+			}
+		}
+		if err != nil {
+			return
+		}
+	}
+}
+
 func (g *Gateway) handleDownload(w http.ResponseWriter, r *http.Request, a *session.Active) {
 	accountID, blobID, name := r.PathValue("accountId"), r.PathValue("blobId"), r.PathValue("name")
 	acct, err := g.accountID(r.Context(), r, a)
@@ -179,7 +212,7 @@ func (g *Gateway) handleDownload(w http.ResponseWriter, r *http.Request, a *sess
 		}
 	}
 	w.WriteHeader(resp.StatusCode)
-	_, _ = io.Copy(w, resp.Body)
+	copyWithDeadline(w, resp.Body)
 }
 
 func (g *Gateway) handleUpload(w http.ResponseWriter, r *http.Request, a *session.Active) {
@@ -207,6 +240,7 @@ func (g *Gateway) handleUpload(w http.ResponseWriter, r *http.Request, a *sessio
 		g.upstreamFailed(w, r, a, "upload", err)
 		return
 	}
+	extendDeadlines(w, uploadDeadline, uploadDeadline+streamChunkDeadline)
 	body := http.MaxBytesReader(w, r.Body, g.MaxUploadBytes)
 	req, err := g.JMAP.Request(r.Context(), a.Address, a.Credential, http.MethodPost, target, body, g.clientIP(r))
 	if err != nil {
@@ -287,6 +321,7 @@ func (g *Gateway) handleEventSource(w http.ResponseWriter, r *http.Request, a *s
 	}
 	ctx, cancel := contextWithTimeout(r, maxStream)
 	defer cancel()
+	extendDeadlines(w, maxStream+streamChunkDeadline, maxStream+streamChunkDeadline)
 	req, err := g.JMAP.Request(ctx, a.Address, a.Credential, http.MethodGet, target, nil, g.clientIP(r))
 	if err != nil {
 		g.upstreamFailed(w, r, a, "eventsource", err)

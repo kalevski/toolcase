@@ -3,6 +3,7 @@ import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { closeIcon } from './icons'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-banner'
 
@@ -212,7 +213,7 @@ export class Banner extends HTMLElement {
 
         const ctaHtml =
             ctaLabel && ctaHref
-                ? `<a class="tc-banner-cta" href="${esc(ctaHref)}">${esc(ctaLabel)}</a>`
+                ? `<a class="tc-banner-cta" href="${esc(safeUrl(ctaHref))}">${esc(ctaLabel)}</a>`
                 : ''
 
         const closeHtml = dismissible

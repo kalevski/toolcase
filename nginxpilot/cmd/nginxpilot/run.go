@@ -72,6 +72,10 @@ func cmdRun(args []string) int {
 		log.Error("admin token misconfiguration; refusing to start", "error", err)
 		return 1
 	}
+	if resolved.Hash == nil && cfg.Admin.ListenAddr() != "" && !config.LoopbackListen(cfg.Admin.ListenAddr()) {
+		log.Error("admin endpoint is not loopback and has no token; refusing to start", "listen", cfg.Admin.ListenAddr())
+		return 1
+	}
 	if resolved.Seeded {
 		log.Info("stored the admin token hash in admin.token_file; admin.token_env may be removed now",
 			"token_file", cfg.Admin.TokenFile, "token_env", cfg.Admin.TokenEnv)

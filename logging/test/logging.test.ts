@@ -2034,15 +2034,70 @@ describe('RedactionReporter', () => {
         expect(captured[0][1].password).toBe('[REDACTED]')
     })
 
-    it('passes Error instances through without modification', () => {
+    it('copies Error instances and redacts secret keys and values on them', () => {
         const captured: any[] = []
         class Sink extends LogReporter {
             log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
         }
-        const err = new Error('boom')
+        const err: any = new Error('boom Bearer abc.def')
+        err.password = 'hunter2'
+        err.code = 'E1'
         const reporter = new RedactionReporter(new Sink(), ['password'])
         reporter.log('error', 's', T0, {}, [err])
-        expect(captured[0]).toBe(err)
+        expect(captured[0]).toBeInstanceOf(Error)
+        expect(captured[0]).not.toBe(err)
+        expect(captured[0].message).toBe('boom [REDACTED]')
+        expect(captured[0].password).toBe('[REDACTED]')
+        expect(captured[0].code).toBe('E1')
+        expect(captured[0].stack).not.toContain('abc.def')
+    })
+
+    it('still redacts a shared (non-circular) object seen twice', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const shared = { password: 'secret', id: 1 }
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('info', 's', T0, {}, [{ a: shared, b: shared, c: [shared] }])
+        expect(captured[0].a.password).toBe('[REDACTED]')
+        expect(captured[0].b.password).toBe('[REDACTED]')
+        expect(captured[0].c[0].password).toBe('[REDACTED]')
+    })
+
+    it('replaces a real cycle with [Circular]', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const obj: any = { password: 'x' }
+        obj.self = obj
+        new RedactionReporter(new Sink(), ['password']).log('info', 's', T0, {}, [obj])
+        expect(captured[0].self).toBe('[Circular]')
+    })
+
+    it('scrubs secret-looking values in strings by default', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('info', 's', T0, {}, ['auth Bearer abc123.def', 'login password=hunter2 ok', 'Authorization: Basic Zm9v', { note: 'token=zzz' }])
+        expect(captured[0]).toBe('auth [REDACTED]')
+        expect(captured[1]).toBe('login [REDACTED] ok')
+        expect(captured[2]).toBe('[REDACTED]')
+        expect(captured[3].note).toBe('[REDACTED]')
+    })
+
+    it('accepts custom valuePatterns', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), [], [/sk-[a-z0-9]+/])
+        reporter.log('info', 's', T0, {}, ['key sk-abc and sk-def', 'Bearer abc'])
+        expect(captured[0]).toBe('key [REDACTED] and [REDACTED]')
+        expect(captured[1]).toBe('Bearer abc')
     })
 
     it('handles circular references without throwing', () => {
@@ -3222,6 +3277,26 @@ describe('jsonFormatter', () => {
     })
 })
 
+describe('log injection escaping', () => {
+    it('textFormatter escapes CR and LF in message bodies', () => {
+        const line = textFormatter('info', 's', T0, {}, ['a\nINFO forged\rb'])
+        expect(line).not.toMatch(/[\r\n]/)
+        expect(line).toContain('a\\nINFO forged\\rb')
+    })
+
+    it('logfmtFormatter escapes quotes, backslashes and newlines', () => {
+        const line = logfmtFormatter('info', 's', T0, { who: 'a"b\\c\nd' }, ['x"y'])
+        expect(line).not.toMatch(/[\r\n]/)
+        expect(line).toContain('who="a\\"b\\\\c\\nd"')
+        expect(line).toContain('msg="x\\"y"')
+    })
+
+    it('jsonFormatter keeps a __proto__ own key as data', () => {
+        const parsed = JSON.parse(jsonFormatter('info', 's', T0, {}, [JSON.parse('{"__proto__":{"x":1}}')]))
+        expect(Object.getPrototypeOf(parsed.messages[0])).toBe(Object.prototype)
+    })
+})
+
 describe('logfmtFormatter', () => {
     it('produces level, scope, ts, and msg fields', () => {
         const line = logfmtFormatter('info', 'auth', T0, {}, ['hello'])
@@ -3269,7 +3344,7 @@ describe('logfmtFormatter', () => {
 
     it('serializes object messages as JSON within the msg field', () => {
         const line = logfmtFormatter('info', 's', T0, {}, [{ id: 7 }])
-        expect(line).toContain('{"id":7}')
+        expect(line).toContain('msg="{\\"id\\":7}"')
     })
 
     it('uses error.message for Error instances in messages', () => {

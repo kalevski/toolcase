@@ -1,6 +1,7 @@
 import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-login'
 
@@ -115,7 +116,7 @@ export class Login extends HTMLElement {
         const loading = this.loading
 
         const patternImgHtml = bgPatternSrc
-            ? `<img src="${esc(bgPatternSrc)}" alt="" class="tc-login-aside-img" aria-hidden="true" loading="lazy" />`
+            ? `<img src="${esc(safeImgSrc(bgPatternSrc))}" alt="" class="tc-login-aside-img" aria-hidden="true" loading="lazy" />`
             : ''
         const asideHtml = `<div class="tc-login-aside" aria-hidden="true"><div class="tc-login-aside-pattern">${patternImgHtml}</div></div>`
 

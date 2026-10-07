@@ -2,8 +2,13 @@
 # admin.listen binds 0.0.0.0 (not loopback) so quaykeeper can reach /status
 # and friends over the shared compose network at http://nginxpilot:9090.
 data_dir: /var/lib/nginxpilot
+# A non-loopback admin.listen needs a token (at least 32 characters): the daemon
+# refuses to start without one. Set NGINXPILOT_TOKEN in the container
+# environment; its hash seeds admin.token_file on the first start.
 admin:
   listen: 0.0.0.0:9090
+  token_env: NGINXPILOT_TOKEN
+  token_file: /var/lib/nginxpilot/secrets/admin.token
 defaults:
   interval: 5m
   keep_releases: 3

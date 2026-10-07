@@ -59,6 +59,10 @@ func cmdValidate(args []string) int {
 		fail("api.token_env %q is empty but listen %q is non-loopback", cfg.API.TokenEnv, cfg.Listen)
 	}
 
+	if err := config.CheckToken(os.Getenv(cfg.API.TokenEnv)); err != nil {
+		fail("%v", err)
+	}
+
 	log := newLogger("json", "error") // quiet during validate, like nginxpilot
 
 	// Shared boot spine (config -> model.Load -> classify.New): buildService

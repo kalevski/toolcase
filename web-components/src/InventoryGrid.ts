@@ -6,6 +6,7 @@ import { esc } from './internal/esc'
 // cooldown/lock are fantasy chrome owned by tc-item-slot when that primitive is
 // present); the extra optional fields are simply ignored here.
 import type { InventoryItem } from './ItemSlot'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-inventory-grid'
 
@@ -141,7 +142,7 @@ export class InventoryGrid extends HTMLElement {
         const name = item.name ?? item.id
         let glyph: string
         if (icon && isImageSrc(icon)) {
-            glyph = `<img class="tc-inventory-grid__glyph" src="${esc(icon)}" alt="" />`
+            glyph = `<img class="tc-inventory-grid__glyph" src="${esc(safeImgSrc(icon))}" alt="" />`
         } else {
             const text = icon || (name ? name.charAt(0).toUpperCase() : '?')
             glyph = `<span class="tc-inventory-grid__glyph" aria-hidden="true">${esc(text)}</span>`

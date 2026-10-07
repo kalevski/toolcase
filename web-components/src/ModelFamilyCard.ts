@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
+import { safeImgSrc, safeUrl } from './internal/safe-url'
 
 const TAG_NAME = 'tc-model-family-card'
 
@@ -100,12 +101,12 @@ export class ModelFamilyCard extends HTMLElement {
 
         const mediaHtml = imageSrc
             ? `<div class="tc-model-family-card-media">` +
-              `<img class="tc-model-family-card-img" src="${esc(imageSrc)}" alt="${esc(imageAlt)}" loading="lazy" />` +
+              `<img class="tc-model-family-card-img" src="${esc(safeImgSrc(imageSrc))}" alt="${esc(imageAlt)}" loading="lazy" />` +
               `</div>`
             : ''
 
         const titleHtml = href
-            ? `<a class="tc-model-family-card-title" href="${esc(href)}">${esc(range)}</a>`
+            ? `<a class="tc-model-family-card-title" href="${esc(safeUrl(href))}">${esc(range)}</a>`
             : `<span class="tc-model-family-card-title">${esc(range)}</span>`
 
         const metaParts = [

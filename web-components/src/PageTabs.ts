@@ -1,5 +1,6 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { safeUrl } from './internal/safe-url'
 
 // tc-page-tabs — the phone page rail: a horizontal, SCROLLING, underline tab strip.
 //
@@ -263,7 +264,7 @@ export class PageTabs extends HTMLElement {
                         return `<span${common} aria-disabled="true">${inner}</span>`
                     }
                     if (tab.href) {
-                        return `<a href="${esc(tab.href)}"${common}>${inner}</a>`
+                        return `<a href="${esc(safeUrl(tab.href))}"${common}>${inner}</a>`
                     }
                     return `<button type="button"${common}>${inner}</button>`
                 })

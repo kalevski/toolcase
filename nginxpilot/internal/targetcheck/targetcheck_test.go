@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/netip"
 	"strings"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ func TestParsePassValid(t *testing.T) {
 		{"http://backend:8080", "backend", "8080"},
 		{"https://api.example.com", "api.example.com", ""},
 		{"http://10.0.0.1:9000", "10.0.0.1", "9000"},
-		{"http://[::1]:8080", "::1", "8080"},
+		{"http://[2001:db8::1]:8080", "2001:db8::1", "8080"},
 		{"http://backend:8080/api", "backend", "8080"},
 		{"http://backend/api/", "backend", ""},
 		{"http://my_service:3000", "my_service", "3000"},
@@ -70,8 +71,7 @@ func TestParseAddr(t *testing.T) {
 		"10.0.0.1:8080",
 		"backend:9000",
 		"backend",
-		"[::1]:5432",
-		"unix:/run/app.sock",
+		"[2001:db8::1]:5432",
 	}
 	for _, in := range valid {
 		if _, err := ParseAddr(in); err != nil {
@@ -94,8 +94,62 @@ func TestParseAddr(t *testing.T) {
 			t.Errorf("ParseAddr(%q): expected error, got none", in)
 		}
 	}
-	if tgt, _ := ParseAddr("unix:/run/app.sock"); !tgt.IsUnix || tgt.Unix != "/run/app.sock" {
-		t.Errorf("unix target not parsed: %+v", tgt)
+	pol := Policy{UnixDirs: []string{"/run/apps"}}
+	if tgt, err := ParseAddrPolicy("unix:/run/apps/app.sock", pol); err != nil || !tgt.IsUnix || tgt.Unix != "/run/apps/app.sock" {
+		t.Errorf("unix target not parsed: %+v %v", tgt, err)
+	}
+}
+
+func TestPolicyDenials(t *testing.T) {
+	pol := DefaultPolicy()
+	pol.UnixDirs = []string{"/run/apps", "/run"}
+	pol.AdminAddr = netip.MustParseAddrPort("0.0.0.0:9090")
+	pass := []string{
+		"http://wmk-ab12cd:8080",
+		"http://web.internal:3000/api/",
+		"https://10.0.0.5:8443",
+		"http://[2001:db8::1]",
+	}
+	for _, in := range pass {
+		if _, err := ParsePassPolicy(in, pol); err != nil {
+			t.Errorf("ParsePassPolicy(%q): unexpected error %v", in, err)
+		}
+	}
+	deny := []string{
+		"http://127.0.0.1:9090",
+		"http://127.1.2.3",
+		"http://[::1]:80",
+		"http://[::ffff:127.0.0.1]:80",
+		"http://169.254.169.254/latest",
+		"http://0.0.0.0:80",
+		"http://localhost:8080",
+		"http://foo.localhost",
+		"http://2130706433",
+		"http://0x7f.1",
+		"http://10.0.0.5:9090",
+		"http://unix:/run/apps/x.sock:/",
+		"http://unix:/run/nginxpilot/admin.sock:/",
+	}
+	for _, in := range deny {
+		if _, err := ParsePassPolicy(in, pol); err == nil {
+			t.Errorf("ParsePassPolicy(%q): expected denial", in)
+		}
+	}
+	denyAddr := []string{
+		"127.0.0.1:5432",
+		"unix:/run/nginxpilot/admin.sock",
+		"unix:/run/apps/../nginxpilot/admin.sock",
+		"unix:/var/run/docker.sock",
+		"unix:/run/docker.sock",
+		"unix:/etc/app.sock",
+	}
+	for _, in := range denyAddr {
+		if _, err := ParseAddrPolicy(in, pol); err == nil {
+			t.Errorf("ParseAddrPolicy(%q): expected denial", in)
+		}
+	}
+	if _, err := ParseAddr("unix:/run/apps/app.sock"); err == nil {
+		t.Errorf("default policy must refuse unix: targets")
 	}
 }
 

@@ -1,6 +1,7 @@
 import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
+import { safeUrl } from './internal/safe-url'
 const TAG_NAME = 'tc-changelog'
 
 export interface ChangelogEntry {
@@ -127,7 +128,7 @@ export class Changelog extends HTMLElement {
         const itemsHtml = visible.map((e) => this._renderEntry(e)).join('')
         const moreHtml =
             hasMore && href
-                ? `<a class="tc-changelog-more" href="${esc(href)}">${esc(label)}</a>`
+                ? `<a class="tc-changelog-more" href="${esc(safeUrl(href))}">${esc(label)}</a>`
                 : ''
 
         patchHtml(

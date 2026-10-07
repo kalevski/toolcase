@@ -233,6 +233,10 @@ func SanitizeDeclarations(decls string, o CSSOptions) string {
 	return strings.Join(out, ";")
 }
 
+func urlSafeInCSS(u string) bool {
+	return !strings.ContainsAny(u, "();, \t\r\n\f\"'\\")
+}
+
 func cleanValue(prop, val string, o CSSOptions) (string, bool) {
 	if badValue(val) {
 		return "", false
@@ -265,7 +269,7 @@ func cleanValue(prop, val string, o CSSOptions) (string, bool) {
 				if o.OnRemote != nil {
 					o.OnRemote()
 				}
-				if o.LoadRemote {
+				if o.LoadRemote && urlSafeInCSS(u) {
 					return "url(" + u + ")"
 				}
 			}

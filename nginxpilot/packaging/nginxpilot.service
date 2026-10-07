@@ -15,10 +15,16 @@ User=nginxpilot
 Group=nginxpilot
 UMask=0027
 
-# Hardening (spec §6, Q24) — the daemon runs unprivileged and only ever
-# writes inside its data_dir.
+# Hardening (spec §6, Q24) — the daemon runs unprivileged. It writes inside
+# its data_dir, and in managed mode the nginx config it renders, the php-fpm
+# pool dir, and certbot's state (acme.config_dir, which holds live/, .work and
+# .logs). Edit ReadWritePaths if nginx.conf_dir, nginx.stream_conf_dir,
+# php.pool_dir or acme.config_dir point elsewhere; paths that do not exist are
+# skipped (the leading "-").
 ProtectSystem=strict
 ReadWritePaths=/var/lib/nginxpilot
+ReadWritePaths=-/etc/nginx/conf.d/nginxpilot.d -/etc/nginx/stream.d/nginxpilot.d -/etc/nginx/nginxpilot
+ReadWritePaths=-/etc/letsencrypt -/var/www/acme -/etc/php/pool.d -/run/php -/run/nginxpilot
 ProtectHome=yes
 PrivateTmp=yes
 NoNewPrivileges=yes
@@ -27,6 +33,23 @@ ProtectKernelModules=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
+# The daemon needs no capabilities, only TCP/UDP (admin API, ACME, sources),
+# unix sockets (admin socket, sd_notify) and netlink (Go's interface lookup).
+# MemoryDenyWriteExecute is inherited by the git, ssh and certbot children;
+# drop that one line if a certbot plugin needs writable+executable memory.
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
 
 # Secrets: prefer environment files or systemd LoadCredential + *_file refs.
 # EnvironmentFile=-/etc/nginxpilot/env

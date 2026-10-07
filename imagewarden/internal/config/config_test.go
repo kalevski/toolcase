@@ -154,3 +154,15 @@ func TestLoadMissingExplicitPathErrors(t *testing.T) {
 		t.Fatal("Load() with an explicit missing path = nil error, want error")
 	}
 }
+
+func TestCheckToken(t *testing.T) {
+	if err := CheckToken(""); err != nil {
+		t.Fatalf("empty token is the loopback dev mode: %v", err)
+	}
+	if err := CheckToken("short"); err == nil {
+		t.Fatal("short token must be refused")
+	}
+	if err := CheckToken(strings.Repeat("a", MinTokenLen)); err != nil {
+		t.Fatal(err)
+	}
+}

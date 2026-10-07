@@ -23,12 +23,16 @@ type ServerConfig struct {
 	Addr          string
 	Handler       http.Handler
 	HeaderTimeout time.Duration
+	ReadTimeout   time.Duration
+	WriteTimeout  time.Duration
+	IdleTimeout   time.Duration
 	Log           *slog.Logger
 }
 
 // NewServer binds the listener now (so port errors surface at boot) and
-// returns a server ready for Serve. There is no Read/WriteTimeout: uploads,
-// downloads and the SSE stream are bounded by their handlers.
+// returns a server ready for Serve. Read and Write timeouts default to 30 s and
+// 60 s; the streaming handlers (upload, download, event stream) extend their own
+// deadlines with http.ResponseController.
 func NewServer(c ServerConfig) (*Server, error) {
 	ln, err := net.Listen("tcp", c.Addr)
 	if err != nil {
@@ -37,10 +41,21 @@ func NewServer(c ServerConfig) (*Server, error) {
 	if c.HeaderTimeout == 0 {
 		c.HeaderTimeout = 10 * time.Second
 	}
+	if c.ReadTimeout == 0 {
+		c.ReadTimeout = 30 * time.Second
+	}
+	if c.WriteTimeout == 0 {
+		c.WriteTimeout = 60 * time.Second
+	}
+	if c.IdleTimeout == 0 {
+		c.IdleTimeout = 2 * time.Minute
+	}
 	hs := &http.Server{
 		Handler:           c.Handler,
 		ReadHeaderTimeout: c.HeaderTimeout,
-		IdleTimeout:       2 * time.Minute,
+		ReadTimeout:       c.ReadTimeout,
+		WriteTimeout:      c.WriteTimeout,
+		IdleTimeout:       c.IdleTimeout,
 		MaxHeaderBytes:    64 << 10,
 	}
 	return &Server{Name: c.Name, srv: hs, ln: ln, log: c.Log}, nil

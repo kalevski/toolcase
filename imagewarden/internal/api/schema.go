@@ -10,8 +10,8 @@ import (
 // surface (spec §5, nginxpilot idiom mirrored from
 // nginxpilot/internal/admin/schema.go): buildOpenAPI ranges over endpoints()
 // so the document can never silently drift from the mux, and
-// TestSchemaCoversEveryEndpoint pins that contract. Unauthenticated like
-// /healthz — it describes the API; it contains no data.
+// TestSchemaCoversEveryEndpoint pins that contract. Behind the bearer token
+// whenever one is configured (only /healthz is public).
 
 // operationDoc is the hand-kept documentation for one endpoint, keyed
 // "METHOD /pattern" in operationDocs.

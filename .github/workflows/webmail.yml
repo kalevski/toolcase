@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/webmail
@@ -68,6 +67,9 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: go
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +92,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          provenance: true
+          sbom: true
           context: webmail
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' }}

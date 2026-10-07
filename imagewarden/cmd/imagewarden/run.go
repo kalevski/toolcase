@@ -72,6 +72,11 @@ func cmdRun(args []string) int {
 		return 1
 	}
 
+	if err := config.CheckToken(token); err != nil {
+		log.Error(err.Error(), "token_env", cfg.API.TokenEnv)
+		return 1
+	}
+
 	// Boot fail-fast (spec §10): buildService runs model.Load (verifies the
 	// sha256 and runs a warmup inference) and wires the classify.Service; any
 	// failure returns non-zero BEFORE the port opens. Shared with `classify`

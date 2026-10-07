@@ -2,6 +2,7 @@ import { markOwned, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { chevronLeftIcon, chevronRightIcon } from './icons'
+import { safeImgSrc } from './internal/safe-url'
 
 const TAG_NAME = 'tc-testimonial-carousel'
 
@@ -241,7 +242,7 @@ export class TestimonialCarousel extends HTMLElement {
         const ratingHtml = typeof item.rating === 'number' ? this._starsHtml(item.rating) : ''
 
         const avatarHtml = item.avatarUrl
-            ? `<img class="tc-testimonial-carousel-avatar" src="${esc(item.avatarUrl)}" alt="" loading="lazy" />`
+            ? `<img class="tc-testimonial-carousel-avatar" src="${esc(safeImgSrc(item.avatarUrl))}" alt="" loading="lazy" />`
             : ''
 
         const roleParts = [item.role, item.company].filter(Boolean) as string[]

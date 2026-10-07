@@ -127,3 +127,17 @@ func TestStoreReplacesAtomically(t *testing.T) {
 		t.Fatalf("Store must leave no temp files behind, found %d entries", len(entries))
 	}
 }
+
+func TestResolveRejectsShortEnvToken(t *testing.T) {
+	t.Setenv("NP_TEST_TOKEN", "too-short")
+	if _, err := Resolve("NP_TEST_TOKEN", ""); err == nil {
+		t.Fatal("env-only: a token under MinLength must be refused at startup")
+	}
+	file := filepath.Join(t.TempDir(), "admin.token")
+	if _, err := Resolve("NP_TEST_TOKEN", file); err == nil {
+		t.Fatal("seeding: a token under MinLength must be refused")
+	}
+	if _, err := os.Stat(file); err == nil {
+		t.Fatal("a short token must not be seeded to disk")
+	}
+}
