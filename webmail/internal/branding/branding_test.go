@@ -87,3 +87,19 @@ func TestToAdmin(t *testing.T) {
 		t.Fatalf("%+v", a)
 	}
 }
+
+func TestJMAPURLIsAnHTTPBaseWithoutCredentials(t *testing.T) {
+	ok, err := Validate(Input{Domain: "a.test", JMAPURL: " http://10.0.0.8:8080/ "}, "a.test")
+	if err != nil || ok.JMAPURL != "http://10.0.0.8:8080" {
+		t.Fatalf("a plain base is kept without its trailing slash: %v %q", err, ok.JMAPURL)
+	}
+	for _, bad := range []string{"ftp://x.test", "http://user:pw@x.test", "http://x.test/?a=b", "x.test", "http://x.test/#f"} {
+		if _, err := Validate(Input{Domain: "a.test", JMAPURL: bad}, "a.test"); err == nil {
+			t.Fatalf("%q must be refused", bad)
+		}
+	}
+	empty, err := Validate(Input{Domain: "a.test"}, "a.test")
+	if err != nil || empty.JMAPURL != "" {
+		t.Fatalf("no address means the default server: %v %q", err, empty.JMAPURL)
+	}
+}

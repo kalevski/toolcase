@@ -9,6 +9,10 @@ branding to webmail's admin API (`/admin/v1`, authenticated with `WEBMAIL_API_TO
 pastes into the platform's Fleet → Webmail tab). Webmail keeps those brandings in its own SQLite and needs no
 platform address or credential.
 
+- **One webmail, several mail servers.** The platform sends each domain's mail server address (`jmapUrl`) with its
+  branding. Sign-in and every later call of that domain go to that server (`internal/mailhost`); a domain with no
+  `jmapUrl` uses `WEBMAIL_JMAP_URL`. When the platform moves a domain to another server it pushes the new address:
+  the sessions of that domain fail their next upstream call and end, and the users sign in again.
 - Browser holds only an opaque `__Host-` session cookie, never a mail credential.
 - Sign-in checks the password against the mail server over JMAP (HTTP Basic) and keeps it sealed (AES-256-GCM under
   `WEBMAIL_SESSION_KEY`) in the session for upstream calls. A domain the platform has not registered cannot sign in.
@@ -63,7 +67,7 @@ a `_FILE` form. All problems are reported at once.
 | `WEBMAIL_LISTEN` | `:8080` | Public HTTP bind (TLS terminated by a proxy) |
 | `WEBMAIL_ADMIN_LISTEN` | `127.0.0.1:8081` | Serves `/_metrics` only; keep it off the public network |
 | `WEBMAIL_PUBLIC_URL` | required | External origin: cookies, `Origin` checks, HSTS |
-| `WEBMAIL_JMAP_URL` | required | Internal base URL of the mail server |
+| `WEBMAIL_JMAP_URL` | required | Internal base URL of the mail server; the default for a domain whose branding names none |
 | `WEBMAIL_API_TOKEN` | required | Bearer token of the platform's calls to `/admin/v1`; at least 32 characters |
 | `WEBMAIL_SESSION_KEY` | required | Base64 of 32 random bytes |
 | `WEBMAIL_DATA_DIR` | `/var/lib/webmail` | SQLite database |
@@ -95,7 +99,7 @@ nothing is silently dropped, and raw CSS or HTML is never stored.
 |---|---|
 | `GET /admin/v1/health` | `{ok, version, domains}` |
 | `GET /admin/v1/brandings?limit=&cursor=&q=` | `{items, total, nextCursor}`, by domain; `limit` 1-100 (25); `q` filters on the domain |
-| `POST /admin/v1/brandings` | register a domain (`201`; `409 exists`) |
+| `POST /admin/v1/brandings` | register a domain (`201`; `409 exists`); `jmapUrl` is the mail server of its mailboxes (an http(s) base, no credentials), empty for the default |
 | `GET` / `PUT` / `DELETE /admin/v1/brandings/{domain}` | read; replace every editable field (`404 not_found`); remove with its logo (`204`, idempotent) |
 | `PUT /admin/v1/brandings/{domain}/logo` | raw PNG, JPEG or WebP up to 512 KiB, type checked against the bytes (`204`, `413`, `415`) |
 | `DELETE /admin/v1/brandings/{domain}/logo` | `204` |
@@ -112,6 +116,7 @@ internal/sanitize    HTML+CSS allow-list sanitiser (x/net/html tokenizer)
 internal/session     sealed passwords, cookie, expiry, CSRF/Origin
 internal/branding    branding validation (rejecting), admin and public (browser) forms
 internal/ratelimit   SQLite-backed failure/window limiters; window limiter refuses blocked keys from memory
+internal/mailhost     the JMAP client of a domain: its branding's mail server, else the default; cached 30 s, dropped when the branding is written
 internal/store       SQLite (WAL, writer pool of 1, append-only migrations): sessions, prefs, rate limits, brandings + logos; 5 s in-process session cache
 internal/fakes       fake JMAP server for tests and local runs
 web/                 React 19 + tc-* SPA, built into internal/web/dist
