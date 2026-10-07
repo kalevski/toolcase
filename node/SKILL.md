@@ -1262,7 +1262,7 @@ const tokens = await exchangeCode(provider, { code, codeVerifier: flow.codeVerif
 // then verifyIdToken(..., { nonce: flow.nonce, ... })
 ```
 
-> **Nonce replay protection.** `verifyCallback` guards only `state`. Always also pass `nonce` to `verifyIdToken` — omitting it silently skips the nonce check and leaves the OIDC flow open to replay attacks.
+> **Nonce replay protection.** `verifyCallback` guards only `state`. Always also pass `nonce` to `verifyIdToken` — it is now required and rejects when missing unless `skipNonceCheck: true` is set in the options. `exp`, `iat` and `sub` are required claims, `azp` is validated for multi-audience tokens, the JWKS is refetched once on an unknown `kid`, and non-https issuers/JWKS URIs are rejected unless the host is loopback or `allowInsecure: true` is set.
 
 ### `flow.ts` — Authorization Code
 
