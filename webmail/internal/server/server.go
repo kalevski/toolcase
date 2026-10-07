@@ -89,6 +89,10 @@ func New(ctx context.Context, cfg *config.Config, log *slog.Logger, build Build,
 	s.hosts = &mailhost.Router{Default: s.jmap, Store: st, Timeout: cfg.UpstreamTimeout, Now: s.now}
 	s.sessions = &session.Manager{
 		Store: st, Key: cfg.SessionKey, PublicURL: cfg.PublicURL, Now: s.now, Log: log,
+		KnownHost: func(ctx context.Context, host string) bool {
+			_, err := st.BrandingForHost(ctx, host)
+			return err == nil
+		},
 		Settings: session.Settings{Idle: cfg.SessionIdle, RememberIdle: cfg.RememberIdle, Max: cfg.SessionMax},
 	}
 	const window = 15 * time.Minute
@@ -163,7 +167,6 @@ func (s *Server) routes(files fs.FS) http.Handler {
 	mux.HandleFunc("GET /_healthz", s.handleHealth)
 	mux.HandleFunc("GET /_version", s.handleVersion)
 	mux.HandleFunc("GET /api/branding", s.handleBranding)
-	mux.HandleFunc("GET /api/logo", s.handleLogo)
 	mux.HandleFunc("POST /api/login", s.handleLogin)
 	mux.HandleFunc("POST /api/logout", s.handleLogout)
 	mux.HandleFunc("GET /api/sessions", s.sessions.Require(s.handleListSessions))

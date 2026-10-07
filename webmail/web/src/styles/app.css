@@ -94,26 +94,6 @@ body {
     font-weight: 600;
 }
 
-.wm-brand__logo {
-    height: 28px;
-    width: auto;
-    max-width: 140px;
-    object-fit: contain;
-}
-
-.wm-brand--lg .wm-brand__logo {
-    height: 44px;
-    max-width: 220px;
-}
-
-.wm-brand__dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--tc-app-accent);
-    flex: none;
-}
-
 .wm-brand__name {
     white-space: nowrap;
     overflow: hidden;
@@ -999,138 +979,516 @@ body {
 
 /* ── Compose ───────────────────────────────────────────────────────────── */
 
+/* A floating window docked bottom right, the way desktop mail apps do it: a slim title bar, borderless field rows,
+   the message filling the rest, and one bar of actions at the bottom. On a phone it takes the whole screen. */
+
 .wm-compose {
+    --wm-c-pad: 16px;
+    --wm-c-row: 40px;
+    --wm-c-accent: var(--tc-app-accent, #2f6fe4);
     position: fixed;
     inset: 0;
     z-index: var(--tc-z-sticky);
     display: flex;
     flex-direction: column;
     background: var(--tc-surface);
-    border: 1px solid var(--tc-border);
-    box-shadow: var(--tc-shadow-lg);
-}
-
-.wm-compose.is-minimised {
-    inset: auto 0 0 auto;
-    width: min(320px, 100%);
+    color: var(--tc-text);
+    font-size: 0.875rem;
 }
 
 @media (min-width: 768px) {
     .wm-compose {
-        inset: auto 16px 0 auto;
-        width: min(640px, calc(100vw - 32px));
-        height: min(80dvh, 720px);
+        inset: auto 24px 0 auto;
+        width: min(560px, calc(100vw - 48px));
+        height: min(82dvh, 640px);
+        border-radius: 10px 10px 0 0;
+        overflow: hidden;
+        box-shadow:
+            0 8px 10px 1px rgba(16, 18, 40, 0.14),
+            0 3px 14px 2px rgba(16, 18, 40, 0.12),
+            0 5px 5px -3px rgba(16, 18, 40, 0.2);
     }
+
     .wm-compose.is-minimised {
         height: auto;
-        width: 320px;
-        inset: auto 16px 0 auto;
+        width: 300px;
     }
+
+    .wm-compose.is-full {
+        inset: 6dvh max(24px, 9vw);
+        width: auto;
+        height: auto;
+        z-index: calc(var(--tc-z-sticky) + 2);
+        border-radius: 10px;
+    }
+}
+
+.wm-compose.is-minimised {
+    inset: auto 0 0 auto;
+    width: min(300px, 100%);
+}
+
+.wm-compose__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--tc-z-sticky) + 1);
+    background: rgba(12, 12, 24, 0.5);
 }
 
 .wm-compose__head {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.25rem 0.25rem 1rem;
-    padding-top: max(0.25rem, env(safe-area-inset-top));
-    border-bottom: 1px solid var(--tc-border);
-    background: var(--tc-surface-muted);
+    gap: 2px;
+    min-height: 40px;
+    padding: 0 6px 0 var(--wm-c-pad);
+    padding-top: env(safe-area-inset-top);
+    cursor: pointer;
+    user-select: none;
 }
 
 .wm-compose__title {
     flex: 1 1 auto;
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+.wm-compose__hbtn,
+.wm-compose__tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.wm-compose__hbtn {
+    width: 30px;
+    height: 30px;
+    opacity: 0.8;
+}
+
+.wm-compose__hbtn:hover,
+.wm-compose__hbtn:focus-visible {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 767.98px) {
+    .wm-compose__hbtn--full {
+        display: none;
+    }
+}
+
 .wm-compose__body {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.75rem 16px;
 }
 
 .wm-compose__body.wm-center {
-    min-height: 0;
+    align-items: center;
+    justify-content: center;
 }
 
 .wm-compose__body[hidden] {
     display: none;
 }
 
-.wm-compose__row {
+/* Field rows: a label in the margin, no boxes, one hairline under each. */
+.wm-compose__fields {
+    flex: none;
+    padding: 0 var(--wm-c-pad);
+}
+
+.wm-cfield {
+    position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
+    min-height: var(--wm-c-row);
+    border-bottom: 1px solid var(--tc-border);
 }
 
-.wm-compose__row .wm-addr {
+.wm-cfield__label {
+    flex: none;
+    color: var(--tc-text-muted);
+}
+
+.wm-cfield__select {
     flex: 1 1 auto;
+    min-width: 0;
+    height: var(--wm-c-row);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    outline: 0;
+    cursor: pointer;
 }
 
-.wm-compose__row .wm-linkbtn {
-    margin-top: 1.75rem;
-    white-space: nowrap;
+.wm-cfield__subject {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--wm-c-row);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.wm-cfield__subject::placeholder {
+    color: var(--tc-text-muted);
+}
+
+.wm-cfield .wm-addr {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    position: static;
+}
+
+.wm-cfield .wm-addr__label {
+    flex: none;
+    font: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--tc-text-muted);
+}
+
+.wm-cfield .wm-addr__box {
+    flex: 1 1 auto;
+    min-height: var(--wm-c-row);
+    padding: 4px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.wm-cfield .wm-addr__box:focus-within {
+    outline: 0;
+}
+
+.wm-cfield .wm-addr__input {
+    min-height: 28px;
+}
+
+.wm-cfield .wm-addr__list {
+    top: calc(100% + 1px);
+    border-radius: 8px;
+}
+
+.wm-cfield .wm-chip {
+    padding-left: 10px;
+    border: 1px solid var(--tc-border);
+    border-radius: 999px;
+    background: var(--tc-surface);
+    line-height: 26px;
+}
+
+.wm-cfield .wm-chip__remove {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+}
+
+.wm-cfield__extras {
+    display: flex;
+    flex: none;
+    gap: 0.75rem;
+    align-self: center;
+}
+
+.wm-cfield__more {
+    padding: 4px 2px;
+    border: 0;
+    background: none;
+    color: var(--tc-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.wm-cfield__more:hover,
+.wm-cfield__more:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Many recipients wrap under the first line; the label and the Cc/Bcc links stay on that first line. */
+.wm-cfield:has(.wm-addr) {
+    align-items: flex-start;
+}
+
+.wm-cfield .wm-addr {
+    align-items: flex-start;
+}
+
+.wm-cfield .wm-addr__label {
+    line-height: var(--wm-c-row);
+}
+
+.wm-cfield__extras {
+    height: var(--wm-c-row);
+    align-items: center;
+    align-self: flex-start;
+}
+
+.wm-cfield .wm-addr__box {
+    padding: 6px 0;
+}
+
+.wm-cfield .wm-addr__input {
+    flex-basis: 6rem;
+    min-width: 6rem;
+}
+
+/* The message: everything left over, no frame. */
+.wm-compose__editor {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .wm-compose__text {
     flex: 1 1 auto;
-    min-height: 220px;
-    resize: vertical;
-    font-family: inherit;
+    min-height: 180px;
+    width: 100%;
+    padding: 12px var(--wm-c-pad);
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.55;
+}
+
+.wm-compose .wm-editor {
+    flex: 1 1 auto;
+    min-height: 180px;
+    border: 0;
+}
+
+.wm-compose .wm-editor__area {
+    padding: 12px var(--wm-c-pad);
+    min-height: 160px;
+    line-height: 1.55;
+}
+
+.wm-compose .wm-editor__area:focus-visible {
+    outline: 0;
+}
+
+/* The formatting bar floats just above the actions, folded away until asked for. */
+.wm-compose .wm-editor__toolbar {
+    position: sticky;
+    bottom: 0;
+    order: 2;
+    flex-wrap: nowrap;
+    gap: 2px;
+    margin: 0 var(--wm-c-pad) 6px;
+    padding: 2px 4px;
+    overflow-x: auto;
+    border: 1px solid var(--tc-border);
+    border-radius: 8px;
+    background: var(--tc-surface);
+    box-shadow: 0 2px 8px rgba(16, 18, 40, 0.12);
+}
+
+.wm-compose .wm-editor__toolbar[hidden] {
+    display: none;
+}
+
+.wm-compose .wm-editor__tool {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
 }
 
 .wm-compose__files {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 4px var(--wm-c-pad) 8px;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 6px;
 }
 
-.wm-file {
+.wm-cfile {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    min-height: 40px;
+    gap: 6px;
+    max-width: 26rem;
+    min-height: 32px;
+    padding: 0 4px 0 10px;
+    border-radius: 6px;
+    background: var(--tc-surface-muted);
 }
 
-.wm-file__name {
+.wm-cfile__name {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 600;
+    color: var(--wm-c-accent);
 }
 
-.wm-file tc-progress {
+.wm-cfile__size {
+    flex: none;
+    color: var(--tc-text-muted);
+}
+
+.wm-cfile tc-progress {
     flex: 1 1 auto;
 }
 
+.wm-cfile__remove {
+    margin-left: auto;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--tc-text-muted);
+    cursor: pointer;
+}
+
+.wm-cfile__remove:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.wm-compose__error {
+    margin: 0;
+    padding: 0 var(--wm-c-pad) 6px;
+}
+
+/* One bar of actions: send on the left, the tools after it, discard at the far right. */
 .wm-compose__foot {
-    position: sticky;
-    bottom: 0;
+    flex: none;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0 max(0.5rem, env(safe-area-inset-bottom));
-    background: var(--tc-surface);
-    border-top: 1px solid var(--tc-border);
-    margin-top: auto;
+    gap: 4px;
+    padding: 8px var(--wm-c-pad) max(12px, env(safe-area-inset-bottom));
+}
+
+.wm-compose__send {
+    height: 36px;
+    padding: 0 24px;
+    margin-right: 8px;
+    border: 0;
+    border-radius: 18px;
+    background: var(--wm-c-accent);
+    color: var(--tc-app-accent-contrast, #ffffff);
+    font: inherit;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(16, 18, 40, 0.25);
+    transition: box-shadow 120ms ease, filter 120ms ease;
+}
+
+.wm-compose__send:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 2px 6px rgba(16, 18, 40, 0.3);
+}
+
+.wm-compose__send:focus-visible {
+    outline: 2px solid var(--wm-c-accent);
+    outline-offset: 2px;
+}
+
+.wm-compose__send:disabled {
+    opacity: 0.55;
+    cursor: default;
+    box-shadow: none;
+    filter: none;
+}
+
+.wm-compose__tool {
+    width: 36px;
+    height: 36px;
+    color: var(--tc-text-muted);
+}
+
+.wm-compose__tool:hover,
+.wm-compose__tool:focus-visible {
+    color: var(--tc-text);
+    background: var(--tc-surface-muted);
+}
+
+.wm-compose__tool.is-on {
+    color: var(--wm-c-accent);
+    background: color-mix(in oklab, var(--wm-c-accent) 12%, transparent);
 }
 
 .wm-compose__status {
     flex: 1 1 auto;
-    font-size: 0.8125rem;
     min-width: 0;
+    padding-left: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--tc-text-muted);
+}
+
+.wm-compose__menuwrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.wm-compose__menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 6px);
+    z-index: 4;
+    min-width: 13rem;
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+    border: 1px solid var(--tc-border);
+    border-radius: 8px;
+    background: var(--tc-surface);
+    box-shadow: 0 6px 20px rgba(16, 18, 40, 0.18);
+}
+
+.wm-compose__menuitem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 0;
+    background: none;
+    color: var(--tc-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-compose__menuitem:hover,
+.wm-compose__menuitem:focus-visible {
+    background: var(--tc-surface-muted);
 }
 
 .wm-addr {

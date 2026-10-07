@@ -19,7 +19,7 @@ type FooterLink struct {
 }
 
 // Branding is one row of the brandings table: what the platform pushed for a
-// mail domain. The logo bytes are not part of it (see Logo).
+// mail domain.
 type Branding struct {
 	Domain          string
 	DisplayName     string
@@ -34,20 +34,24 @@ type Branding struct {
 	AllowUserAccent bool
 	MailboxCount    int
 	JMAPURL         string
-	HasLogo         bool
+	WebmailHost     string
+	SignInScope     string // "any" or "domain"
+	BrandPrimary    string
+	BrandSecondary  string
+	BrandBadge      string
 	UpdatedAt       time.Time
 }
 
 const brandingCols = `domain, display_name, theme, accent, login_title, login_message, support_email, support_url,
-	footer_links, default_locale, allow_user_accent, mailbox_count, jmap_url, logo IS NOT NULL, updated_at`
+	footer_links, default_locale, allow_user_accent, mailbox_count, jmap_url, webmail_host, sign_in_scope, brand_primary, brand_secondary, brand_badge, updated_at`
 
 func scanBranding(sc interface{ Scan(...any) error }) (*Branding, error) {
 	var b Branding
 	var links string
-	var allow, logo int
+	var allow int
 	var updated int64
 	if err := sc.Scan(&b.Domain, &b.DisplayName, &b.Theme, &b.Accent, &b.LoginTitle, &b.LoginMessage, &b.SupportEmail,
-		&b.SupportURL, &links, &b.DefaultLocale, &allow, &b.MailboxCount, &b.JMAPURL, &logo, &updated); err != nil {
+		&b.SupportURL, &links, &b.DefaultLocale, &allow, &b.MailboxCount, &b.JMAPURL, &b.WebmailHost, &b.SignInScope, &b.BrandPrimary, &b.BrandSecondary, &b.BrandBadge, &updated); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -58,7 +62,7 @@ func scanBranding(sc interface{ Scan(...any) error }) (*Branding, error) {
 	if b.FooterLinks == nil {
 		b.FooterLinks = []FooterLink{}
 	}
-	b.AllowUserAccent, b.HasLogo = allow != 0, logo != 0
+	b.AllowUserAccent = allow != 0
 	b.UpdatedAt = time.Unix(updated, 0)
 	return &b, nil
 }
@@ -74,24 +78,26 @@ func linksJSON(links []FooterLink) string {
 // InsertBranding adds a domain; ErrExists when it is already there.
 func (s *Store) InsertBranding(ctx context.Context, b *Branding) error {
 	_, err := s.w.ExecContext(ctx, `INSERT INTO brandings (domain, display_name, theme, accent, login_title, login_message,
-		support_email, support_url, footer_links, default_locale, allow_user_accent, mailbox_count, jmap_url, updated_at)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		support_email, support_url, footer_links, default_locale, allow_user_accent, mailbox_count, jmap_url, webmail_host, sign_in_scope, brand_primary, brand_secondary, brand_badge, updated_at)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		b.Domain, b.DisplayName, b.Theme, b.Accent, b.LoginTitle, b.LoginMessage, b.SupportEmail, b.SupportURL,
-		linksJSON(b.FooterLinks), b.DefaultLocale, b2i(b.AllowUserAccent), b.MailboxCount, b.JMAPURL, s.now().Unix())
+		linksJSON(b.FooterLinks), b.DefaultLocale, b2i(b.AllowUserAccent), b.MailboxCount, b.JMAPURL, b.WebmailHost, scopeOf(b.SignInScope), b.BrandPrimary, b.BrandSecondary, b.BrandBadge, s.now().Unix())
 	if err != nil && strings.Contains(err.Error(), "UNIQUE") {
 		return ErrExists
 	}
 	return err
 }
 
-// UpdateBranding replaces every editable field of a domain (the logo is kept);
+// UpdateBranding replaces every editable field of a domain;
 // ErrNotFound when the domain is not there.
 func (s *Store) UpdateBranding(ctx context.Context, b *Branding) error {
 	res, err := s.w.ExecContext(ctx, `UPDATE brandings SET display_name = ?, theme = ?, accent = ?, login_title = ?,
 		login_message = ?, support_email = ?, support_url = ?, footer_links = ?, default_locale = ?,
-		allow_user_accent = ?, mailbox_count = ?, jmap_url = ?, updated_at = ? WHERE domain = ?`,
+		allow_user_accent = ?, mailbox_count = ?, jmap_url = ?, webmail_host = ?, sign_in_scope = ?, brand_primary = ?, brand_secondary = ?, brand_badge = ?,
+		updated_at = ? WHERE domain = ?`,
 		b.DisplayName, b.Theme, b.Accent, b.LoginTitle, b.LoginMessage, b.SupportEmail, b.SupportURL,
-		linksJSON(b.FooterLinks), b.DefaultLocale, b2i(b.AllowUserAccent), b.MailboxCount, b.JMAPURL, s.now().Unix(), b.Domain)
+		linksJSON(b.FooterLinks), b.DefaultLocale, b2i(b.AllowUserAccent), b.MailboxCount, b.JMAPURL, b.WebmailHost, scopeOf(b.SignInScope), b.BrandPrimary, b.BrandSecondary, b.BrandBadge,
+		s.now().Unix(), b.Domain)
 	if err != nil {
 		return err
 	}
@@ -106,7 +112,14 @@ func (s *Store) GetBranding(ctx context.Context, domain string) (*Branding, erro
 	return scanBranding(s.r.QueryRowContext(ctx, `SELECT `+brandingCols+` FROM brandings WHERE domain = ?`, domain))
 }
 
-// DeleteBranding removes a domain and its logo. It is not an error when the
+// BrandingForHost finds the domain whose webmail is served on host: the one the platform named with that host,
+// else a domain without a named host whose own name is the host (webmail served on the mail domain itself).
+func (s *Store) BrandingForHost(ctx context.Context, host string) (*Branding, error) {
+	return scanBranding(s.r.QueryRowContext(ctx, `SELECT `+brandingCols+` FROM brandings
+		WHERE webmail_host = ? OR (webmail_host = '' AND domain = ?) ORDER BY webmail_host = '' LIMIT 1`, host, host))
+}
+
+// DeleteBranding removes a domain. It is not an error when the
 // domain is already gone.
 func (s *Store) DeleteBranding(ctx context.Context, domain string) error {
 	_, err := s.w.ExecContext(ctx, `DELETE FROM brandings WHERE domain = ?`, domain)
@@ -144,33 +157,10 @@ func (s *Store) CountBrandings(ctx context.Context) (int, error) {
 	return n, err
 }
 
-// SetLogo stores a domain's logo; ErrNotFound when the domain is not there.
-func (s *Store) SetLogo(ctx context.Context, domain, mime string, data []byte) error {
-	res, err := s.w.ExecContext(ctx, `UPDATE brandings SET logo = ?, logo_mime = ?, updated_at = ? WHERE domain = ?`,
-		data, mime, s.now().Unix(), domain)
-	if err != nil {
-		return err
+// scopeOf stores an unset scope as "any", the behaviour before the setting existed.
+func scopeOf(scope string) string {
+	if scope == "" {
+		return "any"
 	}
-	if n, _ := res.RowsAffected(); n == 0 {
-		return ErrNotFound
-	}
-	return nil
-}
-
-// ClearLogo removes a domain's logo (idempotent).
-func (s *Store) ClearLogo(ctx context.Context, domain string) error {
-	_, err := s.w.ExecContext(ctx, `UPDATE brandings SET logo = NULL, logo_mime = '', updated_at = ? WHERE domain = ? AND logo IS NOT NULL`,
-		s.now().Unix(), domain)
-	return err
-}
-
-// Logo returns a domain's logo bytes and content type; ErrNotFound when it has none.
-func (s *Store) Logo(ctx context.Context, domain string) ([]byte, string, error) {
-	var data []byte
-	var mime string
-	err := s.r.QueryRowContext(ctx, `SELECT logo, logo_mime FROM brandings WHERE domain = ? AND logo IS NOT NULL`, domain).Scan(&data, &mime)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, "", ErrNotFound
-	}
-	return data, mime, err
+	return scope
 }

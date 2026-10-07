@@ -102,9 +102,12 @@ func (c *client) do(method, path string, body any, hdr map[string]string) (*http
 		req.Header.Set("X-Webmail-CSRF", c.csrf)
 	}
 	for k, v := range hdr {
-		if v == "" {
+		switch {
+		case k == "Host":
+			req.Host = v
+		case v == "":
 			req.Header.Del(k)
-		} else {
+		default:
 			req.Header.Set(k, v)
 		}
 	}
@@ -519,26 +522,63 @@ func TestLoginRateLimits(t *testing.T) {
 	}
 }
 
-func TestBrandingEndpoint(t *testing.T) {
+func TestBrandingFollowsTheHost(t *testing.T) {
 	e := newEnv(t)
 	c := &client{e: e}
-	_, data := c.do("GET", "/api/branding?domain=example.test", nil, nil)
-	var b struct {
+	type pub struct {
 		Known  bool
+		Domain string
 		Name   string
 		Accent string
 	}
-	json.Unmarshal(data, &b)
-	if !b.Known || b.Name != "Example Co" || b.Accent != "#336699" {
-		t.Fatalf("%s", data)
+	get := func(host, query string) (*http.Response, pub) {
+		resp, data := c.do("GET", "/api/branding"+query, nil, map[string]string{"Host": host})
+		var b pub
+		json.Unmarshal(data, &b)
+		return resp, b
 	}
-	resp, data := c.do("GET", "/api/branding?domain=nowhere.test", nil, nil)
-	json.Unmarshal(data, &b)
-	if resp.StatusCode != 200 || b.Known || b.Name != "Webmail" {
-		t.Fatalf("unknown domain must be neutral, not an error: %d %s", resp.StatusCode, data)
+	if _, b := get("example.test", ""); !b.Known || b.Name != "Example Co" || b.Accent != "#336699" {
+		t.Fatalf("webmail on the mail domain itself wears its branding: %+v", b)
 	}
-	if resp, _ := c.do("GET", "/api/branding?domain=../../x", nil, nil); resp.StatusCode != 200 {
-		t.Fatalf("junk domain: %d", resp.StatusCode)
+	if _, b := get("nowhere.test", "?domain=example.test"); b.Known || b.Name != "Webmail" {
+		t.Fatalf("the address typed must not restyle the page, only the host does: %+v", b)
+	}
+	if resp, b := get("nowhere.test", ""); resp.StatusCode != 200 || b.Known {
+		t.Fatalf("an unknown host is neutral, not an error: %d %+v", resp.StatusCode, b)
+	}
+
+	if resp, _ := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "acme.com", "displayName": "Acme", "webmailHost": "Mail.Acme.com"}, "application/json"); resp.StatusCode != 201 {
+		t.Fatalf("register: %d", resp.StatusCode)
+	}
+	if _, b := get("mail.acme.com:443", ""); !b.Known || b.Domain != "acme.com" || b.Name != "Acme" {
+		t.Fatalf("the named webmail host wears its domain's branding: %+v", b)
+	}
+	if _, b := get("acme.com", ""); b.Known {
+		t.Fatalf("a domain with a named webmail host is not served on its bare name: %+v", b)
+	}
+	if resp, _ := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "bad.test", "webmailHost": "not a host"}, "application/json"); resp.StatusCode != 422 {
+		t.Fatalf("a junk webmail host is refused: %d", resp.StatusCode)
+	}
+}
+
+func TestSignInFromARegisteredWebmailHost(t *testing.T) {
+	e := newEnv(t)
+	if resp, _ := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "acme.com", "webmailHost": "mail.acme.com"}, "application/json"); resp.StatusCode != 201 {
+		t.Fatalf("register: %d", resp.StatusCode)
+	}
+	c := &client{e: e}
+	login := func(origin string) int {
+		resp, _ := c.do("POST", "/api/login", map[string]any{"email": "ann@example.test", "password": "correct-horse"}, map[string]string{"Origin": origin})
+		return resp.StatusCode
+	}
+	if code := login("https://mail.acme.com"); code != 200 {
+		t.Fatalf("a registered webmail host may sign in: %d", code)
+	}
+	if code := login("https://evil.example"); code != 403 {
+		t.Fatalf("an unknown origin is refused: %d", code)
+	}
+	if code := login("http://mail.acme.com"); code != 403 {
+		t.Fatalf("a registered host on another scheme is refused: %d", code)
 	}
 }
 
@@ -606,5 +646,36 @@ func TestReapEndsExpired(t *testing.T) {
 	n, _ := e.s.store.CountSessions(context.Background())
 	if n != 0 {
 		t.Fatalf("%d expired sessions left", n)
+	}
+}
+
+func TestSignInScopeKeepsAHostForItsOwnDomain(t *testing.T) {
+	e := newEnv(t)
+	if resp, _ := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "acme.com", "webmailHost": "mail.acme.com", "signInScope": "domain"}, "application/json"); resp.StatusCode != 201 {
+		t.Fatalf("register: %d", resp.StatusCode)
+	}
+	c := &client{e: e}
+	login := func(host string) (*http.Response, []byte) {
+		return c.do("POST", "/api/login", map[string]any{"email": "ann@example.test", "password": "correct-horse"}, map[string]string{"Host": host})
+	}
+	before := e.world.SessionDocs
+	if resp, data := login("mail.acme.com"); resp.StatusCode != 403 || errCode(data) != "domain_not_allowed" || e.world.SessionDocs != before {
+		t.Fatalf("another domain's address is refused without asking the mail server: %d %s", resp.StatusCode, data)
+	}
+	_, pub := c.do("GET", "/api/branding", nil, map[string]string{"Host": "mail.acme.com"})
+	if !strings.Contains(string(pub), `"signInScope":"domain"`) {
+		t.Fatalf("the page is told about the rule: %s", pub)
+	}
+	if resp, data := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "x.test", "signInScope": "everyone"}, "application/json"); resp.StatusCode != 422 {
+		t.Fatalf("an unknown scope is refused: %d %s", resp.StatusCode, data)
+	}
+	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test", map[string]any{"displayName": "Example Co", "webmailHost": "mail.example.test", "signInScope": "domain"}, "application/json"); resp.StatusCode != 200 {
+		t.Fatalf("update: %d", resp.StatusCode)
+	}
+	if resp, data := login("mail.example.test"); resp.StatusCode != 200 {
+		t.Fatalf("the domain's own address signs in: %d %s", resp.StatusCode, data)
+	}
+	if resp, data := c.do("POST", "/api/login", map[string]any{"email": "ann@example.test", "password": "correct-horse"}, nil); resp.StatusCode != 200 {
+		t.Fatalf("the shared address keeps accepting any mailbox: %d %s", resp.StatusCode, data)
 	}
 }

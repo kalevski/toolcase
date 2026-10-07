@@ -3,13 +3,9 @@ import { ApiError } from '../api/client'
 import { fetchBranding, login, NEUTRAL_BRANDING, type Branding } from '../api/session'
 import { AuthLayout } from '../components/AuthLayout'
 import { BrandFooter } from '../components/BrandFooter'
-import { BrandMark } from '../components/BrandMark'
 import { t, type MessageKey } from '../i18n'
 import { applyAppearance, applyTitle } from '../theme/branding'
-import { domainOf } from '../util/safe'
 import { readStore, writeStore } from '../util/storage'
-
-const brandingCache = new Map<string, Branding>()
 
 type Props = { notice?: MessageKey; onSignedIn: () => Promise<void> | void }
 
@@ -21,36 +17,18 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
     const [error, setError] = useState('')
     const [branding, setBranding] = useState<Branding>(NEUTRAL_BRANDING)
     const passwordRef = useRef<HTMLElement>(null)
-    const domain = domainOf(email)
+    const domainOnly = branding.known && branding.signInScope === 'domain'
 
-    // Restyle live from the domain part, debounced 400 ms. Unknown domains get
-    // the neutral skin (the endpoint never errors for them).
+    // The look belongs to the address the page is served on, so it is read once and never follows what is typed.
     useEffect(() => {
-        if (!domain) {
-            setBranding(NEUTRAL_BRANDING)
-            return
-        }
-        const cached = brandingCache.get(domain)
-        if (cached) {
-            setBranding(cached)
-            return
-        }
         const ctrl = new AbortController()
-        const timer = window.setTimeout(() => {
-            fetchBranding(domain, ctrl.signal)
-                .then((b) => {
-                    brandingCache.set(domain, b)
-                    setBranding(b)
-                })
-                .catch(() => {
-                    // keep the current skin; branding is cosmetic
-                })
-        }, 400)
-        return () => {
-            window.clearTimeout(timer)
-            ctrl.abort()
-        }
-    }, [domain])
+        fetchBranding(ctrl.signal)
+            .then(setBranding)
+            .catch(() => {
+                // keep the neutral skin; branding is cosmetic
+            })
+        return () => ctrl.abort()
+    }, [])
 
     useEffect(() => {
         applyAppearance(branding, 'system')
@@ -70,7 +48,8 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
             await onSignedIn()
         } catch (err) {
             const ae = err as ApiError
-            if (ae.code === 'invalid_credentials' || ae.status === 401) setError(t('login.invalid'))
+            if (ae.code === 'domain_not_allowed') setError(t('login.domainOnly', { domain: branding.domain }))
+            else if (ae.code === 'invalid_credentials' || ae.status === 401) setError(t('login.invalid'))
             else if (ae.code === 'rate_limited' || ae.status === 429) {
                 setError(
                     ae.retryAfter
@@ -85,16 +64,15 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
     }
 
     return (
-        <AuthLayout
-            logo={<BrandMark branding={branding} size="lg" />}
-            title={branding.loginTitle || t('login.title')}
-        >
+        <AuthLayout branding={branding} title={branding.loginTitle || t('login.title')}>
             {notice ? <tc-notice tone="info" text={t(notice)} live></tc-notice> : null}
             <form className="wm-login__form" onSubmit={submit} noValidate>
                 <tc-form-input
                     type="email"
                     name="email"
                     label={t('login.email')}
+                    placeholder={domainOnly ? t('login.domainPlaceholder', { domain: branding.domain }) : undefined}
+                    help={domainOnly && !error ? t('login.domainOnly', { domain: branding.domain }) : undefined}
                     autocomplete="username"
                     value={email}
                     required

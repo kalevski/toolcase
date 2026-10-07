@@ -54,7 +54,7 @@ var migrations = []string{
 		blocked_until INTEGER NOT NULL DEFAULT 0,
 		PRIMARY KEY (bucket, key)
 	);`,
-	// 2: the brandings the platform pushes (one row per mail domain, logo inline).
+	// 2: the brandings the platform pushes (one row per mail domain).
 	`CREATE TABLE brandings (
 		domain            TEXT PRIMARY KEY,       -- lower-case
 		display_name      TEXT NOT NULL DEFAULT '',
@@ -74,6 +74,18 @@ var migrations = []string{
 	);`,
 	// 3: the mail server a domain's mailboxes live on (its JMAP base URL); empty means the configured default.
 	`ALTER TABLE brandings ADD COLUMN jmap_url TEXT NOT NULL DEFAULT '';`,
+	// 4: a domain's mark is its display name in text; the pushed logo images are gone.
+	`ALTER TABLE brandings DROP COLUMN logo;
+	ALTER TABLE brandings DROP COLUMN logo_mime;`,
+	// 5: the host a domain's webmail is served on (proxied to this service); the page wears that domain's branding.
+	`ALTER TABLE brandings ADD COLUMN webmail_host TEXT NOT NULL DEFAULT '';
+	CREATE INDEX brandings_webmail_host ON brandings(webmail_host);`,
+	// 6: who may sign in on the domain's webmail host (any mailbox, or only that domain's addresses), and the
+	// wordmark: its two parts and a small badge above it.
+	`ALTER TABLE brandings ADD COLUMN sign_in_scope TEXT NOT NULL DEFAULT 'any';
+	ALTER TABLE brandings ADD COLUMN brand_primary TEXT NOT NULL DEFAULT '';
+	ALTER TABLE brandings ADD COLUMN brand_secondary TEXT NOT NULL DEFAULT '';
+	ALTER TABLE brandings ADD COLUMN brand_badge TEXT NOT NULL DEFAULT '';`,
 }
 
 // Options configure Open.

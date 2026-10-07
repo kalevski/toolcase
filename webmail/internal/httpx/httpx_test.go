@@ -38,3 +38,21 @@ func TestClientIP(t *testing.T) {
 		t.Errorf("no trusted configured: %s", got)
 	}
 }
+
+func TestRequestHostTrustsForwardedHostOnlyFromAProxy(t *testing.T) {
+	proxy := []netip.Prefix{netip.MustParsePrefix("10.0.0.0/8")}
+	r := httptest.NewRequest("GET", "/", nil)
+	r.Host = "webmail.internal:8080"
+	r.Header.Set("X-Forwarded-Host", "Mail.Acme.com, other.test")
+	r.RemoteAddr = "10.1.2.3:5555"
+	if got := RequestHost(r, proxy); got != "mail.acme.com" {
+		t.Fatalf("from the proxy: %q", got)
+	}
+	r.RemoteAddr = "203.0.113.9:5555"
+	if got := RequestHost(r, proxy); got != "webmail.internal" {
+		t.Fatalf("a direct client cannot pick the host: %q", got)
+	}
+	if got := RequestHost(r, nil); got != "webmail.internal" {
+		t.Fatalf("no trusted proxies: %q", got)
+	}
+}

@@ -14,6 +14,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -53,6 +54,9 @@ type Manager struct {
 	Key       []byte
 	Settings  Settings
 	PublicURL string // scheme://host[:port], for the Origin check
+	// KnownHost reports whether a host is one the platform registered as a domain's webmail address; its
+	// origin (with the public URL's scheme) is accepted as well as the public origin.
+	KnownHost func(ctx context.Context, host string) bool
 	Now       func() time.Time
 	Log       *slog.Logger
 }
@@ -208,7 +212,7 @@ func ClearCookie() *http.Cookie {
 // origin. A missing Origin is rejected: every browser sends it on POST/PUT/
 // DELETE, and refusing the rest closes the gap for odd clients.
 func (m *Manager) CheckCSRF(r *http.Request, s *store.Session) error {
-	if CheckOrigin(r, m.PublicURL) != nil {
+	if !m.OriginOK(r) {
 		return ErrCSRF
 	}
 	got := r.Header.Get(CSRFHeader)
@@ -225,6 +229,26 @@ func CheckOrigin(r *http.Request, publicOrigin string) error {
 		return ErrCSRF
 	}
 	return nil
+}
+
+// OriginOK accepts the public origin, and the origin of a registered webmail host on the same scheme.
+func (m *Manager) OriginOK(r *http.Request) bool {
+	o := r.Header.Get("Origin")
+	if o == "" {
+		return false
+	}
+	if strings.EqualFold(o, m.PublicURL) {
+		return true
+	}
+	if m.KnownHost == nil {
+		return false
+	}
+	u, err := url.Parse(o)
+	pub, perr := url.Parse(m.PublicURL)
+	if err != nil || perr != nil || u.Host == "" || (u.Path != "" && u.Path != "/") || u.User != nil || !strings.EqualFold(u.Scheme, pub.Scheme) {
+		return false
+	}
+	return m.KnownHost(r.Context(), strings.ToLower(u.Hostname()))
 }
 
 // IsMutating reports whether a method changes state.

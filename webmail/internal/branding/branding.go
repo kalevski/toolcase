@@ -27,6 +27,7 @@ const (
 	maxText    = 280
 	maxLabel   = 40
 	maxLinks   = 6
+	maxMark    = 40
 	maxMailbox = 1 << 31
 )
 
@@ -60,12 +61,18 @@ type Input struct {
 	AllowUserAccent bool         `json:"allowUserAccent"`
 	MailboxCount    int          `json:"mailboxCount"`
 	JMAPURL         string       `json:"jmapUrl"`
+	WebmailHost     string       `json:"webmailHost"`
+	// SignInScope says who may sign in on the webmail host: "any" mailbox, or only "domain" addresses.
+	SignInScope string `json:"signInScope"`
+	// The wordmark: a bold first part, a lighter second part and a small badge above it (hidden when empty).
+	BrandPrimary   string `json:"brandPrimary"`
+	BrandSecondary string `json:"brandSecondary"`
+	BrandBadge     string `json:"brandBadge"`
 }
 
 // Admin is the contract's Branding object.
 type Admin struct {
 	Input
-	HasLogo   bool   `json:"hasLogo"`
 	UpdatedAt string `json:"updatedAt"`
 }
 
@@ -133,6 +140,28 @@ func Validate(in Input, domain string) (*store.Branding, error) {
 		return nil, &FieldError{"mailboxCount", "must not be negative"}
 	}
 	b.MailboxCount = in.MailboxCount
+	if b.BrandPrimary, err = clean("brandPrimary", in.BrandPrimary, maxMark); err != nil {
+		return nil, err
+	}
+	if b.BrandSecondary, err = clean("brandSecondary", in.BrandSecondary, maxMark); err != nil {
+		return nil, err
+	}
+	if b.BrandBadge, err = clean("brandBadge", in.BrandBadge, maxMark); err != nil {
+		return nil, err
+	}
+	switch in.SignInScope {
+	case "", "any":
+		b.SignInScope = "any"
+	case "domain":
+		b.SignInScope = "domain"
+	default:
+		return nil, &FieldError{"signInScope", "must be any or domain"}
+	}
+	if in.WebmailHost != "" {
+		if b.WebmailHost = NormalizeDomain(in.WebmailHost); !ValidDomain(b.WebmailHost) {
+			return nil, &FieldError{"webmailHost", "is not a valid host name"}
+		}
+	}
 	if in.JMAPURL != "" {
 		if b.JMAPURL = baseURL(in.JMAPURL); b.JMAPURL == "" {
 			return nil, &FieldError{"jmapUrl", "must be an http(s) address of the mail server"}
@@ -151,9 +180,9 @@ func ToAdmin(b *store.Branding) Admin {
 		Input: Input{
 			Domain: b.Domain, DisplayName: b.DisplayName, Theme: b.Theme, Accent: b.Accent, LoginTitle: b.LoginTitle,
 			LoginMessage: b.LoginMessage, SupportEmail: b.SupportEmail, SupportURL: b.SupportURL, FooterLinks: links,
-			DefaultLocale: b.DefaultLocale, AllowUserAccent: b.AllowUserAccent, MailboxCount: b.MailboxCount, JMAPURL: b.JMAPURL,
+			DefaultLocale: b.DefaultLocale, AllowUserAccent: b.AllowUserAccent, MailboxCount: b.MailboxCount, JMAPURL: b.JMAPURL, WebmailHost: b.WebmailHost, SignInScope: b.SignInScope,
+			BrandPrimary: b.BrandPrimary, BrandSecondary: b.BrandSecondary, BrandBadge: b.BrandBadge,
 		},
-		HasLogo:   b.HasLogo,
 		UpdatedAt: b.UpdatedAt.UTC().Format(time.RFC3339),
 	}
 }
@@ -165,7 +194,6 @@ type PublicBranding struct {
 	Known           bool         `json:"known"`
 	Domain          string       `json:"domain"`
 	Name            string       `json:"name"`
-	LogoURL         string       `json:"logoUrl"`
 	Theme           string       `json:"theme"`
 	Accent          string       `json:"accent"`
 	LoginTitle      string       `json:"loginTitle"`
@@ -175,11 +203,15 @@ type PublicBranding struct {
 	FooterLinks     []FooterLink `json:"footerLinks"`
 	DefaultLanguage string       `json:"defaultLanguage"`
 	AllowUserAccent bool         `json:"allowUserAccent"`
+	SignInScope     string       `json:"signInScope"`
+	BrandPrimary    string       `json:"brandPrimary"`
+	BrandSecondary  string       `json:"brandSecondary"`
+	BrandBadge      string       `json:"brandBadge"`
 }
 
 // Neutral is the skin for unknown domains.
 func Neutral(domain string) *PublicBranding {
-	return &PublicBranding{Domain: domain, Name: "Webmail", FooterLinks: []FooterLink{}}
+	return &PublicBranding{Domain: domain, Name: "Webmail", FooterLinks: []FooterLink{}, SignInScope: "any"}
 }
 
 // Public is the browser form of a stored branding; nil gives the neutral skin.
@@ -190,13 +222,11 @@ func Public(domain string, b *store.Branding) *PublicBranding {
 	p := &PublicBranding{
 		Known: true, Domain: domain, FooterLinks: []FooterLink{}, Name: b.DisplayName, Theme: b.Theme, Accent: b.Accent,
 		LoginTitle: b.LoginTitle, LoginMessage: b.LoginMessage, SupportEmail: b.SupportEmail, SupportURL: b.SupportURL,
-		DefaultLanguage: b.DefaultLocale, AllowUserAccent: b.AllowUserAccent,
+		DefaultLanguage: b.DefaultLocale, AllowUserAccent: b.AllowUserAccent, SignInScope: b.SignInScope,
+		BrandPrimary: b.BrandPrimary, BrandSecondary: b.BrandSecondary, BrandBadge: b.BrandBadge,
 	}
 	if p.Name == "" {
 		p.Name = domain
-	}
-	if b.HasLogo {
-		p.LogoURL = "/api/logo?domain=" + url.QueryEscape(domain)
 	}
 	for _, l := range b.FooterLinks {
 		p.FooterLinks = append(p.FooterLinks, FooterLink{Label: l.Label, URL: l.URL})
@@ -242,4 +272,9 @@ func baseURL(raw string) string {
 		return ""
 	}
 	return strings.TrimRight(u.String(), "/")
+}
+
+// AllowsSignIn reports whether an address of domain may sign in on the host b is served on.
+func AllowsSignIn(b *store.Branding, domain string) bool {
+	return b == nil || b.SignInScope != "domain" || strings.EqualFold(b.Domain, domain)
 }

@@ -66,13 +66,13 @@ func TestValidateRejectsInsteadOfDropping(t *testing.T) {
 
 func TestPublic(t *testing.T) {
 	p := Public("example.test", &store.Branding{
-		DisplayName: "Example", HasLogo: true, Theme: "ocean", Accent: "#336699", DefaultLocale: "de",
+		DisplayName: "Example", Theme: "ocean", Accent: "#336699", DefaultLocale: "de",
 		FooterLinks: []store.FooterLink{{Label: "Privacy", URL: "https://example.test/p"}}, UpdatedAt: time.Now(),
 	})
-	if !p.Known || p.Name != "Example" || p.LogoURL != "/api/logo?domain=example.test" || p.DefaultLanguage != "de" || len(p.FooterLinks) != 1 {
+	if !p.Known || p.Name != "Example" || p.DefaultLanguage != "de" || len(p.FooterLinks) != 1 {
 		t.Fatalf("%+v", p)
 	}
-	if p := Public("a.test", &store.Branding{}); p.Name != "a.test" || p.LogoURL != "" || p.FooterLinks == nil {
+	if p := Public("a.test", &store.Branding{}); p.Name != "a.test" || p.FooterLinks == nil {
 		t.Fatalf("%+v", p)
 	}
 	n := Public("unknown.test", nil)
@@ -82,8 +82,8 @@ func TestPublic(t *testing.T) {
 }
 
 func TestToAdmin(t *testing.T) {
-	a := ToAdmin(&store.Branding{Domain: "example.test", MailboxCount: 4, HasLogo: true, UpdatedAt: time.Unix(0, 0)})
-	if a.Domain != "example.test" || a.MailboxCount != 4 || !a.HasLogo || a.UpdatedAt != "1970-01-01T00:00:00Z" || a.FooterLinks == nil {
+	a := ToAdmin(&store.Branding{Domain: "example.test", MailboxCount: 4, UpdatedAt: time.Unix(0, 0)})
+	if a.Domain != "example.test" || a.MailboxCount != 4 || a.UpdatedAt != "1970-01-01T00:00:00Z" || a.FooterLinks == nil {
 		t.Fatalf("%+v", a)
 	}
 }
@@ -101,5 +101,18 @@ func TestJMAPURLIsAnHTTPBaseWithoutCredentials(t *testing.T) {
 	empty, err := Validate(Input{Domain: "a.test"}, "a.test")
 	if err != nil || empty.JMAPURL != "" {
 		t.Fatalf("no address means the default server: %v %q", err, empty.JMAPURL)
+	}
+}
+
+func TestWordmarkPartsAndBadge(t *testing.T) {
+	b, err := Validate(Input{Domain: "a.test", BrandPrimary: " Acme ", BrandSecondary: "Mail", BrandBadge: "Staff"}, "a.test")
+	if err != nil || b.BrandPrimary != "Acme" || b.BrandSecondary != "Mail" || b.BrandBadge != "Staff" {
+		t.Fatalf("%v %+v", err, b)
+	}
+	if p := Public("a.test", b); p.BrandPrimary != "Acme" || p.BrandBadge != "Staff" {
+		t.Fatalf("the browser gets the parts: %+v", p)
+	}
+	if _, err := Validate(Input{Domain: "a.test", BrandBadge: strings.Repeat("x", 41)}, "a.test"); err == nil {
+		t.Fatal("a badge longer than 40 characters is refused")
 	}
 }

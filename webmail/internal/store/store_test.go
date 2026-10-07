@@ -106,7 +106,7 @@ func TestBrandings(t *testing.T) {
 		t.Fatalf("duplicate: %v", err)
 	}
 	b, err := s.GetBranding(ctx, "a.test")
-	if err != nil || b.DisplayName != "a.test" || len(b.FooterLinks) != 1 || b.MailboxCount != 2 || b.HasLogo {
+	if err != nil || b.DisplayName != "a.test" || len(b.FooterLinks) != 1 || b.MailboxCount != 2 {
 		t.Fatalf("%+v %v", b, err)
 	}
 	if _, err := s.GetBranding(ctx, "nope.test"); !errors.Is(err, ErrNotFound) {
@@ -130,34 +130,14 @@ func TestBrandings(t *testing.T) {
 		t.Fatalf("wildcards are literal: %d %v", total, page)
 	}
 
-	if err := s.SetLogo(ctx, "a.test", "image/png", []byte("png")); err != nil {
-		t.Fatal(err)
-	}
-	if err := s.SetLogo(ctx, "nope.test", "image/png", []byte("png")); !errors.Is(err, ErrNotFound) {
-		t.Fatalf("logo for a missing domain: %v", err)
-	}
-	data, mime, err := s.Logo(ctx, "a.test")
-	if err != nil || string(data) != "png" || mime != "image/png" {
-		t.Fatalf("%q %q %v", data, mime, err)
-	}
-	b, _ = s.GetBranding(ctx, "a.test")
-	if !b.HasLogo {
-		t.Fatal("HasLogo not set")
-	}
 	if err := s.UpdateBranding(ctx, &Branding{Domain: "a.test", DisplayName: "renamed"}); err != nil {
 		t.Fatal(err)
 	}
-	if b, _ = s.GetBranding(ctx, "a.test"); b.DisplayName != "renamed" || !b.HasLogo || len(b.FooterLinks) != 0 {
-		t.Fatalf("update must keep the logo and replace the rest: %+v", b)
+	if b, _ = s.GetBranding(ctx, "a.test"); b.DisplayName != "renamed" || len(b.FooterLinks) != 0 {
+		t.Fatalf("update must replace every editable field: %+v", b)
 	}
 	if err := s.UpdateBranding(ctx, &Branding{Domain: "nope.test"}); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("update missing: %v", err)
-	}
-	if err := s.ClearLogo(ctx, "a.test"); err != nil {
-		t.Fatal(err)
-	}
-	if _, _, err := s.Logo(ctx, "a.test"); !errors.Is(err, ErrNotFound) {
-		t.Fatalf("logo not cleared: %v", err)
 	}
 	if err := s.DeleteBranding(ctx, "a.test"); err != nil {
 		t.Fatal(err)
@@ -167,5 +147,31 @@ func TestBrandings(t *testing.T) {
 	}
 	if n, _ := s.CountBrandings(ctx); n != 3 {
 		t.Fatalf("count %d", n)
+	}
+}
+
+func TestMigrationFourKeepsBrandingsAndDropsTheLogoColumns(t *testing.T) {
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "old.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, m := range migrations[:3] {
+		if _, err := db.Exec(m); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := db.Exec(`INSERT INTO brandings (domain, display_name, logo, logo_mime, jmap_url, updated_at) VALUES ('a.test', 'Acme', x'89504e47', 'image/png', 'http://one.test', 1)`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(migrations[3]); err != nil {
+		t.Fatalf("migration 4: %v", err)
+	}
+	var name, jmap string
+	if err := db.QueryRow(`SELECT display_name, jmap_url FROM brandings WHERE domain = 'a.test'`).Scan(&name, &jmap); err != nil || name != "Acme" || jmap != "http://one.test" {
+		t.Fatalf("the branding survives: %q %q %v", name, jmap, err)
+	}
+	if _, err := db.Exec(`SELECT logo FROM brandings`); err == nil {
+		t.Fatal("the logo column must be gone")
 	}
 }

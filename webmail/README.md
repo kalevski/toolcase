@@ -13,10 +13,19 @@ platform address or credential.
   branding. Sign-in and every later call of that domain go to that server (`internal/mailhost`); a domain with no
   `jmapUrl` uses `WEBMAIL_JMAP_URL`. When the platform moves a domain to another server it pushes the new address:
   the sessions of that domain fail their next upstream call and end, and the users sign in again.
+- **The page wears the branding of the host it is served on.** The platform proxies each mail domain's webmail address
+  (for example `mail.acme.com`) to this service and pushes it as the branding's `webmailHost`. `GET /api/branding` and the
+  signed-in app pick the branding by that host (`X-Forwarded-Host` from a trusted proxy, else `Host`); a domain with no
+  `webmailHost` is served on its own name; the shared `WEBMAIL_PUBLIC_URL` stays neutral. Typing an address never
+  restyles the page. A branding's `signInScope` (`any`, the default, or `domain`) can keep its host for its own
+  domain's addresses: others are refused with `domain_not_allowed` before the mail server is asked. The wordmark is
+  `brandPrimary` and `brandSecondary` (else the display name split at its first space), with an optional `brandBadge`
+  above it. Sign-in and every change also accept the `Origin` of a registered webmail host, on the public URL's
+  scheme.
 - Browser holds only an opaque `__Host-` session cookie, never a mail credential.
 - Sign-in checks the password against the mail server over JMAP (HTTP Basic) and keeps it sealed (AES-256-GCM under
   `WEBMAIL_SESSION_KEY`) in the session for upstream calls. A domain the platform has not registered cannot sign in.
-- State: SQLite in `WEBMAIL_DATA_DIR` (sessions, preferences, rate-limit counters, brandings with their logos). One
+- State: SQLite in `WEBMAIL_DATA_DIR` (sessions, preferences, rate-limit counters, brandings). One
   instance only.
 - Mail bodies are sanitised on the server and shown in a script-less sandboxed iframe.
 
@@ -81,7 +90,7 @@ a `_FILE` form. All problems are reported at once.
 
 ## HTTP API
 
-Public: `GET /_healthz`, `GET /_version`, `GET /api/branding?domain=`, `GET /api/logo?domain=`, `POST /api/login`.
+Public: `GET /_healthz`, `GET /_version`, `GET /api/branding` (by host), `POST /api/login`.
 Authenticated (cookie; mutating requests also need `X-Webmail-CSRF` and a matching `Origin`): `GET /api/session`,
 `POST /api/logout`, `GET /api/sessions`, `DELETE /api/sessions/{id}`, `PUT /api/prefs`, `POST /api/password`,
 `POST /api/jmap`, `GET /api/download/{accountId}/{blobId}/{name}`, `POST /api/upload/{accountId}`,
@@ -91,7 +100,7 @@ Authenticated (cookie; mutating requests also need `X-Webmail-CSRF` and a matchi
 
 `Authorization: Bearer <WEBMAIL_API_TOKEN>` on every call, no cookies or CSRF; wrong tokens are throttled per address.
 A **branding** is `{domain, displayName, theme, accent, loginTitle, loginMessage, supportEmail, supportUrl,
-footerLinks[{label,url}], defaultLocale, allowUserAccent, mailboxCount}` plus the read-only `hasLogo` and `updatedAt`.
+footerLinks[{label,url}], defaultLocale, allowUserAccent, mailboxCount}` plus the read-only `updatedAt`. A domain's mark is its display name, set as text: there are no logo images.
 Every field is validated on write and a bad one is refused (`422 invalid_branding`, the message names the field);
 nothing is silently dropped, and raw CSS or HTML is never stored.
 
@@ -100,9 +109,7 @@ nothing is silently dropped, and raw CSS or HTML is never stored.
 | `GET /admin/v1/health` | `{ok, version, domains}` |
 | `GET /admin/v1/brandings?limit=&cursor=&q=` | `{items, total, nextCursor}`, by domain; `limit` 1-100 (25); `q` filters on the domain |
 | `POST /admin/v1/brandings` | register a domain (`201`; `409 exists`); `jmapUrl` is the mail server of its mailboxes (an http(s) base, no credentials), empty for the default |
-| `GET` / `PUT` / `DELETE /admin/v1/brandings/{domain}` | read; replace every editable field (`404 not_found`); remove with its logo (`204`, idempotent) |
-| `PUT /admin/v1/brandings/{domain}/logo` | raw PNG, JPEG or WebP up to 512 KiB, type checked against the bytes (`204`, `413`, `415`) |
-| `DELETE /admin/v1/brandings/{domain}/logo` | `204` |
+| `GET` / `PUT` / `DELETE /admin/v1/brandings/{domain}` | read; replace every editable field (`404 not_found`); remove (`204`, idempotent) |
 
 ## Architecture
 
@@ -117,7 +124,7 @@ internal/session     sealed passwords, cookie, expiry, CSRF/Origin
 internal/branding    branding validation (rejecting), admin and public (browser) forms
 internal/ratelimit   SQLite-backed failure/window limiters; window limiter refuses blocked keys from memory
 internal/mailhost     the JMAP client of a domain: its branding's mail server, else the default; cached 30 s, dropped when the branding is written
-internal/store       SQLite (WAL, writer pool of 1, append-only migrations): sessions, prefs, rate limits, brandings + logos; 5 s in-process session cache
+internal/store       SQLite (WAL, writer pool of 1, append-only migrations): sessions, prefs, rate limits, brandings; 5 s in-process session cache
 internal/fakes       fake JMAP server for tests and local runs
 web/                 React 19 + tc-* SPA, built into internal/web/dist
 ```
@@ -138,8 +145,7 @@ web/                 React 19 + tc-* SPA, built into internal/web/dist
   There are no temporary credentials, so a stolen database plus `WEBMAIL_SESSION_KEY` yields live passwords: protect
   both, keep the data directory private, and prefer short idle lifetimes.
 - Sign-in for a domain with no branding row fails like a wrong password without asking the mail server.
-- Admin API: constant-time token comparison, per-address window limit and failure throttle, 1 MiB body cap, logos
-  magic-byte checked and served `nosniff` under a sandbox CSP.
+- Admin API: constant-time token comparison, per-address window limit and failure throttle, 1 MiB body cap.
 - Sign-in failures answer identically for unknown address and wrong password, with a minimum response time.
 - Remote images, fonts and `@import` are never loaded unless the reader asks per message; there is no image proxy.
 - cid images are inlined as `data:` URIs by the server (a sandboxed iframe cannot send the cookie).

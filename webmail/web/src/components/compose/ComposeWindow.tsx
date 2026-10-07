@@ -33,6 +33,10 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
     const [status, setStatus] = useState('')
     const [error, setError] = useState('')
     const [minimised, setMinimised] = useState(false)
+    const [full, setFull] = useState(false)
+    const [showBcc, setShowBcc] = useState(false)
+    const [showFormat, setShowFormat] = useState(false)
+    const [moreOpen, setMoreOpen] = useState(false)
     const [confirmDiscard, setConfirmDiscard] = useState(false)
     const [confirmNoSubject, setConfirmNoSubject] = useState(false)
     const dirty = useRef(false)
@@ -197,179 +201,291 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
               ? 'compose.forwardTitle'
               : 'compose.title'
 
+    const toggleFormat = () => {
+        if (!state) return
+        // The formatting bar needs the rich editor; plain text carries across, escaped.
+        if (!state.rich) {
+            update({ rich: true, html: textToHtml(state.text) })
+            setShowFormat(true)
+        } else setShowFormat((v) => !v)
+    }
+
+    const bccOpen = showBcc || (state?.bcc.length ?? 0) > 0
+    const ccOpen = state?.showCc || (state?.cc.length ?? 0) > 0
+
     return (
-        <section
-            className={`wm-compose${minimised ? ' is-minimised' : ''}`}
-            role="dialog"
-            aria-labelledby={titleId}
-            onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                    e.stopPropagation()
-                    close()
-                }
-                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                    e.preventDefault()
-                    send()
-                }
-            }}
-        >
-            <header className="wm-compose__head">
-                <h2 id={titleId} className="wm-compose__title">
-                    {state?.subject.trim() || t(titleKey)}
-                </h2>
-                <tc-icon-button
-                    icon={minimised ? 'Maximize2' : 'Minimize2'}
-                    label={minimised ? t('compose.restore') : t('compose.minimise')}
-                    className="wm-compose__min"
-                    ontc-click={() => setMinimised((m) => !m)}
-                ></tc-icon-button>
-                <tc-icon-button icon="X" label={t('common.close')} ontc-click={close}></tc-icon-button>
-            </header>
-            {!state ? (
-                <div className="wm-compose__body wm-center">
-                    {error ? <p className="wm-error">{error}</p> : <tc-spinner label={t('common.loading')}></tc-spinner>}
-                </div>
-            ) : (
-                <div className="wm-compose__body" hidden={minimised}>
-                    {identities.length > 1 ? (
-                        <tc-select
-                            label={t('compose.from')}
-                            value={state.identityId}
-                            ontc-change={(e) => update({ identityId: String(e.detail.value) })}
-                        >
-                            {identities.map((i) => (
-                                <tc-option key={i.id} value={i.id}>
-                                    {i.name ? `${i.name} <${i.email}>` : i.email}
-                                </tc-option>
-                            ))}
-                        </tc-select>
-                    ) : null}
-                    <div className="wm-compose__row">
-                        <AddressField
-                            label={t('compose.to')}
-                            value={state.to}
-                            onChange={(to) => update({ to })}
-                            onError={setError}
-                            autoFocus={init.mode === 'new' || init.mode === 'forward'}
-                        />
-                        {!state.showCc ? (
-                            <button type="button" className="wm-linkbtn" onClick={() => update({ showCc: true })}>
-                                {t('compose.showCcBcc')}
-                            </button>
-                        ) : null}
-                    </div>
-                    {state.showCc ? (
-                        <>
-                            <AddressField label={t('compose.cc')} value={state.cc} onChange={(cc) => update({ cc })} onError={setError} />
-                            <AddressField label={t('compose.bcc')} value={state.bcc} onChange={(bcc) => update({ bcc })} onError={setError} />
-                        </>
-                    ) : null}
-                    <tc-form-input
-                        label={t('compose.subject')}
-                        value={state.subject}
-                        ontc-change={(e) => update({ subject: String(e.detail.value ?? '') })}
-                    ></tc-form-input>
-
-                    <div className="wm-compose__mode">
-                        <tc-switch
-                            label={t('compose.richText')}
-                            checked={state.rich}
-                            ontc-change={(e) => {
-                                const rich = e.detail.value === true
-                                // Switching modes carries the text across; plain → rich escapes it.
-                                update(rich ? { rich, html: textToHtml(state.text) } : { rich })
-                            }}
-                        ></tc-switch>
-                    </div>
-                    {state.rich ? (
-                        <RichEditor
-                            key="rich"
-                            label={t('compose.body')}
-                            initialHtml={state.html || escapeHtml('')}
-                            onChange={({ html, text }) => update({ html, text })}
-                        />
-                    ) : (
-                        <textarea
-                            className="form-control wm-compose__text"
-                            aria-label={t('compose.body')}
-                            value={state.text}
-                            onChange={(e) => update({ text: e.target.value })}
-                            autoFocus={init.mode === 'reply' || init.mode === 'replyAll'}
-                            onFocus={(e) => {
-                                if (init.mode === 'reply' || init.mode === 'replyAll') e.currentTarget.setSelectionRange(0, 0)
-                            }}
-                        />
-                    )}
-
-                    {state.attachments.length || uploads.length ? (
-                        <ul className="wm-compose__files">
-                            {state.attachments.map((a) => (
-                                <li key={a.blobId} className="wm-file">
-                                    <tc-icon name="paperclip" decorative></tc-icon>
-                                    <span className="wm-file__name">{a.name}</span>
-                                    <span className="wm-muted">{formatBytes(a.size)}</span>
-                                    <tc-icon-button
-                                        icon="X"
-                                        size="small"
-                                        label={t('compose.removeAttachment', { name: a.name })}
-                                        ontc-click={() => update({ attachments: state.attachments.filter((x) => x !== a) })}
-                                    ></tc-icon-button>
-                                </li>
-                            ))}
-                            {uploads.map((u) => (
-                                <li key={u.id} className="wm-file">
-                                    <span className="wm-file__name">{t('compose.uploading', { name: u.name })}</span>
-                                    <tc-progress value={Math.round(u.progress * 100)} aria-label={t('compose.uploading', { name: u.name })}></tc-progress>
-                                    <tc-icon-button icon="X" size="small" label={t('common.cancel')} ontc-click={u.abort}></tc-icon-button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : null}
-
-                    {error ? (
-                        <p className="wm-error" role="alert">
-                            {error}
-                        </p>
-                    ) : null}
-
-                    <footer className="wm-compose__foot">
-                        <tc-button variant="primary" disabled={uploads.length > 0} onClick={() => send()}>
-                            {t('compose.send')}
-                        </tc-button>
-                        <input
-                            ref={fileInput}
-                            type="file"
-                            multiple
-                            hidden
-                            onChange={(e) => addFiles(e.target.files)}
-                        />
-                        <tc-icon-button icon="Paperclip" label={t('compose.attach')} ontc-click={() => fileInput.current?.click()}></tc-icon-button>
-                        <span className="wm-compose__status wm-muted" aria-live="polite">
-                            {status}
-                        </span>
-                        <tc-icon-button icon="Trash2" label={t('compose.discard')} ontc-click={() => setConfirmDiscard(true)}></tc-icon-button>
-                    </footer>
-                </div>
-            )}
-            <ConfirmDialog
-                open={confirmDiscard}
-                title={t('compose.discardTitle')}
-                message={t('compose.discardMessage')}
-                confirmLabel={t('compose.discard')}
-                danger
-                onConfirm={() => void discard()}
-                onCancel={() => setConfirmDiscard(false)}
-            />
-            <ConfirmDialog
-                open={confirmNoSubject}
-                title={t('compose.noSubjectConfirm')}
-                confirmLabel={t('compose.send')}
-                onConfirm={() => {
-                    setConfirmNoSubject(false)
-                    send(true)
+        <>
+            {full && !minimised ? <div className="wm-compose__scrim" onClick={() => setFull(false)} aria-hidden="true" /> : null}
+            <section
+                className={`wm-compose${minimised ? ' is-minimised' : ''}${full && !minimised ? ' is-full' : ''}`}
+                role="dialog"
+                aria-labelledby={titleId}
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                        e.stopPropagation()
+                        if (moreOpen) setMoreOpen(false)
+                        else close()
+                    }
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                        e.preventDefault()
+                        send()
+                    }
                 }}
-                onCancel={() => setConfirmNoSubject(false)}
-            />
-        </section>
+            >
+                <header
+                    className="wm-compose__head"
+                    onClick={(e) => {
+                        // Like a mail app's compose bar: a click on the bar itself folds and unfolds the window.
+                        if ((e.target as HTMLElement).closest('button, tc-icon-button')) return
+                        setMinimised((m) => !m)
+                    }}
+                >
+                    <h2 id={titleId} className="wm-compose__title">
+                        {state?.subject.trim() || t(titleKey)}
+                    </h2>
+                    <button
+                        type="button"
+                        className="wm-compose__hbtn"
+                        aria-label={minimised ? t('compose.restore') : t('compose.minimise')}
+                        title={minimised ? t('compose.restore') : t('compose.minimise')}
+                        onClick={() => setMinimised((m) => !m)}
+                    >
+                        <tc-icon name={minimised ? 'ChevronUp' : 'Minus'} decorative></tc-icon>
+                    </button>
+                    <button
+                        type="button"
+                        className="wm-compose__hbtn wm-compose__hbtn--full"
+                        aria-label={full ? t('compose.exitFullScreen') : t('compose.fullScreen')}
+                        title={full ? t('compose.exitFullScreen') : t('compose.fullScreen')}
+                        onClick={() => {
+                            setMinimised(false)
+                            setFull((f) => !f)
+                        }}
+                    >
+                        <tc-icon name={full ? 'Minimize2' : 'Maximize2'} decorative></tc-icon>
+                    </button>
+                    <button type="button" className="wm-compose__hbtn" aria-label={t('common.close')} title={t('common.close')} onClick={close}>
+                        <tc-icon name="X" decorative></tc-icon>
+                    </button>
+                </header>
+                {!state ? (
+                    <div className="wm-compose__body wm-center" hidden={minimised}>
+                        {error ? <p className="wm-error">{error}</p> : <tc-spinner label={t('common.loading')}></tc-spinner>}
+                    </div>
+                ) : (
+                    <div className="wm-compose__body" hidden={minimised}>
+                        <div className="wm-compose__fields">
+                            {identities.length > 1 ? (
+                                <label className="wm-cfield">
+                                    <span className="wm-cfield__label">{t('compose.from')}</span>
+                                    <select
+                                        className="wm-cfield__select"
+                                        value={state.identityId}
+                                        onChange={(e) => update({ identityId: e.target.value })}
+                                    >
+                                        {identities.map((i) => (
+                                            <option key={i.id} value={i.id}>
+                                                {i.name ? `${i.name} <${i.email}>` : i.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            ) : null}
+                            <div className="wm-cfield">
+                                <AddressField
+                                    label={t('compose.to')}
+                                    value={state.to}
+                                    onChange={(to) => update({ to })}
+                                    onError={setError}
+                                    autoFocus={init.mode === 'new' || init.mode === 'forward'}
+                                />
+                                {!ccOpen || !bccOpen ? (
+                                    <span className="wm-cfield__extras">
+                                        {!ccOpen ? (
+                                            <button type="button" className="wm-cfield__more" onClick={() => update({ showCc: true })}>
+                                                {t('compose.cc')}
+                                            </button>
+                                        ) : null}
+                                        {!bccOpen ? (
+                                            <button type="button" className="wm-cfield__more" onClick={() => setShowBcc(true)}>
+                                                {t('compose.bcc')}
+                                            </button>
+                                        ) : null}
+                                    </span>
+                                ) : null}
+                            </div>
+                            {ccOpen ? (
+                                <div className="wm-cfield">
+                                    <AddressField label={t('compose.cc')} value={state.cc} onChange={(cc) => update({ cc })} onError={setError} />
+                                </div>
+                            ) : null}
+                            {bccOpen ? (
+                                <div className="wm-cfield">
+                                    <AddressField label={t('compose.bcc')} value={state.bcc} onChange={(bcc) => update({ bcc })} onError={setError} />
+                                </div>
+                            ) : null}
+                            <div className="wm-cfield">
+                                <input
+                                    className="wm-cfield__subject"
+                                    type="text"
+                                    placeholder={t('compose.subject')}
+                                    aria-label={t('compose.subject')}
+                                    value={state.subject}
+                                    onChange={(e) => update({ subject: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="wm-compose__editor">
+                            {state.rich ? (
+                                <RichEditor
+                                    key="rich"
+                                    label={t('compose.body')}
+                                    initialHtml={state.html || escapeHtml('')}
+                                    showToolbar={showFormat}
+                                    onChange={({ html, text }) => update({ html, text })}
+                                />
+                            ) : (
+                                <textarea
+                                    className="wm-compose__text"
+                                    aria-label={t('compose.body')}
+                                    value={state.text}
+                                    onChange={(e) => update({ text: e.target.value })}
+                                    autoFocus={init.mode === 'reply' || init.mode === 'replyAll'}
+                                    onFocus={(e) => {
+                                        if (init.mode === 'reply' || init.mode === 'replyAll') e.currentTarget.setSelectionRange(0, 0)
+                                    }}
+                                />
+                            )}
+
+                            {state.attachments.length || uploads.length ? (
+                                <ul className="wm-compose__files">
+                                    {state.attachments.map((a) => (
+                                        <li key={a.blobId} className="wm-cfile">
+                                            <tc-icon name="Paperclip" decorative></tc-icon>
+                                            <span className="wm-cfile__name">{a.name}</span>
+                                            <span className="wm-cfile__size">({formatBytes(a.size)})</span>
+                                            <button
+                                                type="button"
+                                                className="wm-cfile__remove"
+                                                aria-label={t('compose.removeAttachment', { name: a.name })}
+                                                onClick={() => update({ attachments: state.attachments.filter((x) => x !== a) })}
+                                            >
+                                                <tc-icon name="X" decorative></tc-icon>
+                                            </button>
+                                        </li>
+                                    ))}
+                                    {uploads.map((u) => (
+                                        <li key={u.id} className="wm-cfile is-uploading">
+                                            <span className="wm-cfile__name">{u.name}</span>
+                                            <tc-progress value={Math.round(u.progress * 100)} aria-label={t('compose.uploading', { name: u.name })}></tc-progress>
+                                            <button type="button" className="wm-cfile__remove" aria-label={t('common.cancel')} onClick={u.abort}>
+                                                <tc-icon name="X" decorative></tc-icon>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : null}
+                        </div>
+
+                        {error ? (
+                            <p className="wm-error wm-compose__error" role="alert">
+                                {error}
+                            </p>
+                        ) : null}
+
+                        <footer className="wm-compose__foot">
+                            <button type="button" className="wm-compose__send" disabled={uploads.length > 0} onClick={() => send()}>
+                                {t('compose.send')}
+                            </button>
+                            <button
+                                type="button"
+                                className={`wm-compose__tool${showFormat && state.rich ? ' is-on' : ''}`}
+                                aria-label={t('compose.formatting')}
+                                aria-pressed={showFormat && state.rich}
+                                title={t('compose.formatting')}
+                                onClick={toggleFormat}
+                            >
+                                <tc-icon name="Baseline" decorative></tc-icon>
+                            </button>
+                            <input ref={fileInput} type="file" multiple hidden onChange={(e) => addFiles(e.target.files)} />
+                            <button
+                                type="button"
+                                className="wm-compose__tool"
+                                aria-label={t('compose.attach')}
+                                title={t('compose.attach')}
+                                onClick={() => fileInput.current?.click()}
+                            >
+                                <tc-icon name="Paperclip" decorative></tc-icon>
+                            </button>
+                            <span className="wm-compose__status" aria-live="polite">
+                                {status}
+                            </span>
+                            <span className="wm-compose__menuwrap">
+                                <button
+                                    type="button"
+                                    className="wm-compose__tool"
+                                    aria-label={t('compose.more')}
+                                    title={t('compose.more')}
+                                    aria-haspopup="menu"
+                                    aria-expanded={moreOpen}
+                                    onClick={() => setMoreOpen((o) => !o)}
+                                >
+                                    <tc-icon name="EllipsisVertical" decorative></tc-icon>
+                                </button>
+                                {moreOpen ? (
+                                    <ul className="wm-compose__menu" role="menu">
+                                        <li role="none">
+                                            <button
+                                                type="button"
+                                                role="menuitemcheckbox"
+                                                aria-checked={!state.rich}
+                                                className="wm-compose__menuitem"
+                                                onClick={() => {
+                                                    setMoreOpen(false)
+                                                    setShowFormat(false)
+                                                    update(state.rich ? { rich: false } : { rich: true, html: textToHtml(state.text) })
+                                                }}
+                                            >
+                                                <tc-icon name={state.rich ? 'Square' : 'SquareCheck'} decorative></tc-icon>
+                                                {t('compose.plainMode')}
+                                            </button>
+                                        </li>
+                                    </ul>
+                                ) : null}
+                            </span>
+                            <button
+                                type="button"
+                                className="wm-compose__tool"
+                                aria-label={t('compose.discard')}
+                                title={t('compose.discard')}
+                                onClick={() => setConfirmDiscard(true)}
+                            >
+                                <tc-icon name="Trash2" decorative></tc-icon>
+                            </button>
+                        </footer>
+                    </div>
+                )}
+                <ConfirmDialog
+                    open={confirmDiscard}
+                    title={t('compose.discardTitle')}
+                    message={t('compose.discardMessage')}
+                    confirmLabel={t('compose.discard')}
+                    danger
+                    onConfirm={() => void discard()}
+                    onCancel={() => setConfirmDiscard(false)}
+                />
+                <ConfirmDialog
+                    open={confirmNoSubject}
+                    title={t('compose.noSubjectConfirm')}
+                    confirmLabel={t('compose.send')}
+                    onConfirm={() => {
+                        setConfirmNoSubject(false)
+                        send(true)
+                    }}
+                    onCancel={() => setConfirmNoSubject(false)}
+                />
+            </section>
+        </>
     )
 }

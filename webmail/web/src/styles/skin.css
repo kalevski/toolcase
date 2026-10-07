@@ -51,12 +51,6 @@ body {
     color: var(--wm-emphasis);
 }
 
-.wm-brand__dot {
-    border-radius: 3px;
-    width: 10px;
-    height: 10px;
-}
-
 .wm-search__input,
 .wm-search .tc-form-input,
 .wm-search input {
@@ -247,11 +241,13 @@ body {
 /* ── Sign in ────────────────────────────────────────────────────────────── */
 
 .wm-login {
-    --wm-deep: #14132a;
-    --wm-deep-2: #1d1b3a;
-    --wm-stage-rule: rgba(255, 255, 255, 0.13);
-    --wm-stage-ink: #d7d5ea;
-    --wm-stage-ink-2: #8481ae;
+    --wm-accent: var(--tc-app-accent, #2f6fe4);
+    /* the stage takes its tone from the domain's own accent, so every domain's sign-in looks like its own */
+    --wm-stage-bg: color-mix(in oklab, var(--wm-accent) 22%, #0d0c16);
+    --wm-stage-bg-2: color-mix(in oklab, var(--wm-accent) 34%, #0d0c16);
+    --wm-stage-rule: rgba(255, 255, 255, 0.14);
+    --wm-stage-ink: color-mix(in oklab, #ffffff 90%, var(--wm-accent));
+    --wm-stage-ink-2: color-mix(in oklab, #ffffff 58%, var(--wm-accent) 30%);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     min-height: 100dvh;
@@ -260,197 +256,117 @@ body {
 
 @media (min-width: 992px) {
     .wm-login {
-        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     }
 }
 
-.wm-eyebrow {
-    margin: 0 0 0.6rem;
-    font: 600 11px var(--wm-mono);
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: #8fa6ff;
+.wm-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 2rem 16px 2rem;
+    background: linear-gradient(165deg, var(--wm-stage-bg-2), var(--wm-stage-bg) 55%);
+    color: var(--wm-stage-ink);
 }
 
-.wm-stage {
-    display: flex;
-    flex-direction: column;
-    padding: 1.6rem 16px 2.25rem;
-    background:
-        radial-gradient(90% 60% at 12% 0%, color-mix(in srgb, var(--tc-app-accent) 26%, transparent), transparent 60%),
-        linear-gradient(170deg, var(--wm-deep-2), var(--wm-deep));
-    color: var(--wm-stage-ink);
+/* The lining of a business envelope: a fine woven mesh, strongest at the top right and gone by the lower edge. */
+.wm-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+        repeating-linear-gradient(45deg, color-mix(in oklab, var(--wm-accent) 55%, transparent) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(-45deg, color-mix(in oklab, var(--wm-accent) 55%, transparent) 0 1px, transparent 1px 7px);
+    opacity: 0.42;
+    -webkit-mask-image: linear-gradient(205deg, #000 5%, rgba(0, 0, 0, 0.3) 45%, transparent 75%);
+    mask-image: linear-gradient(205deg, #000 5%, rgba(0, 0, 0, 0.3) 45%, transparent 75%);
 }
 
 @media (min-width: 992px) {
     .wm-stage {
-        padding: 1.6rem 2.25rem 2.25rem;
+        order: 1;
+        padding: 2.5rem clamp(2.5rem, 5vw, 5rem) 2.6rem;
     }
 }
 
-.wm-stage__head {
+.wm-brand tc-brand {
+    --bs-brand-primary-font: var(--wm-display);
+    --bs-brand-primary-letter-spacing: 0.02em;
+}
+
+.wm-brand .tc-brand__secondary:not(:empty)::before {
+    content: '\00a0';
+}
+
+/* The badge sits above the mark wherever the mark is large; in the compact top bar it stays beside it. */
+.wm-brand--lg .tc-brand,
+.wm-brand--hero .tc-brand {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+
+/* The domain's name, set as the wordmark, is the page's one large thing. */
+.wm-stage__hero {
+    align-self: center;
     display: flex;
-    align-items: center;
-    padding-bottom: 1.15rem;
-    border-bottom: 1px solid var(--wm-stage-rule);
-}
-
-.wm-stage__head .wm-brand {
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-size: 1.05rem;
-}
-
-.wm-stage__body {
-    padding-top: 2.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
     max-width: 40rem;
 }
 
-@media (min-width: 992px) {
-    .wm-stage__body {
-        padding-top: clamp(2.25rem, 12vh, 7rem);
-    }
+.wm-stage__hero tc-brand {
+    --bs-brand-primary-color: #ffffff;
+    --bs-brand-secondary-color: rgba(255, 255, 255, 0.7);
+    --bs-brand-xlarge-scale: clamp(2.4rem, 1.2rem + 3.6vw, 4.75rem);
+    --bs-brand-primary-letter-spacing: 0.01em;
+    --bs-brand-underline-height: 6px;
+    --bs-brand-label-size: 0.75rem;
+    --bs-brand-label-color: #ffffff;
+    --bs-brand-label-bg: rgba(255, 255, 255, 0.14);
+    --bs-brand-label-padding-y: 0.35em;
+    --bs-brand-label-padding-x: 0.7em;
 }
 
-.wm-login .wm-stage__title {
-    margin: 0;
-    font-family: var(--wm-display);
-    font-size: clamp(1.6rem, 1rem + 2.2vw, 2.3rem);
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.025em;
-    color: #ffffff;
-    text-wrap: pretty;
-}
-
-.wm-stage__lead {
-    margin: 0.85rem 0 0;
-    max-width: 34rem;
-    font-size: 0.92rem;
-    line-height: 1.6;
-    color: var(--wm-stage-ink-2);
-    text-wrap: pretty;
-}
-
-.wm-board {
-    margin-top: 1.6rem;
-    border: 1px solid var(--wm-stage-rule);
-    border-radius: var(--wm-r-lg);
-    background: rgba(0, 0, 0, 0.24);
-    overflow: hidden;
-}
-
-.wm-board__head {
-    display: none;
-    gap: 0.85rem;
-    padding: 9px 14px;
-    border-bottom: 1px solid var(--wm-stage-rule);
-    font: 600 9.5px var(--wm-mono);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--wm-stage-ink-2);
-}
-
-@media (min-width: 768px) {
-    .wm-board__head {
-        display: grid;
-        grid-template-columns: minmax(0, 1.85fr) 6rem 4rem;
-    }
-}
-
-.wm-board__rows {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.wm-board__row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 3px 0.85rem;
-    padding: 11px 14px;
-    border-bottom: 1px dashed var(--wm-stage-rule);
-    border-left: 3px solid var(--wm-row, transparent);
-}
-
-.wm-board__row:last-child {
-    border-bottom: 0;
-}
-
-@media (min-width: 768px) {
-    .wm-board__row {
-        grid-template-columns: minmax(0, 1.85fr) 6rem 4rem;
-        align-items: baseline;
-    }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .wm-board__row {
-        animation: wm-board-in 420ms ease both;
-        animation-delay: var(--wm-delay, 0ms);
-    }
-}
-
-@keyframes wm-board-in {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-}
-
-.wm-board__row--go {
-    --wm-row: #19c37d;
-}
-
-.wm-board__row--warn {
-    --wm-row: #f0a020;
-}
-
-.wm-board__row--muted {
-    --wm-row: var(--wm-stage-ink-2);
-}
-
-.wm-board__from {
-    font: 500 12.5px var(--wm-mono);
-    color: #ffffff;
+.wm-stage__hero .tc-brand__primary,
+.wm-stage__hero .tc-brand__secondary {
+    line-height: 1.02;
     overflow-wrap: anywhere;
 }
 
-.wm-board__state {
-    grid-column: 1;
-    font: 600 10px var(--wm-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--wm-row, var(--wm-stage-ink));
+.wm-stage__hero .tc-brand__underline {
+    margin-top: 0.3em;
 }
 
-.wm-board__when {
-    font: 400 11.5px var(--wm-mono);
-    color: var(--wm-stage-ink-2);
-    text-align: right;
+.wm-stage__domain {
+    margin: 0;
+    font-family: var(--wm-display);
+    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem);
+    font-weight: 500;
+    color: var(--wm-stage-ink);
+    overflow-wrap: anywhere;
 }
 
-.wm-board__subject {
-    grid-column: 1 / -1;
-    font-size: 11.5px;
-    line-height: 1.45;
-    color: var(--wm-stage-ink-2);
-}
-
-@media (min-width: 768px) {
-    .wm-board__state {
-        grid-column: auto;
+/* Phone: the stage is a compact band above the form. */
+@media (max-width: 991.98px) {
+    .wm-stage {
+        padding-top: 1.8rem;
+        padding-bottom: 1.8rem;
     }
 
-    .wm-board__when {
-        grid-column: auto;
-        grid-row: 1;
-        grid-column: 3;
+    .wm-stage__hero {
+        align-self: start;
+        gap: 0.8rem;
     }
 
-    .wm-board__subject {
-        grid-column: 1 / -1;
+    .wm-stage__hero tc-brand {
+        --bs-brand-xlarge-scale: clamp(1.9rem, 1.2rem + 3vw, 2.6rem);
+        --bs-brand-underline-height: 4px;
     }
 }
 
@@ -484,12 +400,6 @@ body {
     color: var(--wm-emphasis);
 }
 
-@media (min-width: 992px) {
-    .wm-stage {
-        order: 1;
-    }
-}
-
 /* ── Compose, settings, labels ──────────────────────────────────────────── */
 
 :root {
@@ -498,32 +408,20 @@ body {
 
 .wm-compose {
     background: var(--wm-paper);
-    border-color: var(--wm-line);
-    box-shadow: 0 -24px 60px -20px rgba(26, 24, 48, 0.35);
-}
-
-@media (min-width: 768px) {
-    .wm-compose {
-        border-radius: var(--wm-r-xl) var(--wm-r-xl) 0 0;
-        overflow: hidden;
-    }
 }
 
 .wm-compose__head {
-    background: var(--wm-paper-tint);
-    border-bottom: 1px solid var(--wm-line);
+    background: color-mix(in oklab, var(--tc-app-accent, #2f6fe4) 9%, var(--wm-paper));
+    color: var(--wm-emphasis);
 }
 
 .wm-compose__title {
     font-family: var(--wm-display);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--wm-emphasis);
+    letter-spacing: -0.005em;
 }
 
-.wm-compose__foot {
-    border-top: 1px solid var(--wm-line);
-    background: var(--wm-paper-tint);
+.wm-compose .wm-cfield {
+    border-bottom-color: var(--wm-line);
 }
 
 .wm-addr__label {

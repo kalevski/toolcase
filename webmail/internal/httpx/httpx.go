@@ -172,6 +172,23 @@ func inNets(ip netip.Addr, nets []netip.Prefix) bool {
 // ClientIP is the client's address: the socket peer, unless it is a trusted
 // proxy, in which case the right-most X-Forwarded-For entry that is not itself
 // trusted.
+// RequestHost is the host name the browser asked for, without a port: X-Forwarded-Host when the request
+// came through a trusted proxy (the front door that serves a domain's webmail address), else Host.
+func RequestHost(r *http.Request, trusted []netip.Prefix) string {
+	host := r.Host
+	if remote, _, err := net.SplitHostPort(r.RemoteAddr); err == nil && len(trusted) > 0 {
+		if ip, perr := netip.ParseAddr(remote); perr == nil && inNets(ip, trusted) {
+			if fwd := strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-Host"), ",")[0]); fwd != "" {
+				host = fwd
+			}
+		}
+	}
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	return strings.ToLower(strings.TrimSuffix(strings.Trim(host, "[]"), "."))
+}
+
 func ClientIP(r *http.Request, trusted []netip.Prefix) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {

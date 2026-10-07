@@ -1,12 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
 	"errors"
-	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,12 +20,9 @@ import (
 
 const (
 	maxAdminBody = 1 << 20
-	maxLogoBytes = 512 << 10
 	defaultPage  = 25
 	maxPage      = 100
 )
-
-var logoTypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/webp": true}
 
 func (s *Server) adminAPIRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /admin/v1/health", s.adminAuth(s.handleAdminHealth))
@@ -36,8 +31,6 @@ func (s *Server) adminAPIRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /admin/v1/brandings/{domain}", s.adminAuth(s.handleAdminGet))
 	mux.HandleFunc("PUT /admin/v1/brandings/{domain}", s.adminAuth(s.handleAdminUpdate))
 	mux.HandleFunc("DELETE /admin/v1/brandings/{domain}", s.adminAuth(s.handleAdminDelete))
-	mux.HandleFunc("PUT /admin/v1/brandings/{domain}/logo", s.adminAuth(s.handleAdminPutLogo))
-	mux.HandleFunc("DELETE /admin/v1/brandings/{domain}/logo", s.adminAuth(s.handleAdminDeleteLogo))
 }
 
 func (s *Server) tokenOK(r *http.Request) bool {
@@ -218,64 +211,5 @@ func (s *Server) handleAdminDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.hosts.Forget(d)
-	w.WriteHeader(http.StatusNoContent)
-}
-
-// logoType checks the declared type and the leading bytes agree on one of the
-// accepted raster formats.
-func logoType(declared string, data []byte) (string, bool) {
-	declared = strings.ToLower(strings.TrimSpace(strings.Split(declared, ";")[0]))
-	var sniffed string
-	switch {
-	case bytes.HasPrefix(data, []byte("\x89PNG\r\n\x1a\n")):
-		sniffed = "image/png"
-	case bytes.HasPrefix(data, []byte("\xff\xd8\xff")):
-		sniffed = "image/jpeg"
-	case len(data) >= 12 && bytes.Equal(data[:4], []byte("RIFF")) && bytes.Equal(data[8:12], []byte("WEBP")):
-		sniffed = "image/webp"
-	}
-	return sniffed, logoTypes[declared] && sniffed == declared
-}
-
-func (s *Server) handleAdminPutLogo(w http.ResponseWriter, r *http.Request) {
-	d, err := pathDomain(r)
-	if err != nil {
-		s.adminFailed(w, r, store.ErrNotFound)
-		return
-	}
-	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxLogoBytes))
-	var tooBig *http.MaxBytesError
-	switch {
-	case errors.As(err, &tooBig):
-		httpx.Error(w, r, http.StatusRequestEntityTooLarge, "too_large", "A logo is at most 512 KiB.")
-		return
-	case err != nil:
-		httpx.Error(w, r, http.StatusBadRequest, "bad_request", "The logo could not be read.")
-		return
-	case len(data) == 0:
-		httpx.Error(w, r, http.StatusBadRequest, "bad_request", "The logo is empty.")
-		return
-	}
-	mime, ok := logoType(r.Header.Get("Content-Type"), data)
-	if !ok {
-		httpx.Error(w, r, http.StatusUnsupportedMediaType, "unsupported_type", "A PNG, JPEG or WebP image is required.")
-		return
-	}
-	if err := s.store.SetLogo(r.Context(), d, mime, data); err != nil {
-		s.adminFailed(w, r, err)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func (s *Server) handleAdminDeleteLogo(w http.ResponseWriter, r *http.Request) {
-	d, err := pathDomain(r)
-	if err == nil {
-		err = s.store.ClearLogo(r.Context(), d)
-	}
-	if err != nil {
-		s.adminFailed(w, r, err)
-		return
-	}
 	w.WriteHeader(http.StatusNoContent)
 }

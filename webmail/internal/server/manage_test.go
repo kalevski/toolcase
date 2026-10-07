@@ -91,12 +91,11 @@ func TestAdminBrandingLifecycle(t *testing.T) {
 		Domain       string
 		DisplayName  string
 		MailboxCount int
-		HasLogo      bool
 		UpdatedAt    string
 		FooterLinks  []struct{ Label, URL string }
 	}
 	json.Unmarshal(data, &b)
-	if b.Domain != "acme.com" || b.DisplayName != "Acme Mail" || b.MailboxCount != 7 || b.HasLogo || b.UpdatedAt == "" || len(b.FooterLinks) != 1 {
+	if b.Domain != "acme.com" || b.DisplayName != "Acme Mail" || b.MailboxCount != 7 || b.UpdatedAt == "" || len(b.FooterLinks) != 1 {
 		t.Fatalf("%s", data)
 	}
 	if resp, data := e.admin("POST", "/admin/v1/brandings", map[string]any{"domain": "acme.com"}, "application/json"); resp.StatusCode != 409 || errCode(data) != "exists" {
@@ -128,7 +127,7 @@ func TestAdminBrandingLifecycle(t *testing.T) {
 	}
 
 	c := &client{e: e}
-	_, pub := c.do("GET", "/api/branding?domain=acme.com", nil, nil)
+	_, pub := c.do("GET", "/api/branding", nil, map[string]string{"Host": "acme.com"})
 	if !strings.Contains(string(pub), `"known":true`) || !strings.Contains(string(pub), `"name":"Acme"`) {
 		t.Fatalf("the browser reads what was pushed: %s", pub)
 	}
@@ -197,47 +196,25 @@ func TestAdminBrandingListPages(t *testing.T) {
 	}
 }
 
-func TestAdminLogo(t *testing.T) {
+func TestThereIsNoLogoUpload(t *testing.T) {
 	e := newEnv(t)
 	png := append([]byte("\x89PNG\r\n\x1a\n"), bytes.Repeat([]byte{1}, 64)...)
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", png, "image/png"); resp.StatusCode != 204 {
-		t.Fatalf("upload: %d", resp.StatusCode)
+	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", png, "image/png"); resp.StatusCode != 404 && resp.StatusCode != 405 {
+		t.Fatalf("a logo upload must not exist: %d", resp.StatusCode)
 	}
-	if _, data := e.admin("GET", "/admin/v1/brandings/example.test", nil, ""); !strings.Contains(string(data), `"hasLogo":true`) {
-		t.Fatalf("%s", data)
+	if resp, _ := e.admin("DELETE", "/admin/v1/brandings/example.test/logo", nil, ""); resp.StatusCode != 404 && resp.StatusCode != 405 {
+		t.Fatalf("a logo delete must not exist: %d", resp.StatusCode)
 	}
 	c := &client{e: e}
-	_, pub := c.do("GET", "/api/branding?domain=example.test", nil, nil)
-	if !strings.Contains(string(pub), `"logoUrl":"/api/logo?domain=example.test"`) {
-		t.Fatalf("%s", pub)
-	}
-	resp, data := c.do("GET", "/api/logo?domain=example.test", nil, nil)
-	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "image/png" || !bytes.Equal(data, png) ||
-		resp.Header.Get("X-Content-Type-Options") != "nosniff" || !strings.Contains(resp.Header.Get("Content-Security-Policy"), "sandbox") {
-		t.Fatalf("serve: %d %v", resp.StatusCode, resp.Header)
-	}
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/ghost.test/logo", png, "image/png"); resp.StatusCode != 404 {
-		t.Fatalf("logo for a missing domain: %d", resp.StatusCode)
-	}
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", png, "image/gif"); resp.StatusCode != 415 {
-		t.Fatalf("declared type: %d", resp.StatusCode)
-	}
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", []byte("<svg onload=alert(1)>"), "image/png"); resp.StatusCode != 415 {
-		t.Fatalf("magic bytes: %d", resp.StatusCode)
-	}
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", append(png, make([]byte, 600<<10)...), "image/png"); resp.StatusCode != 413 {
-		t.Fatalf("too large: %d", resp.StatusCode)
-	}
-	if resp, _ := e.admin("PUT", "/admin/v1/brandings/example.test/logo", []byte{}, "image/png"); resp.StatusCode != 400 {
-		t.Fatalf("empty: %d", resp.StatusCode)
-	}
-	if resp, _ := e.admin("DELETE", "/admin/v1/brandings/example.test/logo", nil, ""); resp.StatusCode != 204 {
-		t.Fatalf("delete logo: %d", resp.StatusCode)
-	}
 	if resp, _ := c.do("GET", "/api/logo?domain=example.test", nil, nil); resp.StatusCode != 404 {
-		t.Fatalf("logo still served: %d", resp.StatusCode)
+		t.Fatalf("no logo is served: %d", resp.StatusCode)
 	}
-	if resp, _ := c.do("GET", "/api/logo?domain=../../x", nil, nil); resp.StatusCode != 404 {
-		t.Fatalf("junk domain: %d", resp.StatusCode)
+	_, pub := c.do("GET", "/api/branding?domain=example.test", nil, nil)
+	if strings.Contains(string(pub), "logo") {
+		t.Fatalf("the public branding carries no logo: %s", pub)
+	}
+	_, data := e.admin("GET", "/admin/v1/brandings/example.test", nil, "")
+	if strings.Contains(string(data), "hasLogo") {
+		t.Fatalf("the admin view carries no logo: %s", data)
 	}
 }

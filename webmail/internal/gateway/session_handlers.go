@@ -130,15 +130,24 @@ func (g *Gateway) handleSession(w http.ResponseWriter, r *http.Request, a *sessi
 			g.Log.Error("store account id", "error", err)
 		}
 	}
-	b, err := g.Store.GetBranding(r.Context(), a.Domain)
+	// The host's branding first, so the app looks like the address it is served on; a session on the shared
+	// webmail address falls back to its own domain's branding.
+	b, err := g.Store.BrandingForHost(r.Context(), httpx.RequestHost(r, g.Trusted))
+	if errors.Is(err, store.ErrNotFound) {
+		b, err = g.Store.GetBranding(r.Context(), a.Domain)
+	}
 	if err != nil && !errors.Is(err, store.ErrNotFound) {
 		g.Log.Warn("branding unavailable", "domain", a.Domain, "error", err)
+	}
+	brandDomain := a.Domain
+	if b != nil {
+		brandDomain = b.Domain
 	}
 	g.count("session", "ok")
 	httpx.JSON(w, http.StatusOK, SessionResponse{
 		Address: a.Address, SessionID: a.PublicID, CSRF: a.CSRF,
 		JMAP:     doc.Rewrite(acct, a.Address),
-		Branding: branding.Public(a.Domain, b),
+		Branding: branding.Public(brandDomain, b),
 		Prefs:    g.loadPrefs(r, a.Address),
 		Limits: map[string]int64{
 			"maxUploadBytes": g.MaxUploadBytes, "maxCallsInRequest": jmap.MaxCalls, "maxBodyBytes": jmap.MaxBodyBytes,

@@ -7,7 +7,6 @@ export type Branding = {
     known: boolean
     domain: string
     name: string
-    logoUrl: string
     theme: string
     accent: string
     loginTitle: string
@@ -17,6 +16,12 @@ export type Branding = {
     footerLinks: FooterLink[]
     defaultLanguage: string
     allowUserAccent: boolean
+    /** Who may sign in on this host: any mailbox, or only addresses of `domain`. */
+    signInScope: 'any' | 'domain'
+    /** The wordmark: its bold first part, its lighter second part and a small badge above it ('' = none). */
+    brandPrimary: string
+    brandSecondary: string
+    brandBadge: string
 }
 
 export type ThemePref = 'light' | 'dark' | 'system'
@@ -66,7 +71,6 @@ export const NEUTRAL_BRANDING: Branding = {
     known: false,
     domain: '',
     name: 'Webmail',
-    logoUrl: '',
     theme: 'ocean',
     accent: '',
     loginTitle: '',
@@ -76,6 +80,10 @@ export const NEUTRAL_BRANDING: Branding = {
     footerLinks: [],
     defaultLanguage: '',
     allowUserAccent: false,
+    signInScope: 'any',
+    brandPrimary: '',
+    brandSecondary: '',
+    brandBadge: '',
 }
 
 function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
@@ -108,7 +116,6 @@ export function normalizeBranding(raw: Partial<Branding> | null | undefined): Br
         known: raw.known === true,
         domain: str(raw.domain),
         name: str(raw.name) || NEUTRAL_BRANDING.name,
-        logoUrl: str(raw.logoUrl),
         theme: str(raw.theme) || 'default',
         accent: str(raw.accent),
         loginTitle: str(raw.loginTitle).slice(0, 280),
@@ -124,11 +131,16 @@ export function normalizeBranding(raw: Partial<Branding> | null | undefined): Br
             : [],
         defaultLanguage: str(raw.defaultLanguage),
         allowUserAccent: raw.allowUserAccent === true,
+        signInScope: raw.signInScope === 'domain' && str(raw.domain) !== '' ? 'domain' : 'any',
+        brandPrimary: str(raw.brandPrimary).slice(0, 40),
+        brandSecondary: str(raw.brandSecondary).slice(0, 40),
+        brandBadge: str(raw.brandBadge).slice(0, 40),
     }
 }
 
-export async function fetchBranding(domain: string, signal?: AbortSignal): Promise<Branding> {
-    const raw = await api<Branding>(`/api/branding?domain=${encodeURIComponent(domain)}`, {
+/** The branding of the host this page is served on (the address the platform gave the domain's webmail). */
+export async function fetchBranding(signal?: AbortSignal): Promise<Branding> {
+    const raw = await api<Branding>('/api/branding', {
         signal,
         allow401: true,
     })

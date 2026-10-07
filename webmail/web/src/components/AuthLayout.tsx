@@ -1,56 +1,21 @@
 import type { ReactNode } from 'react'
+import type { Branding } from '../api/session'
 import { t } from '../i18n'
-
-type BoardRow = { from: string; subject: string; state: string; tone: 'go' | 'warn' | 'muted'; when: string }
-
-const BOARD: readonly BoardRow[] = [
-    { from: 'boss@acme.io', subject: 'Quarterly numbers', state: 'unread', tone: 'go', when: '5 min' },
-    { from: 'billing@vendor.com', subject: 'Invoice 2041 is due', state: 'starred', tone: 'warn', when: '1 h' },
-    { from: 'team@acme.io', subject: 'Standup notes', state: 'read', tone: 'muted', when: 'Mon' },
-]
+import { BrandMark } from './BrandMark'
 
 /**
- * The sign-in frame, in the dashboard's pattern: a dark stage with the brand, a headline and a decorative board on
- * one side, the form card on the other.
+ * The sign-in frame: a stage in the tone of the domain this webmail is served for, its name set large as the
+ * wordmark, over the fine woven lining of a business envelope; and the form on plain paper beside it.
  */
-export function AuthLayout({
-    logo,
-    title,
-    children,
-}: {
-    logo: ReactNode
-    title: string
-    children: ReactNode
-}) {
+export function AuthLayout({ branding, title, children }: { branding: Branding; title: string; children: ReactNode }) {
     return (
         <main className="wm-login">
-            <section className="wm-stage" aria-hidden="true">
-                <header className="wm-stage__head">{logo}</header>
-                <div className="wm-stage__body">
-                    <p className="wm-eyebrow">{t('login.eyebrow')}</p>
-                    <h2 className="wm-stage__title">{t('login.stageTitle')}</h2>
-                    <p className="wm-stage__lead">{t('login.stageLead')}</p>
-                    <div className="wm-board">
-                        <div className="wm-board__head">
-                            <span>{t('login.boardFrom')}</span>
-                            <span>{t('login.boardState')}</span>
-                            <span>{t('login.boardWhen')}</span>
-                        </div>
-                        <ul className="wm-board__rows">
-                            {BOARD.map((row, index) => (
-                                <li
-                                    key={row.from}
-                                    className={`wm-board__row wm-board__row--${row.tone}`}
-                                    style={{ '--wm-delay': `${index * 70}ms` } as React.CSSProperties}
-                                >
-                                    <span className="wm-board__from">{row.from}</span>
-                                    <span className="wm-board__state">{row.state}</span>
-                                    <span className="wm-board__when">{row.when}</span>
-                                    <span className="wm-board__subject">{row.subject}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+            <section className="wm-stage">
+                <div className="wm-stage__hero">
+                    <BrandMark branding={branding} size="hero" />
+                    <p className="wm-stage__domain">
+                        {branding.known ? t('login.stageKnown', { domain: branding.domain }) : t('login.stageNeutral')}
+                    </p>
                 </div>
             </section>
             <section className="wm-card wm-login__panel">

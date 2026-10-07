@@ -34,45 +34,22 @@ func (s *Server) handleBranding(w http.ResponseWriter, r *http.Request) {
 		s.rateLimited(w, r, d)
 		return
 	}
-	domain := branding.NormalizeDomain(r.URL.Query().Get("domain"))
-	if domain == "" || !branding.ValidDomain(domain) {
-		// not an error: the page stays neutral
-		httpx.JSON(w, http.StatusOK, branding.Neutral(domain))
-		return
-	}
-	b, err := s.store.GetBranding(r.Context(), domain)
-	if err != nil && !errors.Is(err, store.ErrNotFound) {
-		s.log.Warn("branding lookup failed", "domain", domain, "error", err)
+	// The page wears the branding of the host it is served on, not of the address someone types.
+	host := httpx.RequestHost(r, s.cfg.TrustedProxies)
+	b, err := s.store.BrandingForHost(r.Context(), host)
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			s.log.Warn("branding lookup failed", "host", host, "error", err)
+		}
 		b = nil // neutral skin; the login page must still render
 	}
+	domain := ""
+	if b != nil {
+		domain = b.Domain
+	}
+	w.Header().Set("Vary", "Host, X-Forwarded-Host")
 	w.Header().Set("Cache-Control", "public, max-age=30")
 	httpx.JSON(w, http.StatusOK, branding.Public(domain, b))
-}
-
-// handleLogo serves a domain's logo from the store. Only the raster types the
-// admin API accepts pass, served as a sandboxed, non-sniffed image.
-func (s *Server) handleLogo(w http.ResponseWriter, r *http.Request) {
-	ip := httpx.ClientIP(r, s.cfg.TrustedProxies)
-	if d, err := s.brandingLim.Hit(r.Context(), ip); err == nil && !d.Allowed {
-		s.rateLimited(w, r, d)
-		return
-	}
-	domain := branding.NormalizeDomain(r.URL.Query().Get("domain"))
-	if !branding.ValidDomain(domain) {
-		http.NotFound(w, r)
-		return
-	}
-	data, ctype, err := s.store.Logo(r.Context(), domain)
-	if err != nil || !logoTypes[ctype] {
-		http.NotFound(w, r)
-		return
-	}
-	h := w.Header()
-	h.Set("Content-Type", ctype)
-	h.Set("X-Content-Type-Options", "nosniff")
-	h.Set("Content-Security-Policy", "sandbox; default-src 'none'; style-src 'unsafe-inline'")
-	h.Set("Cache-Control", "public, max-age=60")
-	_, _ = w.Write(data)
 }
 
 func (s *Server) rateLimited(w http.ResponseWriter, r *http.Request, d ratelimit.Decision) {
@@ -122,7 +99,7 @@ func (s *Server) failDelay(ctx context.Context, start time.Time) {
 
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if o := r.Header.Get("Origin"); o != "" && session.CheckOrigin(r, s.cfg.PublicURL) != nil {
+	if o := r.Header.Get("Origin"); o != "" && !s.sessions.OriginOK(r) {
 		httpx.Error(w, r, http.StatusForbidden, "csrf", "The request could not be verified.")
 		return
 	}
@@ -170,6 +147,15 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	if !ok {
 		reject()
+		return
+	}
+
+	// A domain's webmail host may be kept for that domain's own addresses. The rule is public (the page says it),
+	// so the refusal says so plainly; the mail server is not asked.
+	if host, herr := s.store.BrandingForHost(ctx, httpx.RequestHost(r, s.cfg.TrustedProxies)); herr == nil && !branding.AllowsSignIn(host, domain) {
+		s.logins.Inc("other_domain")
+		s.failDelay(ctx, start)
+		httpx.Error(w, r, http.StatusForbidden, "domain_not_allowed", "Only @"+host.Domain+" addresses can sign in here.")
 		return
 	}
 
