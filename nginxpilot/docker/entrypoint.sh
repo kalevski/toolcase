@@ -40,6 +40,15 @@ chown nginxpilot:nginx /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d \
 chmod 0750 /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d /etc/nginx/nginxpilot/stream.d
 chmod 0770 /run/nginxpilot
 
+# nginx spills any upstream response larger than proxy_buffers into these temp
+# dirs, and its workers run as nginxpilot. A dir owned by anyone else makes
+# nginx abort every large proxied response mid-body (a 6.6 MB download arrives
+# as ~140 KB). The image sets the owner at build time; it is reasserted here at
+# every start because a published image was seen running with it wrong.
+mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+    /var/cache/nginx/fastcgi_temp /var/cache/nginx/scgi_temp /var/cache/nginx/uwsgi_temp
+chown -R nginxpilot:nginx /var/cache/nginx
+
 # php-fpm pool dir + socket dir, for the same overlayfs/rename reason as above.
 # The daemon writes one pool file per app here and asks php-fpm to reload.
 PHP_FPM_BIN="$(command -v php-fpm83 || command -v php-fpm82 || command -v php-fpm || true)"
