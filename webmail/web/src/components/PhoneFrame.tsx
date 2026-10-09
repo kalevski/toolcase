@@ -21,9 +21,9 @@ type Props = {
 }
 
 /**
- * The phone chrome: one tc-mobile-shell with an app bar, an optional band under
- * it, exactly one scrolling pane, a bottom tab dock, and an overlay layer for the
- * compose button and sheets. Same frame as the app-template.
+ * The phone chrome, the dashboard's frame: one tc-mobile-shell with a bar (title, or a back chevron
+ * and a title), an optional band under it, exactly one scrolling pane, a bottom tab dock, and an
+ * overlay layer for the compose button and the sheets.
  */
 export function PhoneFrame({
     variant,
@@ -69,16 +69,17 @@ export function PhoneFrame({
 
     return (
         <tc-mobile-shell className="wm-shell" data-key={dataKey}>
-            <tc-app-bar
-                slot="header"
-                className="wm-shell__bar"
-                variant={variant}
-                heading={title}
-                subheading={subtitle}
-                back-label={t('common.back')}
-                truncate
-                ontc-app-bar-back={onBack}
-            ></tc-app-bar>
+            <header slot="header" className="wm-bar">
+                {variant === 'back' ? (
+                    <button type="button" className="wm-bar__back" aria-label={t('common.back')} onClick={onBack}>
+                        <tc-icon name="ChevronLeft" size="20" decorative></tc-icon>
+                    </button>
+                ) : null}
+                <span className="wm-bar__titles">
+                    <h1 className="wm-bar__title">{title}</h1>
+                    {subtitle ? <span className="wm-bar__subtitle">{subtitle}</span> : null}
+                </span>
+            </header>
 
             {offline ? (
                 <div slot="header" className="wm-offline" role="status">
@@ -87,7 +88,7 @@ export function PhoneFrame({
             ) : null}
 
             {band ? (
-                <div slot="header" className="wm-shell__band">
+                <div slot="header" className="wm-band">
                     {band}
                 </div>
             ) : null}
@@ -96,12 +97,7 @@ export function PhoneFrame({
 
             <div slot="overlay">
                 {fab ? (
-                    <tc-fab
-                        icon="square-pen"
-                        label={fab.label}
-                        variant="icon"
-                        onClick={fab.onPress}
-                    ></tc-fab>
+                    <tc-fab icon="square-pen" label={fab.label} variant="icon" onClick={fab.onPress}></tc-fab>
                 ) : null}
                 {overlay}
             </div>

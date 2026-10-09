@@ -78,28 +78,32 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return (
         <ToastContext.Provider value={api}>
             {children}
+            {/* The dashboard's toast card: paper, a tone bar and dot, the message, the actions. */}
             <div className="wm-toasts" role="status" aria-live="polite">
                 {items.map((item) => (
                     <div key={item.id} className={`wm-toast wm-toast--${item.variant ?? 'info'}`}>
                         <span className="wm-toast__text">{item.message}</span>
-                        {item.action ? (
-                            <tc-button
-                                size="sm"
-                                variant="light"
-                                onClick={() => {
-                                    item.action?.onClick()
-                                    dismiss(item.id)
-                                }}
-                            >
-                                {item.action.label}
-                            </tc-button>
-                        ) : null}
-                        <tc-icon-button
-                            icon="X"
-                            size="small"
-                            label={t('common.close')}
-                            ontc-click={() => dismiss(item.id)}
-                        ></tc-icon-button>
+                        <span className="wm-toast__actions">
+                            {item.action ? (
+                                <tc-button
+                                    size="sm"
+                                    variant="secondary"
+                                    outline
+                                    onClick={() => {
+                                        item.action?.onClick()
+                                        dismiss(item.id)
+                                    }}
+                                >
+                                    {item.action.label}
+                                </tc-button>
+                            ) : null}
+                            <tc-icon-button
+                                icon="X"
+                                size="small"
+                                label={t('common.close')}
+                                ontc-click={() => dismiss(item.id)}
+                            ></tc-icon-button>
+                        </span>
                     </div>
                 ))}
             </div>

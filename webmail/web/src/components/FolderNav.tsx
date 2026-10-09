@@ -83,17 +83,18 @@ export function FolderNav({ mailboxes, currentId, onSelect, onManage, onCreate }
                     aria-current={active ? 'page' : undefined}
                     onClick={() => onSelect(m.id)}
                 >
-                    <tc-icon name={ROLE_ICON[m.role ?? ''] ?? 'folder'} decorative></tc-icon>
+                    <tc-icon name={ROLE_ICON[m.role ?? ''] ?? 'folder'} size="16" decorative></tc-icon>
                     <span className="wm-folders__name">{label}</span>
                     {unread > 0 ? (
-                        <span className="wm-folders__count">
-                            <tc-badge
-                                variant={m.role === 'drafts' ? 'secondary' : 'primary'}
-                                text={String(unread)}
+                        <>
+                            <span
+                                className={`wm-folders__count${m.role === 'drafts' ? ' wm-folders__count--quiet' : ''}`}
                                 aria-hidden="true"
-                            ></tc-badge>
+                            >
+                                {unread}
+                            </span>
                             <span className="wm-sr-only">{t('folders.unread', { count: unread })}</span>
-                        </span>
+                        </>
                     ) : null}
                 </button>
                 {manageable ? (
@@ -113,13 +114,15 @@ export function FolderNav({ mailboxes, currentId, onSelect, onManage, onCreate }
             <ul className="wm-folders__list">{system.map(row)}</ul>
             <div className="wm-folders__head">
                 <span className="wm-folders__heading">{t('folders.title')}</span>
-                <tc-icon-button icon="Plus" size="small" label={t('folders.new')} title={t('folders.new')} ontc-click={onCreate}></tc-icon-button>
+                <tc-icon-button
+                    icon="Plus"
+                    size="small"
+                    label={t('folders.new')}
+                    title={t('folders.new')}
+                    ontc-click={onCreate}
+                ></tc-icon-button>
             </div>
-            {own.length > 0 ? (
-                <ul className="wm-folders__list">{own.map(row)}</ul>
-            ) : (
-                <p className="wm-folders__empty">{t('folders.empty')}</p>
-            )}
+            {own.length > 0 ? <ul className="wm-folders__list">{own.map(row)}</ul> : <p className="wm-folders__empty">{t('folders.empty')}</p>}
         </nav>
     )
 }

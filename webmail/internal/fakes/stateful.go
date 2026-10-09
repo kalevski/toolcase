@@ -215,9 +215,13 @@ func (w *World) statefulMethod(name, acc string, args map[string]any) (any, bool
 					e.Subject = ""
 				}
 				if bv, ok := o["bodyValues"].(map[string]any); ok {
-					for _, v := range bv {
+					for k, v := range bv {
 						if m, ok := v.(map[string]any); ok {
-							e.Text, _ = m["value"].(string)
+							if val, _ := m["value"].(string); k == "html" {
+								e.HTML = val
+							} else {
+								e.Text = val
+							}
 						}
 					}
 				}

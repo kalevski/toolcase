@@ -1,7 +1,6 @@
 import type { Mailbox, Quota } from '../jmap/types'
 import type { Branding } from '../api/session'
 import { t } from '../i18n'
-import { BrandMark } from './BrandMark'
 import { FolderNav } from './FolderNav'
 import { QuotaBar } from './QuotaBar'
 
@@ -27,12 +26,7 @@ export function FoldersSheet({
     onCreate,
 }: FoldersProps) {
     return (
-        <tc-bottom-sheet
-            open={open}
-            heading={t('folders.title')}
-            snap="auto"
-            ontc-sheet-close={onClose}
-        >
+        <tc-bottom-sheet open={open} heading={t('folders.title')} snap="auto" ontc-sheet-close={onClose}>
             {open ? (
                 <div className="wm-sheet">
                     <FolderNav
@@ -55,26 +49,13 @@ type MoreProps = {
     branding: Branding
     address: string
     onSettings: () => void
+    onShortcuts?: () => void
     onSignOut: () => void
 }
 
-function Row({
-    icon,
-    label,
-    danger,
-    onPick,
-}: {
-    icon: string
-    label: string
-    danger?: boolean
-    onPick: () => void
-}) {
+function Row({ icon, label, danger, onPick }: { icon: string; label: string; danger?: boolean; onPick: () => void }) {
     return (
-        <button
-            type="button"
-            className={`wm-more__row${danger ? ' wm-more__row--danger' : ''}`}
-            onClick={onPick}
-        >
+        <button type="button" className={`wm-more__row${danger ? ' wm-more__row--danger' : ''}`} onClick={onPick}>
             <tc-icon name={icon} size="18" decorative></tc-icon>
             <span className="wm-more__row-label">{label}</span>
             <tc-icon name="chevron-right" size="15" decorative></tc-icon>
@@ -82,19 +63,21 @@ function Row({
     )
 }
 
+/** The "more" sheet: who is signed in, then the account rows, the way the dashboard's more sheet is built. */
 export function MoreSheet({ open, onClose, branding, address, onSettings, onSignOut }: MoreProps) {
+    const standing = branding.known && branding.domain ? `${branding.name} · ${branding.domain}` : branding.name
     return (
-        <tc-bottom-sheet
-            open={open}
-            heading={t('shell.more')}
-            snap="auto"
-            ontc-sheet-close={onClose}
-        >
+        <tc-bottom-sheet open={open} heading={t('shell.more')} snap="auto" ontc-sheet-close={onClose}>
             {open ? (
                 <div className="wm-more">
                     <div className="wm-more__identity">
-                        <BrandMark branding={branding} />
-                        <span className="wm-more__address">{address}</span>
+                        <span className="wm-more__avatar" aria-hidden="true">
+                            {address.slice(0, 1)}
+                        </span>
+                        <span className="wm-more__who">
+                            <span className="wm-more__name">{address}</span>
+                            <span className="wm-more__standing">{standing}</span>
+                        </span>
                     </div>
                     <div className="wm-more__group">
                         <p className="wm-more__heading">{t('shell.account')}</p>

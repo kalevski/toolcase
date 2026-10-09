@@ -1,0 +1,778 @@
+/*
+ * The app frame. On a phone (< 768px) one tc-mobile-shell: bar, band, one scrolling pane, dock and an
+ * overlay layer, the same frame the dashboard uses. From 768px up a desktop frame of the same material:
+ * a 52px bar, a folder column and paper panels on the tinted canvas, centred and hairline-framed once
+ * the window is wider than the content measure.
+ */
+
+/* ── Bar (shared by both frames; the dashboard's .qk-bar) ───────────────── */
+
+.wm-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--wm-bar-h);
+    padding: 0 var(--wm-gutter);
+    background: var(--wm-paper);
+}
+
+.wm-bar__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin-left: -8px;
+    border: 0;
+    border-radius: var(--wm-r-lg);
+    background: transparent;
+    color: var(--wm-ink);
+    cursor: pointer;
+}
+
+.wm-bar__back:hover {
+    background: var(--wm-paper-tint-2);
+}
+
+.wm-bar__back:active {
+    transform: scale(0.92);
+}
+
+.wm-bar__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.wm-bar__title {
+    margin: 0;
+    font: 700 17px/1.15 var(--wm-display);
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-bar__subtitle {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-bar__brand {
+    display: flex;
+    align-items: center;
+    flex: none;
+    min-width: 0;
+}
+
+.wm-bar__search {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 640px;
+}
+
+.wm-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: none;
+    margin-left: auto;
+    margin-right: -6px;
+}
+
+/* ── Account menu ───────────────────────────────────────────────────────── */
+
+.wm-account {
+    position: relative;
+}
+
+.wm-account__button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 260px;
+    height: 36px;
+    padding: 0 8px 0 4px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--wm-ink);
+    font: 500 12.5px var(--wm-body);
+    cursor: pointer;
+}
+
+.wm-account__button:hover,
+.wm-account__button[aria-expanded='true'] {
+    border-color: var(--wm-line);
+    background: var(--wm-paper-tint);
+}
+
+.wm-account__button > tc-icon {
+    color: var(--wm-ink-faint);
+}
+
+.wm-account__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--wm-accent);
+    color: var(--wm-on-accent);
+    font: 700 12px var(--wm-display);
+    text-transform: uppercase;
+}
+
+.wm-account__address {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 1099.98px) {
+    .wm-account__address {
+        display: none;
+    }
+}
+
+.wm-account__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: var(--tc-z-dropdown, 1060);
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+    padding: 4px;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    background: var(--wm-paper);
+    box-shadow: 0 24px 50px -20px rgba(var(--wm-shadow-ink), 0.4);
+}
+
+.wm-account__who {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+    padding: 8px 10px 10px;
+    border-bottom: 1px dashed var(--wm-rule);
+}
+
+.wm-account__name {
+    font: 600 13px var(--wm-body);
+    color: var(--wm-emphasis);
+    overflow-wrap: anywhere;
+}
+
+.wm-account__standing {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+}
+
+.wm-account__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: var(--wm-r-md);
+    background: none;
+    color: var(--wm-ink);
+    font: 500 13px var(--wm-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-account__item:hover,
+.wm-account__item:focus-visible {
+    background: var(--wm-paper-tint);
+}
+
+.wm-account__item > tc-icon {
+    color: var(--wm-ink-muted);
+}
+
+.wm-account__item tc-kbd {
+    margin-left: auto;
+}
+
+.wm-account__item--danger,
+.wm-account__item--danger > tc-icon {
+    color: var(--wm-danger);
+}
+
+/* ── Brand ──────────────────────────────────────────────────────────────── */
+
+.wm-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.wm-brand tc-brand {
+    --bs-brand-primary-font: var(--wm-display);
+    --bs-brand-primary-letter-spacing: 0.02em;
+    --bs-brand-primary-size: 1rem;
+    --bs-brand-secondary-size: 1rem;
+}
+
+.wm-brand .tc-brand__secondary:not(:empty)::before {
+    content: '\00a0';
+}
+
+.wm-brand--lg .tc-brand,
+.wm-brand--hero .tc-brand {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+/* ── Offline strip ──────────────────────────────────────────────────────── */
+
+.wm-offline {
+    padding: 5px var(--wm-gutter);
+    font: var(--m-font-body-sm);
+    background: var(--wm-warn-soft);
+    color: var(--wm-ink);
+    border-bottom: 1px solid var(--wm-line);
+}
+
+/* ── Desktop frame ──────────────────────────────────────────────────────── */
+
+.wm-app {
+    position: relative;
+    height: 100dvh;
+    max-width: var(--wm-content-max);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: var(--wm-side-w) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+        'top top'
+        'offline offline'
+        'side main';
+    overflow: hidden;
+    background: var(--wm-bg);
+}
+
+@media (min-width: 1434px) {
+    .wm-app {
+        border-inline: 1px solid var(--wm-line);
+    }
+}
+
+.wm-app > .wm-bar {
+    grid-area: top;
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-app > .wm-bar .wm-bar__brand {
+    width: calc(var(--wm-side-w) - var(--wm-gutter));
+}
+
+.wm-app > .wm-offline {
+    grid-area: offline;
+}
+
+.wm-sidebar {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px 10px 12px var(--wm-gutter);
+}
+
+/* The library's block button is `flex: 1 1 0`; in this column it must keep its own height. */
+.wm-sidebar > *,
+.wm-sidebar > tc-button[block] {
+    flex: 0 0 auto;
+}
+
+.wm-sidebar__compose {
+    margin-bottom: 2px;
+}
+
+.wm-sidebar__compose tc-icon {
+    margin-right: 6px;
+}
+
+.wm-main {
+    grid-area: main;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 12px;
+    min-height: 0;
+    min-width: 0;
+    padding: 12px var(--wm-gutter) 12px 0;
+}
+
+.wm-list-pane,
+.wm-read-pane {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--wm-paper);
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+}
+
+/* One pane at a time until the window is wide enough to split. */
+.wm-read-pane {
+    display: none;
+}
+
+.has-thread .wm-read-pane {
+    display: flex;
+}
+
+.has-thread .wm-list-pane {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .wm-layout-right .wm-main {
+        grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    }
+
+    .wm-layout-right .wm-list-pane {
+        grid-area: 1 / 1;
+        display: flex;
+    }
+
+    .wm-layout-right .wm-read-pane {
+        grid-area: 1 / 2;
+        display: flex;
+    }
+
+    .wm-layout-bottom .wm-main {
+        grid-template-rows: minmax(0, 42%) minmax(0, 1fr);
+    }
+
+    .wm-layout-bottom .wm-list-pane {
+        grid-area: 1 / 1;
+        display: flex;
+    }
+
+    .wm-layout-bottom .wm-read-pane {
+        grid-area: 2 / 1;
+        display: flex;
+    }
+
+    .wm-layout-right .wm-thread__back,
+    .wm-layout-bottom .wm-thread__back {
+        display: none;
+    }
+}
+
+.wm-app .wm-main--settings {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    overflow-y: auto;
+}
+
+/* ── Phone frame ────────────────────────────────────────────────────────── */
+
+tc-mobile-shell.wm-shell {
+    --bs-mobile-shell-bg: var(--wm-paper);
+    --bs-mobile-shell-header-bg: var(--wm-paper);
+    --bs-mobile-shell-dock-bg: var(--wm-paper);
+    --bs-mobile-shell-action-bg: var(--wm-paper);
+    --bs-mobile-shell-edge-bg: var(--wm-paper);
+    --bs-mobile-shell-frame-line: transparent;
+    --bs-mobile-shell-header-shadow: none;
+    --bs-mobile-shell-max-width: none;
+    width: 100%;
+    max-width: none;
+}
+
+.wm-shell .wm-bar {
+    min-height: 54px;
+    padding: 8px var(--wm-gutter) 6px;
+}
+
+.wm-shell__pane {
+    border-top: 1px solid var(--wm-line);
+}
+
+.wm-band {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px var(--wm-gutter) 10px;
+}
+
+.wm-band .wm-chips {
+    flex-wrap: nowrap;
+    margin-inline: calc(-1 * var(--wm-gutter));
+    padding-inline: var(--wm-gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wm-band .wm-chips::-webkit-scrollbar {
+    display: none;
+}
+
+/* The pane is the only scroller, so the inner scrollers give way to it. */
+.wm-shell .wm-list-pane,
+.wm-shell .wm-read-pane {
+    display: block;
+    overflow: visible;
+    min-height: 100%;
+    border: 0;
+    border-radius: 0;
+}
+
+.wm-shell .wm-list,
+.wm-shell .wm-list-empty,
+.wm-shell .wm-thread {
+    overflow: visible;
+}
+
+.wm-shell .wm-bulk,
+.wm-shell .wm-thread > .wm-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--wm-paper);
+}
+
+/* The bar owns the back chevron and the title. */
+.wm-shell .wm-thread__back,
+.wm-shell .wm-settings__head {
+    display: none;
+}
+
+.wm-shell tc-fab {
+    --bs-fab-offset: calc(var(--wm-dock-h) + 24px);
+    --bs-fab-inline: var(--wm-gutter);
+}
+
+/* ── Sheets ─────────────────────────────────────────────────────────────── */
+
+.wm-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0 var(--wm-gutter) var(--wm-gutter);
+}
+
+.wm-dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 var(--wm-gutter) 14px;
+}
+
+.wm-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    padding-top: 12px;
+    border-top: 1px dashed var(--wm-line);
+}
+
+/* The "more" sheet: the dashboard's identity card and grouped rows. */
+.wm-more {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 var(--wm-gutter) var(--wm-gutter);
+}
+
+.wm-more__identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    background: linear-gradient(135deg, var(--wm-accent-soft), var(--wm-paper));
+}
+
+.wm-more__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: var(--wm-accent);
+    color: var(--wm-on-accent);
+    font: 700 16px var(--wm-display);
+    text-transform: uppercase;
+}
+
+.wm-more__who {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wm-more__name {
+    font: 600 14px var(--wm-body);
+    color: var(--wm-emphasis);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-more__standing {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-more__group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wm-more__heading {
+    margin: 0;
+    font: 600 12px var(--wm-body);
+    color: var(--wm-ink-faint);
+}
+
+.wm-more__rows {
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    background: var(--wm-paper);
+    overflow: hidden;
+}
+
+.wm-more__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 0;
+    border-top: 1px solid var(--wm-line-faint);
+    background: transparent;
+    color: var(--wm-ink);
+    font: 500 14px var(--wm-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-more__row:first-child {
+    border-top: 0;
+}
+
+.wm-more__row:hover {
+    background: var(--wm-paper-tint);
+}
+
+.wm-more__row:active {
+    background: var(--wm-paper-tint-2);
+}
+
+.wm-more__row > tc-icon:first-child {
+    color: var(--wm-ink-muted);
+}
+
+.wm-more__row > tc-icon:last-child {
+    color: var(--wm-ink-faint);
+}
+
+.wm-more__row--danger {
+    color: var(--wm-danger);
+}
+
+.wm-more__row--danger > tc-icon:first-child {
+    color: inherit;
+}
+
+.wm-more__row-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Toasts (the dashboard's toast card) ────────────────────────────────── */
+
+.wm-toasts {
+    position: fixed;
+    inset-inline: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: var(--tc-z-tooltip, 1070);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.wm-shell ~ .wm-toasts,
+.wm-toasts.wm-toasts--phone {
+    bottom: calc(var(--wm-dock-h) + 12px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+    .wm-toasts {
+        inset-inline: auto 24px;
+        bottom: 24px;
+        width: min(380px, calc(100vw - 48px));
+    }
+}
+
+/* With a compose window docked bottom right, toasts sit beside it instead of over its Send button. */
+@media (min-width: 768px) {
+    body:has(.wm-compose:not(.is-minimised):not(.is-full)) .wm-toasts {
+        inset-inline-end: calc(24px + min(560px, 100vw - 48px) + 12px);
+    }
+}
+
+.wm-toast {
+    --toast-tone: var(--wm-accent);
+    --toast-soft: var(--wm-accent-soft);
+    pointer-events: auto;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 6px 9px 16px;
+    border: 1px solid var(--wm-line-strong);
+    border-radius: var(--wm-r-2xl);
+    background: var(--wm-paper);
+    color: var(--wm-ink);
+    font: var(--m-font-body);
+    overflow-wrap: anywhere;
+    box-shadow:
+        inset 3px 0 0 var(--toast-tone),
+        0 1px 2px rgba(var(--wm-shadow-ink), 0.08),
+        0 14px 32px -14px rgba(var(--wm-shadow-ink), 0.45);
+    animation: wm-toast-in 0.2s var(--wm-ease) both;
+}
+
+.wm-toast::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--toast-tone);
+    box-shadow: 0 0 0 4px var(--toast-soft);
+}
+
+.wm-toast--success {
+    --toast-tone: var(--wm-success);
+    --toast-soft: var(--wm-success-soft);
+}
+
+.wm-toast--danger {
+    --toast-tone: var(--wm-danger);
+    --toast-soft: var(--wm-danger-soft);
+}
+
+.wm-toast--warning {
+    --toast-tone: var(--wm-warn);
+    --toast-soft: var(--wm-warn-soft);
+}
+
+.wm-toast__text {
+    min-width: 0;
+}
+
+.wm-toast__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+@keyframes wm-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+/* ── Print ──────────────────────────────────────────────────────────────── */
+
+@media print {
+    html,
+    body {
+        background: #ffffff;
+    }
+
+    .wm-app {
+        display: block;
+        height: auto;
+        max-width: none;
+        overflow: visible;
+        border: 0;
+    }
+
+    .wm-bar,
+    .wm-offline,
+    .wm-sidebar,
+    .wm-list-pane,
+    .wm-toolbar,
+    .wm-msg__actions,
+    .wm-banner,
+    .wm-toasts,
+    .wm-compose,
+    .wm-shell__band {
+        display: none !important;
+    }
+
+    .wm-main,
+    .wm-read-pane,
+    .wm-thread {
+        display: block !important;
+        overflow: visible !important;
+        border: 0 !important;
+    }
+
+    .wm-msg__frame {
+        height: auto;
+        min-height: 90vh;
+    }
+
+    tc-mobile-shell.wm-shell,
+    .wm-shell__pane {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    tc-mobile-shell.wm-shell > [slot='header'],
+    tc-mobile-shell.wm-shell > [slot='dock'],
+    tc-mobile-shell.wm-shell > [slot='overlay'] {
+        display: none !important;
+    }
+}

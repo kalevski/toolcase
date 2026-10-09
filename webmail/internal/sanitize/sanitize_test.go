@@ -382,3 +382,25 @@ func TestCSSRemoteURLCannotBreakOut(t *testing.T) {
 		}
 	}
 }
+
+func TestBlockedImagePlaceholder(t *testing.T) {
+	r := Sanitize(`<p><img src="https://t.example/a.png" width="120" height="60" alt="Logo <b>"><img src="https://t.example/p.gif" width="1" height="1"></p>`, Options{})
+	if strings.Contains(r.HTML, "<img") {
+		t.Fatalf("blocked image kept as <img>: %s", r.HTML)
+	}
+	if !strings.Contains(r.HTML, `<span class="wm-img-blocked" data-blocked="1" style="width:120px;height:60px;">Logo &lt;b&gt;</span>`) {
+		t.Fatalf("no sized placeholder: %s", r.HTML)
+	}
+	if strings.Count(r.HTML, "wm-img-blocked\"") != 1 {
+		t.Fatalf("tracking pixel left a placeholder: %s", r.HTML)
+	}
+	if c := Sanitize(`<img src="cid:missing@x"><img src="https://t.example/b.png">`, Options{}); strings.Contains(c.HTML, "<img") || strings.Contains(c.HTML, "wm-img-blocked\"") {
+		t.Fatalf("unsized, alt-less image left something: %s", c.HTML)
+	}
+	if r.Blocked != 2 || !r.HasRemote {
+		t.Fatalf("blocked=%d remote=%v", r.Blocked, r.HasRemote)
+	}
+	if l := Sanitize(`<img src="https://t.example/a.png" width="120">`, Options{LoadRemote: true}); !strings.Contains(l.HTML, `<img width="120" src="https://t.example/a.png"`) && !strings.Contains(l.HTML, `src="https://t.example/a.png"`) {
+		t.Fatalf("allowed image not kept: %s", l.HTML)
+	}
+}

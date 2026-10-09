@@ -1,0 +1,434 @@
+/*
+ * webmail design tokens: the platform dashboard's look (webapp.mk/web) on the mail app.
+ *
+ * `--wm-*` resolve to the blueprint theme's `--bp-*` tokens and fall back to the generic `--tc-*`
+ * tokens, so the dark theme (aurora) and a domain's own accent keep working. The `--m-font-*` scale
+ * is the dashboard's type scale, copied as is, so both apps set the same sizes. Component theming
+ * goes through the `--bs-<component>-*` contract and is scoped to the component's own tag, because
+ * the library declares its defaults there (a value on :root would lose to them).
+ */
+
+:root {
+    /* canvas and paper */
+    --wm-bg: var(--bp-bg, var(--tc-surface-muted, var(--tc-surface)));
+    --wm-bg-2: var(--bp-bg-2, var(--tc-surface-muted, var(--tc-surface)));
+    --wm-paper: var(--bp-paper, var(--tc-surface));
+    --wm-paper-tint: var(--bp-paper-tint, var(--tc-surface-hover, var(--tc-surface)));
+    --wm-paper-tint-2: var(--bp-paper-tint-2, var(--tc-surface-muted, var(--tc-surface)));
+
+    /* hairlines */
+    --wm-line: var(--bp-border, var(--tc-border));
+    --wm-line-strong: var(--bp-border-strong, var(--tc-border-strong, var(--tc-border)));
+    --wm-line-faint: var(--bp-border-faint, var(--tc-border-faint, var(--tc-border)));
+    --wm-rule: var(--bp-border-rule, var(--tc-border));
+
+    /* ink */
+    --wm-ink: var(--bp-text, var(--tc-text));
+    --wm-ink-soft: var(--bp-text-soft, var(--tc-text));
+    --wm-ink-muted: var(--bp-text-muted, var(--tc-text-muted));
+    --wm-ink-faint: var(--bp-text-faint, var(--tc-text-faint, var(--tc-text-muted)));
+    --wm-emphasis: var(--bp-emphasis, var(--tc-emphasis, var(--tc-text)));
+
+    /* the domain's accent (set per domain by theme/branding.ts) */
+    --wm-accent: var(--tc-app-accent);
+    --wm-accent-hover: var(--tc-app-accent-hover, var(--tc-app-accent));
+    --wm-on-accent: var(--tc-app-accent-contrast, #ffffff);
+    --wm-accent-soft: color-mix(in oklab, var(--wm-accent) 9%, var(--wm-paper));
+    --wm-accent-tint: color-mix(in oklab, var(--wm-accent) 16%, var(--wm-paper));
+    --wm-accent-line: color-mix(in oklab, var(--wm-accent) 40%, transparent);
+    --wm-accent-glow: color-mix(in oklab, var(--wm-accent) 30%, transparent);
+
+    /* status */
+    --wm-success: var(--bp-success, var(--tc-success));
+    --wm-success-fg: var(--bp-success-fg, var(--tc-success));
+    --wm-success-soft: var(--bp-success-soft, var(--tc-success-bg));
+    --wm-warn: var(--bp-amber, var(--tc-warning));
+    --wm-warn-fg: var(--bp-amber-fg, var(--tc-warning));
+    --wm-warn-soft: var(--bp-amber-soft, var(--tc-warning-bg));
+    --wm-danger: var(--bp-danger, var(--tc-danger));
+    --wm-danger-soft: var(--bp-danger-soft, var(--tc-danger-bg));
+
+    /* type */
+    --wm-body: var(--bp-body, var(--tc-font-sans, system-ui, -apple-system, 'Segoe UI', sans-serif));
+    --wm-display: var(--bp-display, var(--tc-font-sans, system-ui, -apple-system, sans-serif));
+    --wm-mono: var(--bp-mono, var(--tc-font-mono, ui-monospace, 'SF Mono', Menlo, monospace));
+    --wm-ease: var(--bp-ease, cubic-bezier(0.4, 0, 0.2, 1));
+
+    /* corners: the dashboard's rounded scale */
+    --wm-r-sm: var(--bp-r-sm, 4px);
+    --wm-r-md: var(--bp-r-md, 5px);
+    --wm-r-lg: var(--bp-r-lg, 8px);
+    --wm-r-xl: var(--bp-r-xl, 10px);
+    --wm-r-2xl: var(--bp-r-2xl, 14px);
+
+    /* measures */
+    --wm-gutter: 16px;
+    --wm-gutter-wide: 32px;
+    --wm-bar-h: 52px;
+    --wm-dock-h: 60px;
+    --wm-side-w: 232px;
+    --wm-content-max: 1400px;
+    --wm-shadow-ink: 26, 24, 48;
+
+    /* the dashboard's type scale (webapp.mk/web/src/styles/_theme.scss) */
+    --m-body: var(--wm-body);
+    --m-display: var(--wm-display);
+    --m-mono: var(--wm-mono);
+    --m-font-hero: 700 34px/1.08 var(--wm-display);
+    --m-font-h1: 700 26px/1.1 var(--wm-display);
+    --m-font-h2: 700 22px/1.14 var(--wm-display);
+    --m-font-h3: 600 19px/1.2 var(--wm-display);
+    --m-font-card-title: 600 17px/1.2 var(--wm-display);
+    --m-font-page-title: 700 17px var(--wm-display);
+    --m-font-nav-title: 600 14px var(--wm-body);
+    --m-font-title-sm: 700 15px var(--wm-body);
+    --m-font-section: 600 13px var(--wm-body);
+    --m-font-label: 600 13px var(--wm-body);
+    --m-font-body: 400 13.5px/1.5 var(--wm-body);
+    --m-font-body-sm: 400 12.5px/1.45 var(--wm-body);
+    --m-font-btn: 600 14px var(--wm-body);
+    --m-font-btn-sm: 600 12.5px var(--wm-body);
+    --m-font-tab: 500 10.5px var(--wm-body);
+    --m-font-tab-active: 700 10.5px var(--wm-body);
+    --m-font-chip: 500 11px var(--wm-body);
+    --m-font-chip-md: 500 11.5px var(--wm-body);
+    --m-font-chip-lg: 500 12px var(--wm-body);
+    --m-font-eyebrow: 600 11px var(--wm-mono);
+    --m-font-eyebrow-lg: 600 11.5px var(--wm-mono);
+    --m-font-meta: 400 11.5px var(--wm-mono);
+    --m-font-meta-strong: 500 11.5px var(--wm-mono);
+    --m-font-stat: 700 20px var(--wm-mono);
+    --m-font-stat-sm: 700 15px var(--wm-mono);
+    --m-track-eyebrow: 0.03em;
+    --m-track-hero: -0.015em;
+
+    --m-pad-page: var(--wm-gutter);
+    --m-pad-page-wide: 20px;
+    --m-radius-control: var(--wm-r-md);
+    --m-radius-tile: var(--wm-r-lg);
+    --m-radius-card: var(--wm-r-xl);
+    --m-radius-hero: var(--wm-r-2xl);
+    --m-radius-sheet: 16px 16px 0 0;
+    --m-radius-notice: 0 var(--wm-r-lg) var(--wm-r-lg) 0;
+    --m-shadow-card: none;
+    --m-shadow-dock: none;
+    --m-shadow-actionbar: 0 -8px 22px -16px rgba(var(--wm-shadow-ink), 0.25);
+    --m-shadow-sheet: 0 -24px 60px -20px rgba(var(--wm-shadow-ink), 0.35);
+    --m-scrim: rgba(var(--wm-shadow-ink), 0.34);
+    --m-grabber-bg: var(--wm-line-strong);
+    --m-dock-bg: var(--wm-paper);
+    --m-dock-border: var(--wm-line);
+    --m-dock-idle: var(--wm-ink-faint);
+    --m-dock-active: var(--wm-accent);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+    height: 100%;
+}
+
+html {
+    background: var(--wm-bg);
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--wm-bg);
+    color: var(--wm-ink);
+    font: var(--m-font-body);
+    overflow-wrap: break-word;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: color-mix(in oklab, var(--wm-accent) 18%, transparent);
+}
+
+:is(h1, h2, h3, h4) {
+    font-family: var(--wm-display);
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+:is(code, kbd, samp, .tc-list-row-meta, .tc-quota-meter-label, .tc-list-section-meta, .wm-mono) {
+    font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+    outline: 2px solid var(--wm-accent);
+    outline-offset: 2px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible,
+:where(tc-button, tc-icon-button, tc-form-input, tc-select, tc-chip):focus-visible {
+    border-radius: var(--wm-r-sm);
+}
+
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+
+.wm-sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.wm-muted {
+    color: var(--wm-ink-muted);
+}
+
+.wm-mono {
+    font-family: var(--wm-mono);
+}
+
+.wm-meta {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.wm-error {
+    margin: 0;
+    color: var(--wm-danger);
+    font: var(--m-font-body-sm);
+}
+
+.wm-center {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wm-gutter);
+}
+
+.wm-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.wm-grid-2 {
+    display: grid;
+    gap: 10px;
+}
+
+@media (min-width: 576px) {
+    .wm-grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.wm-linkbtn {
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    color: var(--wm-accent);
+    font: 500 12px var(--wm-body);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    min-height: 24px;
+}
+
+/* ── Library components, themed the way the dashboard themes them ───────── */
+
+/* One button casing in every theme: blueprint sets buttons uppercase, aurora does not; sentence case wins. */
+:root[data-tc-theme] .btn {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+tc-form-input,
+tc-textarea {
+    font-size: 16px;
+}
+
+tc-select .form-label,
+tc-textarea .form-label,
+tc-form-input .form-label,
+tc-form-input .tc-form-input-label {
+    font: var(--bs-form-input-label-weight, 500) var(--bs-form-input-label-size, 12px) / 1.4 var(--wm-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wm-ink-muted);
+}
+
+tc-textarea .tc-field-message,
+tc-select .tc-field-message,
+tc-form-input .tc-field-message {
+    font-family: var(--wm-body);
+    font-size: 0.8rem;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--wm-ink-muted);
+}
+
+tc-page-tabs {
+    --bs-page-tabs-gap: 18px;
+    --bs-page-tabs-tab-font: 500 13px var(--wm-body);
+    --bs-page-tabs-tab-font-active: 700 13px var(--wm-body);
+    --bs-page-tabs-tab-color: var(--wm-ink-muted);
+    --bs-page-tabs-tab-color-active: var(--wm-emphasis);
+    --bs-page-tabs-underline-color: var(--wm-accent);
+}
+
+tc-section-card {
+    --bs-section-card-bg: var(--wm-paper);
+    --bs-section-card-border-color: var(--wm-line);
+    --bs-section-card-shadow: none;
+    --bs-section-card-header-bg: var(--wm-paper-tint);
+    --bs-section-card-header-border-color: var(--wm-line);
+    --bs-section-card-header-padding-y: 0.55rem;
+    --bs-section-card-header-padding-x: 0.875rem;
+    --bs-section-card-body-padding: 0.875rem;
+    --bs-section-card-title-color: var(--wm-emphasis);
+    --bs-section-card-title-font-size: 0.875rem;
+    --bs-section-card-icon-color: var(--wm-accent);
+    --bs-section-card-icon-chip-size: 1.625rem;
+    --bs-section-card-icon-size: 0.9375rem;
+    --bs-section-card-icon-chip-bg: var(--wm-paper);
+    --bs-section-card-icon-chip-border-color: var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    overflow: hidden;
+}
+
+tc-section-card .tc-section-card-title,
+tc-section-card h3 {
+    font-family: var(--wm-display);
+}
+
+tc-empty-state {
+    --bs-empty-state-color: var(--wm-ink-muted);
+    --bs-empty-state-icon-bg: var(--wm-paper);
+    --bs-empty-state-icon-color: var(--wm-accent);
+    --bs-empty-state-icon-padding: 0.75rem;
+    --bs-empty-state-icon-max: 44px;
+    --bs-empty-state-heading-size: 0.9375rem;
+    --bs-empty-state-description-size: 0.8125rem;
+    --bs-empty-state-padding-y: 2rem;
+}
+
+tc-empty-state tc-button,
+tc-empty-state tc-button > .btn {
+    width: auto;
+    min-width: 0;
+    max-width: max-content;
+    flex: 0 0 auto;
+    align-self: center;
+}
+
+tc-notice {
+    --bs-notice-font: 400 12.5px/1.45 var(--wm-body);
+    --bs-notice-label-font: 600 11px var(--wm-mono);
+    --bs-notice-label-track: 0.03em;
+    --bs-notice-radius: 0 var(--wm-r-lg) var(--wm-r-lg) 0;
+}
+
+tc-quota-meter {
+    --bs-quota-meter-fill: var(--wm-accent);
+    --bs-quota-meter-track-bg: var(--wm-line-faint);
+    --bs-quota-meter-track-shadow: none;
+    --bs-quota-meter-label-color: var(--wm-ink-muted);
+    --bs-quota-meter-label-font: 500 12px var(--wm-mono);
+}
+
+tc-tab-dock {
+    --bs-tab-dock-border: 1px solid var(--wm-line);
+    --bs-tab-dock-icon-stroke: 1.7;
+    --bs-tab-dock-padding-top: 7px;
+    --bs-tab-dock-badge-bg: var(--wm-danger);
+    --bs-tab-dock-badge-color: #ffffff;
+}
+
+tc-fab {
+    --bs-fab-radius: 14px;
+    --bs-fab-shadow: 0 0 0 1px var(--wm-accent-line), 0 14px 30px -12px var(--wm-accent-glow);
+    --bs-fab-shadow-active: 0 0 0 1px var(--wm-accent-line), 0 6px 14px -8px var(--wm-accent-glow);
+    --bs-fab-focus-color: var(--wm-accent);
+}
+
+tc-bottom-sheet {
+    --bs-bottom-sheet-header-padding: 8px var(--wm-gutter) 0;
+    --bs-bottom-sheet-body-padding: 10px var(--wm-gutter) 0;
+    --bs-bottom-sheet-body-gap: 10px;
+    --bs-bottom-sheet-footer-padding: 12px var(--wm-gutter) 6px;
+    --bs-bottom-sheet-footer-gap: 8px;
+    --bs-bottom-sheet-handle-bg: var(--wm-line-strong);
+}
+
+tc-bottom-sheet .tc-sheet-title {
+    font-family: var(--wm-display);
+    letter-spacing: -0.01em;
+}
+
+tc-bottom-sheet tc-form-input,
+tc-bottom-sheet tc-select,
+tc-bottom-sheet tc-textarea {
+    --bs-form-input-gap: 0.1rem;
+}
+
+tc-bottom-sheet > [slot='footer'] {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    border-top: 1px dashed var(--wm-line);
+}
+
+/* A sheet is a centred card on a wide screen, as it is in the dashboard shell. */
+@media (min-width: 992px) {
+    tc-bottom-sheet {
+        --bs-bottom-sheet-radius: var(--wm-r-2xl);
+        --bs-bottom-sheet-shadow: 0 24px 64px -16px rgba(var(--wm-shadow-ink), 0.3);
+        --bs-bottom-sheet-pad-bottom: 18px;
+        inset: 0;
+        margin: auto;
+        width: min(560px, 100% - 96px);
+        height: fit-content;
+        max-height: calc(100% - 96px);
+    }
+
+    tc-bottom-sheet::before {
+        display: none;
+    }
+
+    tc-bottom-sheet[data-sheet-snapped] {
+        height: fit-content;
+        max-height: calc(100% - 96px);
+    }
+}
+
+/* ── Touch, motion ──────────────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+    button,
+    a,
+    [role='button'],
+    label,
+    summary {
+        touch-action: manipulation;
+    }
+
+    .wm-hide-coarse {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

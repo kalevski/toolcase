@@ -1,7 +1,48 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import type { ThreadSummary } from '../api/mail'
-import { t } from '../i18n'
+import type { EmailAddress } from '../jmap/types'
+import { locale, t } from '../i18n'
 import { displayName, formatShortDate } from '../util/format'
+
+/**
+ * Who a row is from (or to). A lone bare address reads as its local part with the domain muted, so
+ * "carol@example.test" scans as "carol" first; names and lists stay as they are.
+ */
+function peopleOf(list: EmailAddress[], own: string): { node: ReactNode; initial: string } {
+    const mine = (a: EmailAddress) => a.email.toLowerCase() === own.toLowerCase()
+    if (list.length === 1 && !list[0].name && !mine(list[0])) {
+        const at = list[0].email.lastIndexOf('@')
+        if (at > 0) {
+            const local = list[0].email.slice(0, at)
+            return {
+                node: (
+                    <>
+                        {local}
+                        <span className="wm-row__domain">{list[0].email.slice(at)}</span>
+                    </>
+                ),
+                initial: local.slice(0, 1),
+            }
+        }
+    }
+    const names = list.map((a) => (mine(a) ? t('list.me') : displayName(a)))
+    return { node: names.join(', '), initial: (names[0] ?? '').replace(/^[^\p{L}\p{N}]+/u, '').slice(0, 1) }
+}
+
+/** The day heading a row falls under: Today, Yesterday, Earlier this week, then month and year. */
+function groupOf(iso: string, now: Date): { key: string; label: string } {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return { key: 'unknown', label: '' }
+    const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+    const diff = Math.round((day(now) - day(d)) / 86_400_000)
+    if (diff <= 0) return { key: 'today', label: t('list.groupToday') }
+    if (diff === 1) return { key: 'yesterday', label: t('list.groupYesterday') }
+    if (diff < 7) return { key: 'week', label: t('list.groupWeek') }
+    return {
+        key: `${d.getFullYear()}-${d.getMonth()}`,
+        label: d.toLocaleDateString(locale(), { month: 'long', year: 'numeric' }),
+    }
+}
 
 export type SwipeKind = 'archive' | 'delete'
 
@@ -40,13 +81,10 @@ function Row({
     const open = props.openId === thread.threadId
     const cursor = props.cursorId === thread.threadId
 
-    const people = props.showRecipients
-        ? (email.to ?? []).map((a) => displayName(a)).join(', ')
-        : (email.from ?? [])
-              .map((a) =>
-                  a.email.toLowerCase() === props.ownAddress.toLowerCase() ? t('list.me') : displayName(a),
-              )
-              .join(', ')
+    const { node: people, initial } = peopleOf(
+        (props.showRecipients ? email.to : email.from) ?? [],
+        props.ownAddress,
+    )
     const subject = email.subject?.trim() || t('list.noSubject')
     const count = thread.emailIds.length
 
@@ -115,7 +153,11 @@ function Row({
                 onPointerUp={onPointerEnd}
                 onPointerCancel={onPointerEnd}
             >
-                <label className="wm-row__check">
+                {/* The sender's initial; it becomes the checkbox on hover, on focus and while selecting. */}
+                <label className="wm-check wm-row__lead">
+                    <span className="wm-row__avatar" aria-hidden="true">
+                        {initial || '?'}
+                    </span>
                     <input
                         type="checkbox"
                         className="form-check-input"
@@ -132,27 +174,29 @@ function Row({
                         if (!suppressClick.current) props.onOpen(thread)
                     }}
                 >
-                    <span className="wm-row__top">
-                        <span className="wm-row__from">
+                    <span className="wm-row__from">
+                        <span className="wm-row__people">
                             {thread.unread ? <span className="wm-sr-only">{t('list.unread')}: </span> : null}
-                            {thread.draft ? <span className="wm-row__draft">{t('list.draft')} </span> : null}
                             {people || t('list.unknownSender')}
-                            {count > 1 ? (
-                                <span className="wm-row__count" aria-label={t('list.count', { count })}>
-                                    {count}
-                                </span>
-                            ) : null}
                         </span>
-                        <time className="wm-row__date" dateTime={email.receivedAt}>
-                            {formatShortDate(email.receivedAt)}
-                        </time>
+                        {thread.draft ? <span className="wm-row__draft">{t('list.draft')}</span> : null}
+                        {count > 1 ? (
+                            <span className="wm-row__count" aria-label={t('list.count', { count })}>
+                                {count}
+                            </span>
+                        ) : null}
                     </span>
-                    <span className="wm-row__subject">{subject}</span>
-                    <span className="wm-row__preview">{email.preview}</span>
+                    <time className="wm-row__date" dateTime={email.receivedAt}>
+                        {formatShortDate(email.receivedAt)}
+                    </time>
+                    <span className="wm-row__text">
+                        <span className="wm-row__subject">{subject}</span>
+                        <span className="wm-row__preview">{email.preview}</span>
+                    </span>
                 </button>
                 <span className="wm-row__aside">
                     {email.hasAttachment ? (
-                        <tc-icon name="paperclip" label={t('list.attachment')}></tc-icon>
+                        <tc-icon name="paperclip" size="14" label={t('list.attachment')}></tc-icon>
                     ) : null}
                     <button
                         type="button"
@@ -161,7 +205,7 @@ function Row({
                         aria-label={thread.flagged ? t('action.unstar') : t('action.star')}
                         onClick={() => props.onToggleStar(thread)}
                     >
-                        <tc-icon name="star" decorative></tc-icon>
+                        <tc-icon name="star" size="15" decorative></tc-icon>
                     </button>
                 </span>
             </div>
@@ -170,6 +214,7 @@ function Row({
 }
 
 export function MessageList(props: Props) {
+    const now = new Date()
     const sentinel = useRef<HTMLDivElement>(null)
     const loadMore = useRef(props.onLoadMore)
     loadMore.current = props.onLoadMore
@@ -202,11 +247,22 @@ export function MessageList(props: Props) {
     }
 
     return (
-        <div className="wm-list">
+        <div className={`wm-list${props.selected.size ? ' is-selecting' : ''}`}>
             <ul className="wm-list__rows">
-                {props.threads.map((th) => (
-                    <Row key={th.threadId} thread={th} props={props} />
-                ))}
+                {props.threads.map((th, i) => {
+                    const group = groupOf(th.email.receivedAt, now)
+                    const prev = i > 0 ? groupOf(props.threads[i - 1].email.receivedAt, now).key : ''
+                    return (
+                        <Fragment key={th.threadId}>
+                            {group.label && group.key !== prev ? (
+                                <li className="wm-group" role="presentation">
+                                    <span>{group.label}</span>
+                                </li>
+                            ) : null}
+                            <Row thread={th} props={props} />
+                        </Fragment>
+                    )
+                })}
             </ul>
             <div ref={sentinel} className="wm-list__sentinel">
                 {props.loading ? (
@@ -216,7 +272,7 @@ export function MessageList(props: Props) {
                         {t('list.loadMore')}
                     </tc-button>
                 ) : props.threads.length > 0 ? (
-                    <span className="wm-muted">{t('list.end')}</span>
+                    <span>{t('list.end')}</span>
                 ) : null}
             </div>
         </div>

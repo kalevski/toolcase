@@ -64,7 +64,12 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
     }
 
     return (
-        <AuthLayout branding={branding} title={branding.loginTitle || t('login.title')}>
+        <AuthLayout
+            branding={branding}
+            title={branding.loginTitle || t('login.title')}
+            lead={branding.loginMessage || t('login.lead')}
+            footer={<BrandFooter branding={branding} />}
+        >
             {notice ? <tc-notice tone="info" text={t(notice)} live></tc-notice> : null}
             <form className="wm-login__form" onSubmit={submit} noValidate>
                 <tc-form-input
@@ -72,7 +77,6 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
                     name="email"
                     label={t('login.email')}
                     placeholder={domainOnly ? t('login.domainPlaceholder', { domain: branding.domain }) : undefined}
-                    help={domainOnly && !error ? t('login.domainOnly', { domain: branding.domain }) : undefined}
                     autocomplete="username"
                     value={email}
                     required
@@ -108,10 +112,7 @@ export function LoginScreen({ notice, onSignedIn }: Props) {
                     {t('login.submit')}
                 </tc-button>
             </form>
-            {branding.loginMessage ? (
-                <p className="wm-login__message">{branding.loginMessage}</p>
-            ) : null}
-            <BrandFooter branding={branding} />
+            {domainOnly ? <p className="wm-login__note">{t('login.domainOnly', { domain: branding.domain })}</p> : null}
         </AuthLayout>
     )
 }

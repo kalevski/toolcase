@@ -70,7 +70,7 @@ export function RichEditor({ initialHtml, onChange, label, showToolbar = true }:
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => run(tool.cmd, tool.arg)}
                     >
-                        <tc-icon name={tool.icon} decorative></tc-icon>
+                        <tc-icon name={tool.icon} size="15" decorative></tc-icon>
                     </button>
                 ))}
             </div>

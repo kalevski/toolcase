@@ -1,0 +1,750 @@
+/*
+ * Compose: a window docked bottom right on a desktop (full screen on a phone), in the dashboard's
+ * material: hairline frame, tinted title bar, mono field labels, dashed rules, library buttons.
+ */
+
+.wm-compose {
+    --wm-c-pad: 14px;
+    --wm-c-row: 36px;
+    position: fixed;
+    inset: 0;
+    z-index: var(--tc-z-sticky, 1020);
+    display: flex;
+    flex-direction: column;
+    background: var(--wm-paper);
+    color: var(--wm-ink);
+    font: var(--m-font-body);
+}
+
+/* On a desktop the window starts small and grows with what is written, up to its cap; replies start smaller. */
+@media (min-width: 768px) {
+    .wm-compose {
+        inset: auto 24px 0 auto;
+        width: min(560px, calc(100vw - 48px));
+        height: auto;
+        min-height: min(380px, 80dvh);
+        max-height: min(80dvh, 620px);
+        border: 1px solid var(--wm-line-strong);
+        border-bottom: 0;
+        border-radius: var(--wm-r-xl) var(--wm-r-xl) 0 0;
+        overflow: hidden;
+        box-shadow:
+            0 1px 2px rgba(var(--wm-shadow-ink), 0.08),
+            0 -10px 40px -16px rgba(var(--wm-shadow-ink), 0.35);
+    }
+
+    .wm-compose.is-reply {
+        min-height: min(300px, 80dvh);
+    }
+
+    .wm-compose.is-minimised {
+        height: auto;
+        min-height: 0;
+        width: 300px;
+    }
+
+    .wm-compose.is-full {
+        inset: 6dvh max(24px, 9vw);
+        width: auto;
+        height: auto;
+        max-height: none;
+        z-index: calc(var(--tc-z-sticky, 1020) + 2);
+        border-bottom: 1px solid var(--wm-line-strong);
+        border-radius: var(--wm-r-xl);
+    }
+}
+
+.wm-compose.is-minimised {
+    inset: auto 0 0 auto;
+    width: min(300px, 100%);
+}
+
+.wm-compose__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--tc-z-sticky, 1020) + 1);
+    background: rgba(var(--wm-shadow-ink), 0.34);
+    backdrop-filter: blur(2px);
+}
+
+.wm-compose__head {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 40px;
+    padding: 0 6px 0 var(--wm-c-pad);
+    padding-top: env(safe-area-inset-top);
+    border-bottom: 1px solid var(--wm-line);
+    background: var(--wm-paper-tint);
+    cursor: pointer;
+    user-select: none;
+}
+
+.wm-compose__title {
+    flex: 1 1 auto;
+    margin: 0;
+    font: 700 13.5px var(--wm-display);
+    letter-spacing: -0.005em;
+    color: var(--wm-emphasis);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-compose__hbtn,
+.wm-compose__tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    border: 0;
+    border-radius: var(--wm-r-md);
+    background: none;
+    color: var(--wm-ink-muted);
+    cursor: pointer;
+}
+
+.wm-compose__hbtn {
+    width: 28px;
+    height: 28px;
+}
+
+.wm-compose__hbtn svg,
+.wm-compose__tool svg {
+    width: 16px;
+    height: 16px;
+}
+
+.wm-compose__hbtn:hover,
+.wm-compose__hbtn:focus-visible,
+.wm-compose__tool:hover,
+.wm-compose__tool:focus-visible {
+    color: var(--wm-ink);
+    background: var(--wm-paper-tint-2);
+}
+
+@media (max-width: 767.98px) {
+    .wm-compose__hbtn--full {
+        display: none;
+    }
+}
+
+.wm-compose__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wm-compose__body.wm-center {
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+}
+
+.wm-compose__body[hidden] {
+    display: none;
+}
+
+/* Field rows: a mono label in the margin, no boxes, one dashed rule under each. */
+.wm-compose__fields {
+    flex: none;
+    padding: 0 var(--wm-c-pad);
+}
+
+.wm-cfield {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--wm-c-row);
+    border-bottom: 1px dashed var(--wm-rule);
+}
+
+.wm-cfield__label,
+.wm-cfield .wm-addr__label {
+    flex: none;
+    min-width: 2.75rem;
+    font: 600 10.5px var(--wm-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--wm-ink-faint);
+}
+
+.wm-cfield__select {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--wm-c-row);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    outline: 0;
+    cursor: pointer;
+}
+
+.wm-cfield__subject {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--wm-c-row);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: 500 13.5px var(--wm-body);
+}
+
+.wm-cfield__subject::placeholder {
+    color: var(--wm-ink-faint);
+    font-weight: 400;
+}
+
+.wm-cfield .wm-addr {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    position: static;
+}
+
+.wm-cfield .wm-addr__label {
+    line-height: var(--wm-c-row);
+}
+
+.wm-cfield .wm-addr__box {
+    flex: 1 1 auto;
+    min-height: var(--wm-c-row);
+    padding: 5px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.wm-cfield .wm-addr__box:focus-within {
+    outline: 0;
+}
+
+.wm-cfield .wm-addr__input {
+    flex-basis: 6rem;
+    min-width: 6rem;
+    min-height: 26px;
+}
+
+.wm-cfield .wm-addr__list {
+    top: calc(100% + 1px);
+}
+
+.wm-cfield:has(.wm-addr) {
+    align-items: flex-start;
+}
+
+.wm-cfield__extras {
+    display: flex;
+    flex: none;
+    gap: 10px;
+    align-items: center;
+    align-self: flex-start;
+    height: var(--wm-c-row);
+}
+
+.wm-cfield__more {
+    padding: 2px 2px;
+    border: 0;
+    background: none;
+    color: var(--wm-ink-muted);
+    font: 500 12px var(--wm-body);
+    cursor: pointer;
+}
+
+.wm-cfield__more:hover,
+.wm-cfield__more:focus-visible {
+    color: var(--wm-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* The message: everything left over, no frame. */
+.wm-compose__editor {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.wm-compose__text {
+    flex: 1 1 auto;
+    min-height: 160px;
+    field-sizing: content;
+    width: 100%;
+    padding: 12px var(--wm-c-pad);
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: transparent;
+    color: inherit;
+    font: 400 13.5px/1.55 var(--wm-body);
+}
+
+.wm-compose .wm-editor {
+    flex: 1 1 auto;
+    min-height: 160px;
+    border: 0;
+}
+
+.wm-compose .wm-editor__area {
+    padding: 12px var(--wm-c-pad);
+    min-height: 140px;
+    font: 400 13.5px/1.55 var(--wm-body);
+}
+
+.wm-compose .wm-editor__area:focus-visible {
+    outline: 0;
+}
+
+/* The formatting bar floats just above the actions, folded away until asked for. */
+.wm-compose .wm-editor__toolbar {
+    position: sticky;
+    bottom: 0;
+    order: 2;
+    flex-wrap: nowrap;
+    gap: 2px;
+    margin: 0 var(--wm-c-pad) 6px;
+    padding: 2px 4px;
+    overflow-x: auto;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    background: var(--wm-paper);
+    box-shadow: 0 2px 8px rgba(var(--wm-shadow-ink), 0.12);
+}
+
+.wm-compose .wm-editor__toolbar[hidden] {
+    display: none;
+}
+
+.wm-compose .wm-editor__tool {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--wm-r-md);
+}
+
+.wm-compose__files {
+    list-style: none;
+    margin: 0;
+    padding: 4px var(--wm-c-pad) 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.wm-cfile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    min-height: 30px;
+    padding: 0 4px 0 8px;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-md);
+    background: var(--wm-paper-tint);
+    font: var(--m-font-body-sm);
+}
+
+.wm-cfile > tc-icon {
+    color: var(--wm-ink-muted);
+}
+
+.wm-cfile__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--wm-ink);
+}
+
+.wm-cfile__size {
+    flex: none;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+.wm-cfile tc-progress {
+    flex: 1 1 6rem;
+}
+
+.wm-cfile__remove {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--wm-r-sm);
+    background: none;
+    color: var(--wm-ink-muted);
+    cursor: pointer;
+}
+
+.wm-cfile__remove svg {
+    width: 14px;
+    height: 14px;
+}
+
+.wm-cfile__remove:hover {
+    background: var(--wm-paper-tint-2);
+    color: var(--wm-ink);
+}
+
+.wm-compose__error {
+    padding: 0 var(--wm-c-pad) 6px;
+}
+
+/* One bar of actions: send on the left, the tools after it, discard at the far right. */
+.wm-compose__foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px var(--wm-c-pad) max(10px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--wm-line);
+    background: var(--wm-paper);
+}
+
+.wm-compose__send {
+    margin-right: 6px;
+}
+
+.wm-compose__tool {
+    width: 32px;
+    height: 32px;
+}
+
+.wm-compose__tool.is-on {
+    color: var(--wm-accent);
+    background: var(--wm-accent-soft);
+}
+
+.wm-compose__status {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+.wm-compose__menuwrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.wm-compose__menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 6px);
+    z-index: 4;
+    min-width: 13rem;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    background: var(--wm-paper);
+    box-shadow: 0 16px 40px -16px rgba(var(--wm-shadow-ink), 0.4);
+}
+
+.wm-compose__menuitem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--wm-ink);
+    font: 500 13px var(--wm-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-compose__menuitem:hover,
+.wm-compose__menuitem:focus-visible {
+    background: var(--wm-paper-tint);
+}
+
+/* ── Address field (chips + suggestions) ────────────────────────────────── */
+
+.wm-addr {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wm-addr__label {
+    font: 500 12px var(--wm-body);
+}
+
+.wm-addr__box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    min-height: 36px;
+    padding: 4px 8px;
+    border: 1px solid var(--wm-line-strong);
+    border-radius: var(--wm-r-md);
+    background: var(--wm-paper);
+    cursor: text;
+}
+
+.wm-addr__box:focus-within {
+    outline: 2px solid var(--wm-accent);
+    outline-offset: -1px;
+}
+
+.wm-addr__input {
+    flex: 1 1 8rem;
+    min-width: 8rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--wm-ink);
+    font: 400 13.5px var(--wm-body);
+    min-height: 26px;
+}
+
+.wm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100%;
+    padding: 0 0 0 8px;
+    border: 1px solid var(--wm-line);
+    border-radius: 999px;
+    background: var(--wm-paper-tint);
+    font: 500 12.5px/24px var(--wm-body);
+    color: var(--wm-ink);
+}
+
+.wm-chip__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-chip__remove {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--wm-ink-muted);
+    cursor: pointer;
+}
+
+.wm-chip__remove svg {
+    width: 13px;
+    height: 13px;
+}
+
+.wm-chip__remove:hover {
+    color: var(--wm-danger);
+}
+
+.wm-addr__list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    max-height: 240px;
+    overflow-y: auto;
+    background: var(--wm-paper);
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    box-shadow: 0 16px 40px -16px rgba(var(--wm-shadow-ink), 0.4);
+}
+
+.wm-addr__option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 6px 12px;
+    font: var(--m-font-body-sm);
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.wm-addr__option strong {
+    color: var(--wm-emphasis);
+}
+
+.wm-addr__option.is-active,
+.wm-addr__option:hover {
+    background: var(--wm-paper-tint);
+}
+
+/* ── Editor ─────────────────────────────────────────────────────────────── */
+
+.wm-editor {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--wm-line-strong);
+    border-radius: var(--wm-r-md);
+    min-height: 240px;
+}
+
+.wm-editor__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--wm-line);
+    background: var(--wm-paper-tint);
+}
+
+.wm-editor__tool {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: none;
+    color: var(--wm-ink-muted);
+    cursor: pointer;
+}
+
+.wm-editor__tool svg {
+    width: 15px;
+    height: 15px;
+}
+
+.wm-editor__tool:hover {
+    background: var(--wm-paper-tint-2);
+    color: var(--wm-ink);
+}
+
+.wm-editor__area {
+    flex: 1 1 auto;
+    padding: 10px 12px;
+    overflow-y: auto;
+    outline: 0;
+    min-height: 180px;
+    overflow-wrap: anywhere;
+}
+
+.wm-editor__area:focus-visible {
+    outline: 2px solid var(--wm-accent);
+    outline-offset: -2px;
+}
+
+.wm-editor__area blockquote {
+    margin: 6px 0;
+    padding-left: 10px;
+    border-left: 3px solid var(--wm-line-strong);
+    color: var(--wm-ink-muted);
+}
+
+@media (pointer: coarse) {
+    .wm-compose__tool,
+    .wm-compose__hbtn,
+    .wm-editor__tool,
+    .wm-chip__remove {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ── Editor modes: Visual (WYSIWYG) and HTML (editable source) ──────────── */
+
+.wm-compose__modes {
+    flex: none;
+    display: flex;
+    gap: 2px;
+    padding: 6px var(--wm-c-pad) 0;
+}
+
+.wm-compose__mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: none;
+    color: var(--wm-ink-muted);
+    font: 500 12px var(--wm-body);
+    cursor: pointer;
+}
+
+.wm-compose__mode:hover {
+    background: var(--wm-paper-tint-2);
+    color: var(--wm-ink);
+}
+
+.wm-compose__mode.is-active {
+    border-color: var(--wm-accent-line);
+    background: var(--wm-accent-soft);
+    color: var(--wm-emphasis);
+    font-weight: 700;
+}
+
+.wm-source-editor {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wm-source-editor__code {
+    flex: 1 1 55%;
+    min-height: 120px;
+    width: 100%;
+    padding: 10px var(--wm-c-pad);
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: var(--wm-bg-2);
+    color: var(--wm-ink);
+    font: 400 12.5px/1.55 var(--wm-mono);
+    tab-size: 2;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.wm-source-editor__code:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--wm-accent-line);
+}
+
+.wm-source-editor__note {
+    margin: 0;
+    padding: 4px var(--wm-c-pad);
+    border-block: 1px dashed var(--wm-rule);
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+.wm-source-editor__preview {
+    flex: 1 1 45%;
+    min-height: 90px;
+    width: 100%;
+    border: 0;
+    background: #ffffff;
+}

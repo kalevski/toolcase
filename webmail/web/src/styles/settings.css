@@ -1,0 +1,127 @@
+/*
+ * Settings: a page of section cards under a tab rail, the dashboard's profile layout.
+ */
+
+.wm-settings {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.wm-app .wm-settings {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.wm-settings__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin-left: -8px;
+}
+
+.wm-settings__title {
+    margin: 0;
+    font: var(--m-font-page-title);
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+}
+
+.wm-settings__tabs {
+    padding: 2px 0 0;
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-shell .wm-settings__tabs {
+    padding-inline: var(--wm-gutter);
+    background: var(--wm-paper);
+}
+
+.wm-settings__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 0 32px;
+}
+
+.wm-shell .wm-settings__panel {
+    padding: 14px var(--wm-gutter) calc(var(--wm-dock-h) + 40px);
+    background: var(--wm-bg);
+    min-height: 100%;
+}
+
+.wm-settings__lead {
+    margin: 0;
+    font: var(--m-font-body-sm);
+    color: var(--wm-ink-muted);
+    text-wrap: pretty;
+}
+
+.wm-settings__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.wm-settings__form > tc-button {
+    align-self: flex-start;
+}
+
+.wm-settings__h {
+    margin: 0;
+    font: var(--m-font-section);
+    color: var(--wm-emphasis);
+}
+
+/* Plain rows: trusted senders, sessions. */
+.wm-plain-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    overflow: hidden;
+}
+
+.wm-plain-list__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 40px;
+    padding: 6px 6px 6px 12px;
+    font: var(--m-font-body-sm);
+    overflow-wrap: anywhere;
+}
+
+.wm-plain-list__row + .wm-plain-list__row {
+    border-top: 1px dashed var(--wm-rule);
+}
+
+.wm-plain-list__row--mono {
+    font: var(--m-font-meta-strong);
+    color: var(--wm-ink);
+}
+
+.wm-session__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.wm-session__agent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font: 600 13px var(--wm-body);
+    color: var(--wm-emphasis);
+}
+
+.wm-session__meta {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+}

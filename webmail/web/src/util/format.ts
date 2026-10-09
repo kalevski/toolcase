@@ -3,8 +3,12 @@ import type { EmailAddress } from '../jmap/types'
 
 export function formatBytes(n: number): string {
     if (!Number.isFinite(n) || n < 0) return t('bytes.b', { n: 0 })
-    if (n < 1024) return t('bytes.b', { n })
-    if (n < 1024 * 1024) return t('bytes.kb', { n: Math.round(n / 1024) })
+    // Under 1000 bytes stays in bytes; from there on KB, with a decimal while it is a small number.
+    if (n < 1000) return t('bytes.b', { n })
+    if (n < 1024 * 1024) {
+        const kb = n / 1024
+        return t('bytes.kb', { n: kb < 10 ? kb.toFixed(1).replace(/\.0$/, '') : Math.round(kb) })
+    }
     if (n < 1024 * 1024 * 1024) return t('bytes.mb', { n: (n / 1024 / 1024).toFixed(1) })
     return t('bytes.gb', { n: (n / 1024 / 1024 / 1024).toFixed(1) })
 }

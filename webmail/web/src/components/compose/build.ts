@@ -3,7 +3,7 @@ import { getQuoteBody } from '../../api/mail'
 import type { Email, EmailAddress, Identity } from '../../jmap/types'
 import { t } from '../../i18n'
 import { displayName, formatAddressList, formatLongDate } from '../../util/format'
-import { quoteText, textToHtml } from '../../util/richtext'
+import { normaliseHtml, quoteText, textToHtml } from '../../util/richtext'
 import type { ComposeInit, ComposeState } from './types'
 
 export function pickIdentity(identities: Identity[], address: string, source?: Email): Identity | undefined {
@@ -82,16 +82,21 @@ export async function buildComposeState(
     const src = full ?? init.source
     if (init.mode === 'draft') {
         const id = identities.find((i) => i.email.toLowerCase() === src.from?.[0]?.email.toLowerCase()) ?? pickIdentity(identities, address)
-        const text = bodyText(full)
+        // A draft written in the rich editor holds an HTML part: reopen it as rich text, not as its markup.
+        const htmlPart = full?.htmlBody?.find((p) => p.type === 'text/html' && p.partId)
+        const htmlSrc = htmlPart?.partId ? full?.bodyValues?.[htmlPart.partId]?.value : undefined
+        const rich = htmlSrc ? normaliseHtml(htmlSrc) : null
+        const text = rich ? rich.text : bodyText(full)
         return {
             ...empty(id),
+            rich: !!rich,
             to: src.to ?? [],
             cc: src.cc ?? [],
             bcc: src.bcc ?? [],
             showCc: !!(src.cc?.length || src.bcc?.length),
             subject: src.subject ?? '',
             text,
-            html: textToHtml(text),
+            html: rich ? rich.html : textToHtml(text),
             attachments: (src.attachments ?? [])
                 .filter((a) => a.blobId)
                 .map((a) => ({ blobId: a.blobId!, name: a.name ?? 'attachment', type: a.type, size: a.size })),

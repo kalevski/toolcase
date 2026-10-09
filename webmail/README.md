@@ -60,11 +60,18 @@ Docker: `docker build -t webmail .` (builds the SPA in a node stage against the 
 
 ## Look
 
-The SPA wears the platform dashboard's own look: the `blueprint` theme (`aurora` for readers who prefer dark) with
-Space Grotesk, Chakra Petch and JetBrains Mono, a tinted ground with paper panels, and the same sign-in layout. A mail
-domain's branding `theme` is one of the dashboard's theme variants (`ocean`, `forest`, `rose`, ...), applied as
-`data-tc-variant`; its accent colour still overrides the variant's. `web/src/styles/blueprint.css` carries the
-dashboard's component tokens, `skin.css` the layout of the mail screens.
+The SPA is the platform dashboard (webapp.mk/web) applied to mail: the `blueprint` theme (`aurora` for readers
+who prefer dark) with Space Grotesk, Chakra Petch and JetBrains Mono, the dashboard's type scale and component
+tokens, a tinted canvas with paper panels, dashed rules between rows, mono metadata, and the same sign-in layout
+(a white card, a dark stage in the tone of the domain's accent). Phones get one `tc-mobile-shell` frame: bar,
+search band, pane, dock; wider screens get a 52px bar, a folder column and the list and reading panes, centred
+and hairline-framed past 1400px. A mail domain's branding `theme` is one of the dashboard's theme variants
+(`ocean`, `forest`, `rose`, ...), applied as `data-tc-variant`; its accent colour still overrides the variant's.
+
+`web/src/styles/` is one file per concern: `tokens.css` (the `--wm-*` tokens, resolved from the theme's `--bp-*`
+with `--tc-*` fallbacks, the dashboard's `--m-font-*` scale and the `--bs-*` component theming), `chrome.css`
+(both frames, sheets, toasts), `mail.css` (folders, search, list, reading pane), `compose.css`, `settings.css`
+and `login.css`.
 
 ## Configuration (environment only)
 

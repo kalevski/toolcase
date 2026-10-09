@@ -3,8 +3,9 @@ import { JmapClient } from '../api/jmap'
 import { sendDraft, SendFailed, type Draft } from '../api/compose'
 import { getIdentities, getMailboxes, getQuota, type ThreadSummary } from '../api/mail'
 import { logout, savePrefs, type Prefs, type SessionInfo } from '../api/session'
+import { AccountMenu } from '../components/AccountMenu'
 import { BrandMark } from '../components/BrandMark'
-import { ComposeWindow } from '../components/compose/ComposeWindow'
+import { ComposeWindow, type ComposeHandle } from '../components/compose/ComposeWindow'
 import type { ComposeInit, ComposeState } from '../components/compose/types'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { FolderDialogs, type FolderDialogState } from '../components/FolderDialogs'
@@ -15,7 +16,7 @@ import { MessageList, type SwipeKind } from '../components/MessageList'
 import { MoveDialog } from '../components/MoveDialog'
 import { QuotaBar } from '../components/QuotaBar'
 import { SearchBar, searchFilter, type SearchBarHandle, type SearchQuery } from '../components/SearchBar'
-import { ShortcutsHelp } from '../components/ShortcutsHelp'
+import { SHORTCUTS, ShortcutsHelp } from '../components/ShortcutsHelp'
 import { ThreadView } from '../components/ThreadView'
 import type { ReplyMode } from '../components/MessageCard'
 import { mailboxForRole } from '../jmap/quirks'
@@ -304,17 +305,38 @@ export function MailApp({
 
     // ── Compose & send with undo ─────────────────────────────────────────────
     const composeSeq = useRef(1)
+    const composeRef = useRef<ComposeHandle>(null)
+    const composeBusy = useRef(false)
+
+    /**
+     * Open a compose window. If one is already open its text goes to Drafts first, the writer is told so, and
+     * only then does the new one take its place; if it cannot be saved it stays open and nothing is lost.
+     */
     const openComposeWith = useCallback(
-        (init: ComposeInit) => {
-            setCompose((cur) => {
-                if (cur) {
-                    toasts.show({ message: t('compose.title'), duration: 1500, key: 'compose-open' })
-                    return cur
+        async (init: ComposeInit) => {
+            if (composeBusy.current) return
+            const open = composeRef.current
+            if (open) {
+                // That very draft is the open window: there is nothing to replace.
+                if (init.mode === 'draft' && open.draftId() === init.source.id) return
+                composeBusy.current = true
+                try {
+                    const result = await open.flush()
+                    if (result === 'failed') {
+                        toasts.show({ message: t('compose.keepOpen'), variant: 'danger', duration: 6000 })
+                        return
+                    }
+                    if (result === 'saved') {
+                        toasts.show({ message: t('compose.savedToDrafts'), variant: 'success', duration: 3000, key: 'draft-saved' })
+                    }
+                    notifyChanged()
+                } finally {
+                    composeBusy.current = false
                 }
-                return { key: composeSeq.current++, init }
-            })
+            }
+            setCompose({ key: composeSeq.current++, init })
         },
-        [toasts],
+        [toasts, notifyChanged],
     )
 
     const reply = useCallback(
@@ -347,7 +369,7 @@ export function MailApp({
             } catch (err) {
                 const draftId = err instanceof SendFailed ? err.draftId : state.draftId
                 toasts.show({ message: t('compose.sendFailed'), variant: 'danger', duration: 8000 })
-                setCompose({ key: composeSeq.current++, init: { mode: 'restore', state: { ...state, draftId } } })
+                void openComposeWith({ mode: 'restore', state: { ...state, draftId } })
             } finally {
                 notifyChanged()
             }
@@ -362,7 +384,8 @@ export function MailApp({
                     cancelled = true
                     window.clearTimeout(timer)
                     window.clearInterval(interval)
-                    setCompose({ key: composeSeq.current++, init: { mode: 'restore', state } })
+                    // A message started since the send is saved to Drafts before the unsent one comes back.
+                    void openComposeWith({ mode: 'restore', state })
                     announce(t('compose.undone'))
                 },
             },
@@ -442,6 +465,8 @@ export function MailApp({
     // ── Sign out / password ──────────────────────────────────────────────────
     const signOut = async () => {
         try {
+            // An open message goes to Drafts first, so signing out does not throw its text away.
+            await composeRef.current?.flush()
             await logout()
         } catch {
             // the session is gone either way from our side
@@ -502,69 +527,89 @@ export function MailApp({
     )
 
     const filterChips = (
-        <div className="wm-filters" role="group" aria-label={t('list.filters')}>
+        <div className="wm-chips" role="group" aria-label={t('list.filters')}>
             {(['all', 'unread', 'starred'] as ListFilter[]).map((f) => (
-                <button
-                    key={f}
-                    type="button"
-                    className={`wm-filter${listFilter === f ? ' is-active' : ''}`}
-                    aria-pressed={listFilter === f}
-                    onClick={() => setListFilter(f)}
-                >
+                <tc-chip key={f} size="md" selected={listFilter === f} ontc-click={() => setListFilter(f)}>
                     {t(f === 'all' ? 'list.filterAll' : f === 'unread' ? 'list.filterUnread' : 'list.filterStarred')}
-                </button>
+                </tc-chip>
             ))}
+        </div>
+    )
+
+    // What the list holds, in the dashboard's mono meta voice: the unread count and the folder's size.
+    const listMeta = searching
+        ? ''
+        : [
+              currentBox && currentBox.unreadEmails > 0 ? t('folders.unread', { count: currentBox.unreadEmails }) : '',
+              currentBox && currentBox.totalEmails > 0 ? t('list.count', { count: currentBox.totalEmails }) : '',
+          ]
+              .filter(Boolean)
+              .join(' · ')
+
+    const bulkBar = (showTitle: boolean) => (
+        <div className="wm-bulk" role="toolbar" aria-label={t('list.actions')}>
+            <label className="wm-check">
+                <input
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={allSelected}
+                    ref={(el) => {
+                        if (el) el.indeterminate = selected.size > 0 && !allSelected
+                    }}
+                    onChange={() =>
+                        setSelected(allSelected ? new Set() : new Set(list.threads.map((x) => x.threadId)))
+                    }
+                    aria-label={t('list.selectAll')}
+                />
+            </label>
+            {selected.size ? (
+                <>
+                    <span className="wm-bulk__count" aria-live="polite">
+                        {t('list.selected', { count: selected.size })}
+                    </span>
+                    {roles.archive && currentMailbox !== roles.archive ? (
+                        <tc-icon-button icon="Archive" size="small" label={t('action.archive')} ontc-click={() => bulk('archive')}></tc-icon-button>
+                    ) : null}
+                    <tc-icon-button
+                        icon="Trash2"
+                        size="small"
+                        label={inTrash ? t('action.deleteForever') : t('action.delete')}
+                        ontc-click={() => bulk(inTrash ? 'deleteForever' : 'delete')}
+                    ></tc-icon-button>
+                    <tc-icon-button icon="MailOpen" size="small" label={t('action.markRead')} ontc-click={() => bulk('read')}></tc-icon-button>
+                    <tc-icon-button icon="Mail" size="small" label={t('action.markUnread')} ontc-click={() => bulk('unread')}></tc-icon-button>
+                    <tc-icon-button
+                        icon="FolderInput"
+                        size="small"
+                        label={t('action.move')}
+                        ontc-click={() => setMoveTargets(targetsFromThreads(selectedThreads))}
+                    ></tc-icon-button>
+                    <tc-icon-button
+                        icon="ShieldAlert"
+                        size="small"
+                        label={inJunk ? t('action.notJunk') : t('action.junk')}
+                        ontc-click={() => bulk(inJunk ? 'notJunk' : 'junk')}
+                    ></tc-icon-button>
+                    <tc-icon-button icon="X" size="small" label={t('list.clearSelection')} ontc-click={() => setSelected(new Set())}></tc-icon-button>
+                </>
+            ) : (
+                <>
+                    {showTitle ? (
+                        <h1 className="wm-bulk__title">
+                            <span>{listTitle}</span>
+                            {listMeta ? <span className="wm-bulk__meta">{listMeta}</span> : null}
+                        </h1>
+                    ) : (
+                        <span className="wm-bulk__count wm-bulk__meta">{listMeta}</span>
+                    )}
+                    <tc-icon-button icon="RefreshCw" size="small" label={t('common.retry')} ontc-click={() => notifyChanged()}></tc-icon-button>
+                </>
+            )}
         </div>
     )
 
     const listBody = (
         <>
-            <div className="wm-bulk" role="toolbar" aria-label={t('list.actions')}>
-                <label className="wm-row__check">
-                    <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={allSelected}
-                        ref={(el) => {
-                            if (el) el.indeterminate = selected.size > 0 && !allSelected
-                        }}
-                        onChange={() =>
-                            setSelected(allSelected ? new Set() : new Set(list.threads.map((x) => x.threadId)))
-                        }
-                        aria-label={t('list.selectAll')}
-                    />
-                </label>
-                {selected.size ? (
-                    <>
-                        <span className="wm-bulk__count" aria-live="polite">
-                            {t('list.selected', { count: selected.size })}
-                        </span>
-                        {roles.archive && currentMailbox !== roles.archive ? (
-                            <tc-icon-button icon="Archive" label={t('action.archive')} ontc-click={() => bulk('archive')}></tc-icon-button>
-                        ) : null}
-                        <tc-icon-button
-                            icon="Trash2"
-                            label={inTrash ? t('action.deleteForever') : t('action.delete')}
-                            ontc-click={() => bulk(inTrash ? 'deleteForever' : 'delete')}
-                        ></tc-icon-button>
-                        <tc-icon-button icon="MailOpen" label={t('action.markRead')} ontc-click={() => bulk('read')}></tc-icon-button>
-                        <tc-icon-button icon="Mail" label={t('action.markUnread')} ontc-click={() => bulk('unread')}></tc-icon-button>
-                        <tc-icon-button
-                            icon="FolderInput"
-                            label={t('action.move')}
-                            ontc-click={() => setMoveTargets(targetsFromThreads(selectedThreads))}
-                        ></tc-icon-button>
-                        <tc-icon-button
-                            icon="ShieldAlert"
-                            label={inJunk ? t('action.notJunk') : t('action.junk')}
-                            ontc-click={() => bulk(inJunk ? 'notJunk' : 'junk')}
-                        ></tc-icon-button>
-                        <tc-icon-button icon="X" label={t('list.clearSelection')} ontc-click={() => setSelected(new Set())}></tc-icon-button>
-                    </>
-                ) : (
-                    <tc-icon-button icon="RefreshCw" label={t('common.retry')} ontc-click={() => notifyChanged()}></tc-icon-button>
-                )}
-            </div>
             {list.error && !list.threads.length ? (
                 <div className="wm-list-empty">
                     <p className="wm-error">{t('common.error')}</p>
@@ -615,7 +660,30 @@ export function MailApp({
                 />
             ) : (
                 <div className="wm-read-empty">
-                    <tc-empty-state icon="mail" heading={t('read.empty')}></tc-empty-state>
+                    <tc-empty-state
+                        icon="mail"
+                        heading={t('read.empty')}
+                        description={
+                            currentBox && !searching
+                                ? currentBox.unreadEmails > 0
+                                    ? t('read.emptyUnread', { count: currentBox.unreadEmails, folder: mailboxLabel(currentBox) })
+                                    : t('read.emptyAllRead', { folder: mailboxLabel(currentBox) })
+                                : undefined
+                        }
+                    ></tc-empty-state>
+                    <dl className="wm-read-empty__keys wm-hide-coarse" aria-label={t('shortcuts.title')}>
+                        {(['j', 'r', 'e', '/', '?'] as const).map((key) => {
+                            const entry = SHORTCUTS.find(([k]) => k === key)
+                            return entry ? (
+                                <div key={key}>
+                                    <dt>
+                                        <tc-kbd>{key}</tc-kbd>
+                                    </dt>
+                                    <dd>{t(entry[1])}</dd>
+                                </div>
+                            ) : null
+                        })}
+                    </dl>
                 </div>
             )}
         </section>
@@ -629,11 +697,14 @@ export function MailApp({
         <>
             {compose ? (
                 <ComposeWindow
+                    ref={composeRef}
                     key={compose.key}
                     init={compose.init}
-                    onClose={() => {
+                    onClose={(pending) => {
                         setCompose(null)
                         notifyChanged()
+                        // The draft write is still under way when the window closes; refresh once it is done.
+                        void Promise.resolve(pending).finally(notifyChanged)
                     }}
                     onSend={sendWithUndo}
                 />
@@ -754,6 +825,7 @@ export function MailApp({
                         readPane
                     ) : (
                         <section className="wm-list-pane" aria-label={listTitle}>
+                            {bulkBar(false)}
                             {listBody}
                         </section>
                     )}
@@ -776,16 +848,19 @@ export function MailApp({
     return (
         <MailContext.Provider value={ctx}>
             <div className={appClass}>
-                <header className="wm-topbar">
-                    <BrandMark branding={session.branding} />
-                    {search}
-                    <div className="wm-topbar__actions">
-                        <tc-button variant="primary" className="wm-topbar__compose" onClick={() => openComposeWith({ mode: 'new' })}>
-                            {t('shell.compose')}
-                        </tc-button>
-                        <tc-icon-button icon="Keyboard" label={t('shell.shortcuts')} className="wm-hide-coarse" ontc-click={() => setHelp(true)}></tc-icon-button>
-                        <tc-icon-button icon="Settings" label={t('shell.settings')} ontc-click={() => setSettings(true)}></tc-icon-button>
-                        <tc-icon-button icon="LogOut" label={t('shell.signOut')} ontc-click={() => void signOut()}></tc-icon-button>
+                <header className="wm-bar">
+                    <div className="wm-bar__brand">
+                        <BrandMark branding={session.branding} />
+                    </div>
+                    <div className="wm-bar__search">{search}</div>
+                    <div className="wm-bar__actions">
+                        <AccountMenu
+                            address={session.address}
+                            branding={session.branding}
+                            onSettings={() => setSettings(true)}
+                            onShortcuts={() => setHelp(true)}
+                            onSignOut={() => void signOut()}
+                        />
                     </div>
                 </header>
 
@@ -795,17 +870,22 @@ export function MailApp({
                     </div>
                 ) : null}
 
-                <aside className="wm-sidebar">{folders}</aside>
+                <aside className="wm-sidebar">
+                    <tc-button variant="primary" block className="wm-sidebar__compose" onClick={() => openComposeWith({ mode: 'new' })}>
+                        <tc-icon name="SquarePen" size="15" decorative></tc-icon> {t('shell.compose')}
+                    </tc-button>
+                    {folders}
+                </aside>
 
                 {settings ? (
                     <main className="wm-main wm-main--settings">{settingsView}</main>
                 ) : (
                     <main className="wm-main">
                         <section className="wm-list-pane" aria-label={listTitle}>
-                            <div className="wm-list-head">
-                                <h1 className="wm-list-head__title">{listTitle}</h1>
-                                {filterChips}
-                            </div>
+                            <header className="wm-list-head">
+                                {bulkBar(true)}
+                                <div className="wm-list-head__chips">{filterChips}</div>
+                            </header>
                             {listBody}
                         </section>
                         {readPane}

@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { destroyDraft, saveDraft, type Draft } from '../../api/compose'
 import { CAP_MAIL } from '../../jmap/types'
 import { t } from '../../i18n'
 import { useMail } from '../../state/mail'
 import { useToasts } from '../../state/toasts'
 import { formatBytes, formatShortDate } from '../../util/format'
-import { escapeHtml, textToHtml } from '../../util/richtext'
+import { escapeHtml, normaliseHtml, prettyHtml, textToHtml } from '../../util/richtext'
 import { ConfirmDialog } from '../ConfirmDialog'
 import { AddressField } from './AddressField'
 import { buildComposeState } from './build'
@@ -16,16 +16,25 @@ const AUTOSAVE_MS = 10_000
 
 type Upload = { id: number; name: string; progress: number; abort: () => void }
 
+/** What the shell may ask of an open window: write it to Drafts before something else takes its place. */
+export type ComposeHandle = {
+    /** 'saved' = it is in Drafts because of this window, 'untouched' = nothing to keep, 'failed' = still unsaved. */
+    flush: () => Promise<'saved' | 'untouched' | 'failed'>
+    /** The id of the draft this window currently stands for, if any. */
+    draftId: () => string | null
+}
+
 type Props = {
     init: ComposeInit
-    onClose: () => void
+    /** `pending` settles when the draft write that closing started is done, so the shell can refresh its lists. */
+    onClose: (pending?: Promise<unknown>) => void
     /** Hand the finished message to the shell, which runs the undo window and submits. */
     onSend: (state: ComposeState, draft: Draft) => void
 }
 
 let uploadSeq = 1
 
-export function ComposeWindow({ init, onClose, onSend }: Props) {
+export const ComposeWindow = forwardRef<ComposeHandle, Props>(function ComposeWindow({ init, onClose, onSend }, ref) {
     const { jmap, session, identities, roles } = useMail()
     const toasts = useToasts()
     const [state, setState] = useState<ComposeState | null>(null)
@@ -36,11 +45,15 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
     const [full, setFull] = useState(false)
     const [showBcc, setShowBcc] = useState(false)
     const [showFormat, setShowFormat] = useState(false)
+    const [editor, setEditor] = useState<'visual' | 'html'>('visual')
+    const [source, setSource] = useState('')
+    const [richKey, setRichKey] = useState(0)
     const [moreOpen, setMoreOpen] = useState(false)
     const [confirmDiscard, setConfirmDiscard] = useState(false)
     const [confirmNoSubject, setConfirmNoSubject] = useState(false)
     const dirty = useRef(false)
     const saving = useRef(false)
+    const wrote = useRef(false)
     const stateRef = useRef<ComposeState | null>(null)
     stateRef.current = state
     const fileInput = useRef<HTMLInputElement>(null)
@@ -83,21 +96,26 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
         [identities],
     )
 
-    const save = useCallback(async () => {
+    const save = useCallback(async (): Promise<'saved' | 'idle' | 'failed'> => {
         const s = stateRef.current
-        if (!s || !dirty.current || saving.current || !roles.drafts) return
+        if (!s || !dirty.current || saving.current || !roles.drafts) return 'idle'
         const draft = toDraft(s)
-        if (!draft) return
+        if (!draft) return 'idle'
         saving.current = true
         dirty.current = false
         setStatus(t('compose.draftSaving'))
         try {
             const id = await saveDraft(jmap, draft, roles.drafts, s.draftId)
+            // The ref first: the shell may read draftId() before React has rendered the state below.
+            if (stateRef.current) stateRef.current = { ...stateRef.current, draftId: id }
             setState((cur) => (cur ? { ...cur, draftId: id } : cur))
             setStatus(t('compose.draftSaved', { time: formatShortDate(new Date().toISOString()) }))
+            wrote.current = true
+            return 'saved'
         } catch {
             dirty.current = true
             setStatus(t('compose.draftFailed'))
+            return 'failed'
         } finally {
             saving.current = false
         }
@@ -107,6 +125,29 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
         const timer = window.setInterval(() => void save(), AUTOSAVE_MS)
         return () => window.clearInterval(timer)
     }, [save])
+
+    // Write everything unsaved to Drafts (waiting for a save already under way), and say what happened.
+    const flush = useCallback(async (): Promise<'saved' | 'untouched' | 'failed'> => {
+        for (let i = 0; i < 100 && saving.current; i++) await new Promise((r) => window.setTimeout(r, 50))
+        if (dirty.current) {
+            await save()
+            if (dirty.current) return 'failed'
+        }
+        return wrote.current ? 'saved' : 'untouched'
+    }, [save])
+
+    useImperativeHandle(ref, () => ({ flush, draftId: () => stateRef.current?.draftId ?? null }), [flush])
+
+    // Closing the tab or reloading with text that is not in Drafts yet: ask first.
+    useEffect(() => {
+        const warn = (e: BeforeUnloadEvent) => {
+            if (!dirty.current && !saving.current) return
+            e.preventDefault()
+            e.returnValue = ''
+        }
+        window.addEventListener('beforeunload', warn)
+        return () => window.removeEventListener('beforeunload', warn)
+    }, [])
 
     const mailCap = jmap.session.accounts[jmap.accountId]?.accountCapabilities?.[CAP_MAIL] as
         | { maxSizeAttachmentsPerEmail?: number }
@@ -188,10 +229,17 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
     }
 
     const close = () => {
-        // Closing keeps the draft: save what is unsaved, then go.
-        void save()
+        // Closing keeps the draft: save what is unsaved, say so, then go.
         uploads.forEach((u) => u.abort())
-        onClose()
+        const pending = flush().then((result) => {
+            if (result === 'saved') {
+                toasts.show({ message: t('compose.savedToDrafts'), variant: 'success', duration: 2500, key: 'draft-saved' })
+            } else if (result === 'failed') {
+                toasts.show({ message: t('compose.draftFailed'), variant: 'danger' })
+            }
+            return result
+        })
+        onClose(pending)
     }
 
     const titleKey =
@@ -201,11 +249,29 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
               ? 'compose.forwardTitle'
               : 'compose.title'
 
+    // Visual (WYSIWYG) and HTML (editable source). Both write the same sanitised html and text into the state;
+    // switching remounts the visual editor from it, so nothing typed in either view is lost.
+    const chooseEditor = (mode: 'visual' | 'html') => {
+        if (!state) return
+        const html = state.rich ? state.html : textToHtml(state.text)
+        if (!state.rich) update({ rich: true, html })
+        if (mode === 'html') setSource(prettyHtml(html))
+        else setRichKey((k) => k + 1)
+        setShowFormat(false)
+        setEditor(mode)
+    }
+
+    const editSource = (value: string) => {
+        setSource(value)
+        update(normaliseHtml(value))
+    }
+
     const toggleFormat = () => {
         if (!state) return
         // The formatting bar needs the rich editor; plain text carries across, escaped.
         if (!state.rich) {
             update({ rich: true, html: textToHtml(state.text) })
+            setEditor('visual')
             setShowFormat(true)
         } else setShowFormat((v) => !v)
     }
@@ -217,7 +283,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
         <>
             {full && !minimised ? <div className="wm-compose__scrim" onClick={() => setFull(false)} aria-hidden="true" /> : null}
             <section
-                className={`wm-compose${minimised ? ' is-minimised' : ''}${full && !minimised ? ' is-full' : ''}`}
+                className={`wm-compose${minimised ? ' is-minimised' : ''}${full && !minimised ? ' is-full' : ''}${init.mode === 'new' || init.mode === 'restore' || init.mode === 'draft' ? '' : ' is-reply'}`}
                 role="dialog"
                 aria-labelledby={titleId}
                 onKeyDown={(e) => {
@@ -250,7 +316,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                         title={minimised ? t('compose.restore') : t('compose.minimise')}
                         onClick={() => setMinimised((m) => !m)}
                     >
-                        <tc-icon name={minimised ? 'ChevronUp' : 'Minus'} decorative></tc-icon>
+                        <tc-icon name={minimised ? 'ChevronUp' : 'Minus'} size="16" decorative></tc-icon>
                     </button>
                     <button
                         type="button"
@@ -262,10 +328,10 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                             setFull((f) => !f)
                         }}
                     >
-                        <tc-icon name={full ? 'Minimize2' : 'Maximize2'} decorative></tc-icon>
+                        <tc-icon name={full ? 'Minimize2' : 'Maximize2'} size="16" decorative></tc-icon>
                     </button>
                     <button type="button" className="wm-compose__hbtn" aria-label={t('common.close')} title={t('common.close')} onClick={close}>
-                        <tc-icon name="X" decorative></tc-icon>
+                        <tc-icon name="X" size="16" decorative></tc-icon>
                     </button>
                 </header>
                 {!state ? (
@@ -336,10 +402,45 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                             </div>
                         </div>
 
+                        <div className="wm-compose__modes" role="group" aria-label={t('compose.modes')}>
+                            {(['visual', 'html'] as const).map((m) => (
+                                <button
+                                    key={m}
+                                    type="button"
+                                    className={`wm-compose__mode${state.rich && editor === m ? ' is-active' : ''}`}
+                                    aria-pressed={state.rich && editor === m}
+                                    onClick={() => chooseEditor(m)}
+                                >
+                                    <tc-icon name={m === 'visual' ? 'Eye' : 'Code'} size="14" decorative></tc-icon>
+                                    {t(m === 'visual' ? 'compose.modeVisual' : 'compose.modeHtml')}
+                                </button>
+                            ))}
+                        </div>
+
                         <div className="wm-compose__editor">
-                            {state.rich ? (
+                            {state.rich && editor === 'html' ? (
+                                <div className="wm-source-editor">
+                                    <textarea
+                                        className="wm-source-editor__code"
+                                        aria-label={t('compose.htmlSource')}
+                                        spellCheck={false}
+                                        autoCapitalize="off"
+                                        autoCorrect="off"
+                                        value={source}
+                                        onChange={(e) => editSource(e.target.value)}
+                                    />
+                                    <p className="wm-source-editor__note">{t('compose.htmlNote')}</p>
+                                    <iframe
+                                        className="wm-source-editor__preview"
+                                        title={t('compose.htmlPreview')}
+                                        sandbox=""
+                                        referrerPolicy="no-referrer"
+                                        srcDoc={`<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><style>body{margin:0;padding:10px 14px;font:14px/1.5 system-ui,sans-serif;color:#1c2430}blockquote{margin:.5em 0;padding-left:.75em;border-left:3px solid #c7ced9;color:#4a5668}</style>${state.html}`}
+                                    />
+                                </div>
+                            ) : state.rich ? (
                                 <RichEditor
-                                    key="rich"
+                                    key={`rich-${richKey}`}
                                     label={t('compose.body')}
                                     initialHtml={state.html || escapeHtml('')}
                                     showToolbar={showFormat}
@@ -362,7 +463,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                 <ul className="wm-compose__files">
                                     {state.attachments.map((a) => (
                                         <li key={a.blobId} className="wm-cfile">
-                                            <tc-icon name="Paperclip" decorative></tc-icon>
+                                            <tc-icon name="Paperclip" size="14" decorative></tc-icon>
                                             <span className="wm-cfile__name">{a.name}</span>
                                             <span className="wm-cfile__size">({formatBytes(a.size)})</span>
                                             <button
@@ -395,9 +496,16 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                         ) : null}
 
                         <footer className="wm-compose__foot">
-                            <button type="button" className="wm-compose__send" disabled={uploads.length > 0} onClick={() => send()}>
+                            <tc-button
+                                variant="primary"
+                                size="sm"
+                                title={t('compose.sendHint', { keys: /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘↩' : 'Ctrl+Enter' })}
+                                className="wm-compose__send"
+                                disabled={uploads.length > 0 || undefined}
+                                onClick={() => send()}
+                            >
                                 {t('compose.send')}
-                            </button>
+                            </tc-button>
                             <button
                                 type="button"
                                 className={`wm-compose__tool${showFormat && state.rich ? ' is-on' : ''}`}
@@ -405,8 +513,9 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                 aria-pressed={showFormat && state.rich}
                                 title={t('compose.formatting')}
                                 onClick={toggleFormat}
+                                disabled={state.rich && editor === 'html'}
                             >
-                                <tc-icon name="Baseline" decorative></tc-icon>
+                                <tc-icon name="Baseline" size="16" decorative></tc-icon>
                             </button>
                             <input ref={fileInput} type="file" multiple hidden onChange={(e) => addFiles(e.target.files)} />
                             <button
@@ -416,7 +525,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                 title={t('compose.attach')}
                                 onClick={() => fileInput.current?.click()}
                             >
-                                <tc-icon name="Paperclip" decorative></tc-icon>
+                                <tc-icon name="Paperclip" size="16" decorative></tc-icon>
                             </button>
                             <span className="wm-compose__status" aria-live="polite">
                                 {status}
@@ -431,7 +540,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                     aria-expanded={moreOpen}
                                     onClick={() => setMoreOpen((o) => !o)}
                                 >
-                                    <tc-icon name="EllipsisVertical" decorative></tc-icon>
+                                    <tc-icon name="EllipsisVertical" size="16" decorative></tc-icon>
                                 </button>
                                 {moreOpen ? (
                                     <ul className="wm-compose__menu" role="menu">
@@ -444,6 +553,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                                 onClick={() => {
                                                     setMoreOpen(false)
                                                     setShowFormat(false)
+                                                    setEditor('visual')
                                                     update(state.rich ? { rich: false } : { rich: true, html: textToHtml(state.text) })
                                                 }}
                                             >
@@ -461,7 +571,7 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
                                 title={t('compose.discard')}
                                 onClick={() => setConfirmDiscard(true)}
                             >
-                                <tc-icon name="Trash2" decorative></tc-icon>
+                                <tc-icon name="Trash2" size="16" decorative></tc-icon>
                             </button>
                         </footer>
                     </div>
@@ -488,4 +598,4 @@ export function ComposeWindow({ init, onClose, onSend }: Props) {
             </section>
         </>
     )
-}
+})

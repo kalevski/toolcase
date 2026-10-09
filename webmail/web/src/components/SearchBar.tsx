@@ -41,6 +41,7 @@ type Props = {
     onClear: () => void
 }
 
+/** The search box of the dashboard's bands: one framed row with the glyph, the field and its tools. */
 export const SearchBar = forwardRef<SearchBarHandle, Props>(function SearchBar(
     { mailboxes, query, onSearch, onClear },
     ref,
@@ -60,50 +61,50 @@ export const SearchBar = forwardRef<SearchBarHandle, Props>(function SearchBar(
 
     const submit = (e: FormEvent) => {
         e.preventDefault()
+        setShowFilters(false)
         if (isSearchActive(q)) onSearch(q)
         else onClear()
     }
 
+    const clear = () => {
+        setQ(EMPTY_SEARCH)
+        onClear()
+    }
+
     return (
         <form className="wm-search" role="search" onSubmit={submit}>
-            <div className="wm-search__row">
-                <tc-icon name="search" decorative className="wm-search__icon"></tc-icon>
+            <div className="wm-search__box">
+                <tc-icon name="search" size="16" decorative></tc-icon>
                 <input
                     ref={inputRef}
                     type="search"
-                    className="form-control wm-search__input"
+                    className="wm-search__input"
                     placeholder={t('search.placeholder')}
                     aria-label={t('search.placeholder')}
                     enterKeyHint="search"
+                    autoComplete="off"
                     value={q.text}
                     onChange={(e) => setQ({ ...q, text: e.target.value })}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
-                            setQ(EMPTY_SEARCH)
-                            onClear()
+                            clear()
                             inputRef.current?.blur()
                         }
                     }}
                 />
+                {query || q.text ? (
+                    <tc-icon-button icon="X" size="small" label={t('search.clear')} ontc-click={clear}></tc-icon-button>
+                ) : null}
                 <tc-icon-button
                     icon="SlidersHorizontal"
+                    size="small"
                     label={t('search.filters')}
                     aria-expanded={showFilters}
                     ontc-click={() => setShowFilters((s) => !s)}
                 ></tc-icon-button>
-                {query ? (
-                    <tc-icon-button
-                        icon="X"
-                        label={t('search.clear')}
-                        ontc-click={() => {
-                            setQ(EMPTY_SEARCH)
-                            onClear()
-                        }}
-                    ></tc-icon-button>
-                ) : null}
             </div>
             {showFilters ? (
-                <div className="wm-search__filters">
+                <div className="wm-search__panel">
                     <tc-select
                         label={t('search.field')}
                         value={q.field}
@@ -122,7 +123,7 @@ export const SearchBar = forwardRef<SearchBarHandle, Props>(function SearchBar(
                         <tc-option value="">{t('search.allFolders')}</tc-option>
                         {orderedMailboxes(mailboxes).map(({ mailbox: m, depth }) => (
                             <tc-option key={m.id} value={m.id}>
-                                {' '.repeat(depth) + mailboxLabel(m)}
+                                {' '.repeat(depth) + mailboxLabel(m)}
                             </tc-option>
                         ))}
                     </tc-select>
@@ -138,7 +139,7 @@ export const SearchBar = forwardRef<SearchBarHandle, Props>(function SearchBar(
                         value={q.before}
                         ontc-change={(e) => setQ({ ...q, before: String(e.detail.value ?? '') })}
                     ></tc-form-input>
-                    <tc-button type="submit" variant="primary">
+                    <tc-button type="submit" variant="primary" size="sm">
                         {t('search.submit')}
                     </tc-button>
                 </div>

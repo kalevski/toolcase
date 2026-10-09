@@ -1,0 +1,259 @@
+/*
+ * Sign in: the dashboard's login. A white card with the form and, on a wide screen, a dark stage
+ * beside it carrying the domain's wordmark in the tone of its accent.
+ */
+
+.wm-login {
+    --lg-deep: #14132a;
+    --lg-deep-2: #1d1b3a;
+    --lg-rule: rgba(255, 255, 255, 0.13);
+    --lg-ink: #d7d5ea;
+    --lg-ink-2: #8481ae;
+    --lg-glow: color-mix(in oklab, var(--wm-accent) 26%, transparent);
+    --lg-eyebrow: color-mix(in oklab, var(--wm-accent) 55%, #ffffff);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+    background: var(--wm-paper);
+}
+
+@media (min-width: 992px) {
+    .wm-login {
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    }
+}
+
+/* ── Stage ──────────────────────────────────────────────────────────────── */
+
+.wm-login__stage {
+    display: none;
+    flex-direction: column;
+    padding: 28px var(--wm-gutter) 36px;
+    background:
+        radial-gradient(90% 60% at 12% 0%, var(--lg-glow), transparent 60%),
+        linear-gradient(170deg, var(--lg-deep-2), var(--lg-deep));
+    color: var(--lg-ink);
+}
+
+@media (min-width: 992px) {
+    .wm-login__stage {
+        display: flex;
+        order: 1;
+        padding: 28px 36px 36px;
+    }
+}
+
+.wm-login__stage-head {
+    display: flex;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--lg-rule);
+}
+
+.wm-login__stage-head tc-brand {
+    --bs-brand-primary-color: #ffffff;
+    --bs-brand-secondary-color: rgba(255, 255, 255, 0.72);
+    --bs-brand-label-color: #ffffff;
+    --bs-brand-label-bg: rgba(255, 255, 255, 0.14);
+}
+
+.wm-login__stage-body {
+    padding-top: clamp(36px, 12vh, 7rem);
+    max-width: 40rem;
+}
+
+.wm-login__eyebrow {
+    margin: 0 0 10px;
+    font: var(--m-font-eyebrow);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--lg-eyebrow);
+}
+
+.wm-login__stage-title {
+    margin: 0;
+    font-family: var(--wm-display);
+    font-size: clamp(1.6rem, 1rem + 2.2vw, 2.3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+
+.wm-login__stage-lead {
+    margin: 14px 0 0;
+    max-width: 34rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--lg-ink-2);
+    text-wrap: pretty;
+}
+
+.wm-login__facts {
+    display: flex;
+    flex-direction: column;
+    margin: 28px 0 0;
+    border: 1px solid var(--lg-rule);
+    border-radius: var(--wm-r-2xl);
+    background: rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+}
+
+.wm-login__fact {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px dashed var(--lg-rule);
+}
+
+.wm-login__fact:last-child {
+    border-bottom: 0;
+}
+
+.wm-login__fact dt {
+    font: 600 10px var(--wm-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lg-ink-2);
+    align-self: baseline;
+}
+
+.wm-login__fact dd {
+    margin: 0;
+    font: 500 12.5px var(--wm-mono);
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+
+.wm-login__card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 24px var(--wm-gutter) 28px;
+    background: var(--wm-paper);
+}
+
+@media (min-width: 992px) {
+    .wm-login__card {
+        order: 2;
+        min-height: 0;
+        padding: 28px 36px 36px;
+    }
+}
+
+.wm-login__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-login__host {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+    .wm-login__card-head .wm-brand {
+        display: none;
+    }
+}
+
+.wm-login__body {
+    padding-top: 36px;
+}
+
+@media (min-width: 992px) {
+    .wm-login__body {
+        padding-top: clamp(36px, 12vh, 7rem);
+        max-width: 24rem;
+    }
+}
+
+.wm-login__title {
+    margin: 0;
+    font-family: var(--wm-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--wm-emphasis);
+}
+
+.wm-login__lead {
+    margin: 10px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--wm-ink-muted);
+    text-wrap: pretty;
+    white-space: pre-line;
+}
+
+.wm-login__body > tc-notice {
+    display: block;
+    margin-top: 18px;
+}
+
+.wm-login__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.wm-login__form tc-button {
+    display: block;
+    margin-top: 2px;
+}
+
+.wm-login__note {
+    margin: 18px 0 0;
+    padding-top: 14px;
+    border-top: 1px dashed var(--wm-line);
+    font: 400 11.5px/1.5 var(--wm-mono);
+    color: var(--wm-ink-faint);
+}
+
+.wm-login__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: auto;
+    padding-top: 28px;
+}
+
+.wm-login__foot a {
+    font: 400 11.5px var(--wm-body);
+    color: var(--wm-ink-faint);
+    text-decoration: none;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.wm-login__foot a:hover {
+    color: var(--wm-accent);
+}
+
+.wm-login__foot nav {
+    display: contents;
+}
+
+.wm-login__foot ul {
+    display: contents;
+}
+
+.wm-login__foot li {
+    display: inline-flex;
+    list-style: none;
+}

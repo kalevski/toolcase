@@ -95,7 +95,7 @@ export function AddressField({ label, value, onChange, onError, autoFocus }: Pro
                             aria-label={t('compose.removeAddress', { address: a.email })}
                             onClick={() => onChange(value.filter((v) => v !== a))}
                         >
-                            <tc-icon name="x" decorative></tc-icon>
+                            <tc-icon name="x" size="13" decorative></tc-icon>
                         </button>
                     </span>
                 ))}

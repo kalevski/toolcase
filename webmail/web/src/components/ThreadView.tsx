@@ -83,7 +83,8 @@ export function ThreadView({ threadId, currentMailbox, onBack, onAction, onMove,
     }
 
     const subject = emails[emails.length - 1].subject?.trim() || t('list.noSubject')
-    const targets: ActionTarget[] = [{ members: emails, face: emails[emails.length - 1] }]
+    const last = emails[emails.length - 1]
+    const targets: ActionTarget[] = [{ members: emails, face: last }]
     const flagged = emails.some((e) => e.keywords?.$flagged)
     const inTrash = !!roles.trash && currentMailbox === roles.trash
     const inJunk = !!roles.junk && currentMailbox === roles.junk
@@ -102,16 +103,24 @@ export function ThreadView({ threadId, currentMailbox, onBack, onAction, onMove,
                 ></tc-icon-button>
                 <tc-icon-button icon="FolderInput" label={t('action.move')} ontc-click={() => onMove(targets)}></tc-icon-button>
                 <tc-icon-button icon="Mail" label={t('action.markUnread')} ontc-click={() => onAction('unread', targets, { closeThread: true })}></tc-icon-button>
+                <span className="wm-toolbar__spacer" />
+                {/* Reply to the latest message from the top, so it is never below a long body. */}
+                <tc-icon-button icon="Reply" size="small" show-label="always" label={t('action.reply')} ontc-click={() => onReply('reply', last)}></tc-icon-button>
+                <tc-icon-button icon="ReplyAll" size="small" label={t('action.replyAll')} ontc-click={() => onReply('replyAll', last)}></tc-icon-button>
+                <tc-icon-button icon="Forward" size="small" label={t('action.forward')} ontc-click={() => onReply('forward', last)}></tc-icon-button>
+                <span className="wm-toolbar__rule" aria-hidden="true" />
                 <tc-icon-button
                     icon={flagged ? 'StarOff' : 'Star'}
                     label={flagged ? t('action.unstar') : t('action.star')}
                     ontc-click={() => onAction(flagged ? 'unstar' : 'star', targets)}
                 ></tc-icon-button>
             </div>
-            <h2 className="wm-thread__subject" tabIndex={-1}>
-                {subject}
-            </h2>
-            {emails.length > 1 ? <p className="wm-muted wm-thread__count">{t('read.thread', { count: emails.length })}</p> : null}
+            <header className="wm-thread__head">
+                <h2 className="wm-thread__subject" tabIndex={-1}>
+                    {subject}
+                </h2>
+                {emails.length > 1 ? <p className="wm-thread__count">{t('read.thread', { count: emails.length })}</p> : null}
+            </header>
             <div className="wm-thread__messages">
                 {emails.map((e) => (
                     <MessageCard

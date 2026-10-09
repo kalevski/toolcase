@@ -229,7 +229,11 @@ func (s *state) start(name string, attrs []html.Attribute, selfClosing bool) {
 	if name == "img" {
 		var ok bool
 		out, ok = s.imgAttrs(attrs, out)
-		_ = ok
+		if !ok {
+			// No usable source (remote and blocked, an unresolved cid:, a bad URL): never a broken-image glyph.
+			s.blockedImage(attrs)
+			return
+		}
 	}
 	s.body.WriteByte('<')
 	s.body.WriteString(name)
@@ -353,6 +357,63 @@ func clip(s string, n int) string {
 		}
 	}
 	return s
+}
+
+// blockedImage stands in for an image that is not shown: a quiet box of the image's own size (so the layout does
+// not jump when images are loaded) carrying its alt text, instead of the browser's broken-image glyph. Tracking
+// pixels (a side of 2px or less) and images with neither a size nor alt text leave nothing behind.
+func (s *state) blockedImage(attrs []html.Attribute) {
+	var w, h int
+	var alt string
+	for _, a := range attrs {
+		switch strings.ToLower(a.Key) {
+		case "width":
+			w = pixels(a.Val)
+		case "height":
+			h = pixels(a.Val)
+		case "alt":
+			alt = strings.TrimSpace(a.Val)
+		}
+	}
+	if (w > 0 && w <= 2) || (h > 0 && h <= 2) || (w == 0 && h == 0 && alt == "") {
+		return
+	}
+	style := ""
+	if w > 0 {
+		style += fmt.Sprintf("width:%dpx;", min(w, 2000))
+	}
+	if h > 0 {
+		style += fmt.Sprintf("height:%dpx;", min(h, 2000))
+	}
+	s.body.WriteString(`<span class="wm-img-blocked" data-blocked="1"`)
+	if style != "" {
+		s.body.WriteString(` style="` + style + `"`)
+	}
+	s.body.WriteByte('>')
+	if len(alt) > 200 {
+		alt = alt[:200]
+		for len(alt) > 0 && !validUTF8Tail(alt) {
+			alt = alt[:len(alt)-1]
+		}
+	}
+	s.body.WriteString(html.EscapeString(alt))
+	s.body.WriteString("</span>")
+}
+
+// pixels reads an HTML length attribute as whole pixels; percentages and junk read as 0 (unknown).
+func pixels(v string) int {
+	v = strings.TrimSuffix(strings.TrimSpace(v), "px")
+	n := 0
+	for _, r := range v {
+		if r < '0' || r > '9' {
+			return 0
+		}
+		n = n*10 + int(r-'0')
+		if n > 100000 {
+			return 100000
+		}
+	}
+	return n
 }
 
 // imgAttrs adds the src of an image: cid: images become data: URIs, remote
@@ -479,7 +540,7 @@ func (s *state) document() string {
 	return buildDocument(s.body.String(), s.styles, s.bodyAttrs, s.o.LoadRemote)
 }
 
-const baseCSS = `html,body{margin:0;padding:0}body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;color:#1c2430;background:#fff;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}pre{white-space:pre-wrap}a{color:#1a56b0}blockquote{margin:.5em 0 .5em .5em;padding-left:.75em;border-left:3px solid #c7ced9;color:#4a5668}.wm-body{padding:12px}`
+const baseCSS = `html,body{margin:0;padding:0}body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;color:#1c2430;background:#fff;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}pre{white-space:pre-wrap}a{color:#1a56b0}blockquote{margin:.5em 0 .5em .5em;padding-left:.75em;border-left:3px solid #c7ced9;color:#4a5668}.wm-body{padding:12px}.wm-img-blocked{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;max-width:100%;min-width:1.5em;min-height:1.5em;padding:2px 6px;vertical-align:middle;border:1px dashed #c7ced9;border-radius:4px;background:#f4f6f9;color:#6b7686;font-size:12px;line-height:1.3;overflow:hidden}`
 
 func buildDocument(body string, styles []string, wrapAttrs string, remote bool) string {
 	img := "data:"

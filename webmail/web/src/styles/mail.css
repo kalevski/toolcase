@@ -1,0 +1,1227 @@
+/*
+ * The mail screens: folders, search, the conversation list, the reading pane. Rows are the dashboard's
+ * inbox rows (dashed rules, a 3px accent bar for unread, mono meta); messages are its thread cards.
+ */
+
+/* ── Folders ────────────────────────────────────────────────────────────── */
+
+.wm-folders {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wm-folders__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.wm-folders__item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.wm-folders__link {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 32px;
+    padding: 4px 8px 4px 10px;
+    border: 1px solid transparent;
+    border-radius: var(--wm-r-md);
+    background: none;
+    color: var(--wm-ink);
+    font: 500 13px var(--wm-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-folders__link tc-icon,
+.wm-folders__link svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--wm-ink-muted);
+}
+
+.wm-folders__link:hover {
+    background: var(--wm-paper);
+}
+
+.wm-folders__link.is-active {
+    background: var(--wm-paper);
+    border-color: var(--wm-line);
+    color: var(--wm-emphasis);
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 var(--wm-accent);
+}
+
+.wm-folders__link.is-active tc-icon,
+.wm-folders__link.is-active svg {
+    color: var(--wm-accent);
+}
+
+.wm-folders__name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-folders__count {
+    flex: none;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--wm-accent-tint);
+    color: var(--wm-emphasis);
+    font: 600 11px/18px var(--wm-mono);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.wm-folders__count--quiet {
+    background: var(--wm-bg-2);
+    color: var(--wm-ink-muted);
+}
+
+.wm-folders__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0 0 0 2px;
+    font: 500 11.5px/1.3 var(--wm-mono);
+    color: var(--wm-ink-muted);
+    white-space: nowrap;
+}
+
+.wm-folders__heading {
+    display: inline-flex;
+    align-items: center;
+}
+
+.wm-folders__heading::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--wm-accent);
+}
+
+.wm-folders__head::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--wm-line);
+}
+
+.wm-folders__head tc-icon-button {
+    order: 3;
+    margin-right: -4px;
+}
+
+.wm-folders__empty {
+    margin: 0;
+    padding: 4px 10px;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+/* Storage sits right under the folders, not pinned to the column's foot. */
+.wm-quota {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 4px;
+    padding: 10px 2px 0;
+    border-top: 1px dashed var(--wm-rule);
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Folders in a sheet: taller rows in a bordered container, like the dashboard's grouped rows. */
+.wm-sheet .wm-folders__list {
+    gap: 0;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    background: var(--wm-paper);
+    overflow: hidden;
+}
+
+.wm-sheet .wm-folders__item + .wm-folders__item {
+    border-top: 1px solid var(--wm-line-faint);
+}
+
+.wm-sheet .wm-folders__link {
+    min-height: 44px;
+    padding-inline: 14px;
+    border: 0;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+.wm-sheet .wm-folders__link.is-active {
+    border: 0;
+}
+
+/* ── Search ─────────────────────────────────────────────────────────────── */
+
+.wm-search {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.wm-search__box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 36px;
+    padding: 0 4px 0 10px;
+    border: 1px solid var(--wm-line-strong);
+    border-radius: var(--wm-r-lg);
+    background: var(--wm-paper);
+    transition: border-color 0.18s var(--wm-ease), box-shadow 0.18s var(--wm-ease);
+}
+
+.wm-search__box:focus-within {
+    border-color: var(--wm-accent);
+    box-shadow: 0 0 0 3px var(--wm-accent-soft);
+}
+
+.wm-search__box > tc-icon {
+    flex: none;
+    color: var(--wm-ink-faint);
+}
+
+.wm-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--wm-ink);
+    font: 400 13.5px var(--wm-body);
+}
+
+.wm-search__input::placeholder {
+    color: var(--wm-ink-faint);
+}
+
+.wm-search__input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.wm-search__box tc-icon-button {
+    flex: none;
+    color: var(--wm-ink-muted);
+}
+
+.wm-search__box tc-icon-button[aria-expanded='true'] {
+    color: var(--wm-accent);
+}
+
+.wm-search__panel {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    background: var(--wm-paper);
+}
+
+.wm-search__panel tc-button {
+    justify-self: end;
+}
+
+@media (min-width: 576px) {
+    .wm-search__panel {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .wm-search__panel tc-button {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 768px) {
+    .wm-search__panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: var(--tc-z-dropdown, 1060);
+        box-shadow: 0 24px 50px -20px rgba(var(--wm-shadow-ink), 0.35);
+    }
+}
+
+.wm-quota__label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wm-quota__percent {
+    color: var(--wm-ink-faint);
+}
+
+/* ── Chips (list filters) ───────────────────────────────────────────────── */
+
+/* Filters read as filters: sentence case in the body face (the theme sets chips as mono uppercase labels). */
+.wm-chips .tc-chip {
+    font-family: var(--wm-body);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.wm-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.wm-chips > * {
+    flex: 0 0 auto;
+}
+
+/* ── List head ──────────────────────────────────────────────────────────── */
+
+.wm-list-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px 10px 6px;
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-list-head__chips {
+    padding-left: 32px;
+}
+
+.wm-bulk {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 36px;
+    padding: 0 6px;
+}
+
+.wm-shell .wm-bulk {
+    border-bottom: 1px dashed var(--wm-rule);
+}
+
+.wm-bulk__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    padding-left: 2px;
+    font: var(--m-font-page-title);
+    letter-spacing: -0.01em;
+    color: var(--wm-emphasis);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.wm-bulk__title > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wm-bulk__meta {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.wm-bulk__count {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: 4px;
+    font: 600 13px var(--wm-body);
+    color: var(--wm-emphasis);
+}
+
+/* A bare checkbox outside tc-check gets the library's check tokens here, else it paints nothing. */
+.wm-check {
+    --bs-form-check-bg: var(--wm-paper);
+    --bs-form-check-border-color: var(--wm-line-strong);
+    --bs-form-check-bg-image: none;
+    --bs-form-check-checked-bg: var(--wm-accent);
+    --bs-form-check-checked-border-color: var(--wm-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 32px;
+    min-height: 32px;
+    cursor: pointer;
+}
+
+.wm-check .form-check-input,
+.wm-check .form-check-input[type='checkbox'] {
+    margin: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.wm-check .form-check-input:focus-visible {
+    border-color: var(--wm-accent);
+    box-shadow: 0 0 0 3px var(--wm-accent-soft);
+}
+
+/* ── List ───────────────────────────────────────────────────────────────── */
+
+.wm-list,
+.wm-list-empty {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wm-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px var(--wm-gutter);
+}
+
+.wm-list__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wm-list__sentinel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+.wm-row {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px dashed var(--wm-rule);
+}
+
+.wm-row:last-child {
+    border-bottom: 0;
+}
+
+.wm-row__swipe {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    font: 600 13px var(--wm-body);
+}
+
+.wm-row__swipe-left,
+.wm-row__swipe-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    visibility: hidden;
+}
+
+.wm-row.is-swiping .wm-row__swipe {
+    background: var(--wm-bg-2);
+}
+
+.wm-row__swipe-left.is-visible {
+    visibility: visible;
+    color: var(--wm-success-fg);
+}
+
+.wm-row__swipe-right.is-visible {
+    visibility: visible;
+    color: var(--wm-danger);
+}
+
+.wm-row__inner {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    background: var(--wm-paper);
+    touch-action: pan-y;
+    transition: transform var(--tc-transition-fast, 0.15s ease);
+}
+
+.wm-row.is-swiping .wm-row__inner {
+    transition: none;
+}
+
+.wm-row__inner:hover {
+    background: var(--wm-paper-tint);
+}
+
+.wm-row.is-open .wm-row__inner,
+.wm-row.is-selected .wm-row__inner {
+    background: var(--wm-accent-soft);
+}
+
+.wm-row.is-unread .wm-row__inner {
+    box-shadow: inset 3px 0 0 var(--wm-accent);
+}
+
+.wm-row.is-cursor .wm-row__inner {
+    box-shadow: inset 0 0 0 2px var(--wm-accent-line);
+}
+
+.wm-row.is-cursor.is-unread .wm-row__inner {
+    box-shadow:
+        inset 3px 0 0 var(--wm-accent),
+        inset 0 0 0 2px var(--wm-accent-line);
+}
+
+/* The lead: the sender's initial, swapped for the checkbox on hover, on focus and while selecting. */
+.wm-row__lead {
+    position: relative;
+    align-self: stretch;
+    width: 44px;
+    padding-left: 4px;
+}
+
+.wm-row__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--wm-bg-2);
+    color: var(--wm-ink-muted);
+    font: 600 11.5px var(--wm-body);
+    text-transform: uppercase;
+}
+
+.wm-row.is-unread .wm-row__avatar {
+    background: var(--wm-accent-tint);
+    color: var(--wm-accent);
+}
+
+.wm-row__lead .form-check-input {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 2px);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.wm-row__inner:hover .wm-row__lead .form-check-input,
+.wm-row__lead:focus-within .form-check-input,
+.wm-row.is-selected .wm-row__lead .form-check-input,
+.wm-list.is-selecting .wm-row__lead .form-check-input {
+    opacity: 1;
+}
+
+.wm-row__inner:hover .wm-row__avatar,
+.wm-row__lead:focus-within .wm-row__avatar,
+.wm-row.is-selected .wm-row__avatar,
+.wm-list.is-selecting .wm-row__avatar {
+    visibility: hidden;
+}
+
+/* Touch has no hover: the initial stays until selecting starts, and a tap on it selects the row. */
+@media (hover: none) {
+    .wm-row__inner:hover .wm-row__lead .form-check-input {
+        opacity: 0;
+    }
+
+    .wm-row__inner:hover .wm-row__avatar {
+        visibility: visible;
+    }
+}
+
+.wm-row__domain {
+    color: var(--wm-ink-faint);
+    font-weight: 400;
+}
+
+/* Date groups, the dashboard's dashed-rule group heading. */
+.wm-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 4px 14px;
+    font: 500 11px/1.3 var(--wm-mono);
+    color: var(--wm-ink-muted);
+    white-space: nowrap;
+}
+
+.wm-group::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--wm-line-faint);
+}
+
+.wm-row:has(+ .wm-group) {
+    border-bottom: 0;
+}
+
+.wm-row__main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        'from date'
+        'text text';
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: baseline;
+    padding: 9px 4px 9px 0;
+    border: 0;
+    background: none;
+    color: var(--wm-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-row__from {
+    grid-area: from;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font: 500 13px/1.35 var(--wm-body);
+    color: var(--wm-ink);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.wm-row__from > span:first-child,
+.wm-row__people {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wm-row__count {
+    flex: none;
+    font: 500 11px var(--wm-mono);
+    color: var(--wm-ink-faint);
+}
+
+.wm-row__draft {
+    flex: none;
+    font: 600 11px var(--wm-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--wm-danger);
+}
+
+.wm-row__date {
+    grid-area: date;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.wm-row__text {
+    grid-area: text;
+    min-width: 0;
+    font: 400 13px/1.35 var(--wm-body);
+    color: var(--wm-ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-row__subject {
+    color: var(--wm-ink);
+}
+
+.wm-row__preview {
+    color: var(--wm-ink-muted);
+}
+
+.wm-row__preview:not(:empty)::before {
+    content: ' \2014\00a0';
+    color: var(--wm-ink-faint);
+}
+
+.wm-row.is-unread .wm-row__from,
+.wm-row.is-unread .wm-row__subject {
+    font-weight: 600;
+    color: var(--wm-emphasis);
+}
+
+.wm-row.is-unread .wm-row__date {
+    color: var(--wm-ink-muted);
+}
+
+.wm-row__aside {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 4px;
+    color: var(--wm-ink-faint);
+}
+
+.wm-row__aside > tc-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.wm-row__star {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: var(--wm-r-md);
+    background: none;
+    color: var(--wm-ink-faint);
+    cursor: pointer;
+}
+
+.wm-row__star tc-icon,
+.wm-row__star svg {
+    width: 15px;
+    height: 15px;
+}
+
+.wm-row__star:hover {
+    background: var(--wm-paper-tint-2);
+    color: var(--wm-ink);
+}
+
+.wm-row__star.is-on {
+    color: var(--wm-warn);
+}
+
+.wm-row__star.is-on svg {
+    fill: currentColor;
+}
+
+/* Compact density: tighter rows, and from 992px one line per conversation. */
+.wm-density-compact .wm-row__main {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    row-gap: 0;
+}
+
+@media (min-width: 992px) {
+    .wm-density-compact .wm-row__main {
+        grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto;
+        grid-template-areas: 'from text date';
+        column-gap: 12px;
+    }
+
+    .wm-density-compact .wm-row__text {
+        font-size: 12.5px;
+    }
+}
+
+/* ── Reading ────────────────────────────────────────────────────────────── */
+
+.wm-read-empty {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px var(--wm-gutter);
+}
+
+/* A few shortcuts under the empty state, so the blank pane teaches something. */
+.wm-read-empty__keys {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
+    justify-content: center;
+    gap: 6px 18px;
+    max-width: 520px;
+    margin: 4px 0 0;
+    padding-top: 14px;
+    border-top: 1px dashed var(--wm-rule);
+}
+
+.wm-read-empty__keys > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: var(--m-font-body-sm);
+    color: var(--wm-ink-muted);
+}
+
+.wm-read-empty__keys dd {
+    margin: 0;
+}
+
+.wm-thread {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.wm-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 44px;
+    padding: 4px 8px;
+    background: var(--wm-paper);
+    border-bottom: 1px solid var(--wm-line);
+}
+
+.wm-toolbar__spacer {
+    flex: 1 1 auto;
+}
+
+.wm-toolbar__rule {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: var(--wm-line);
+}
+
+.wm-thread__head {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px var(--wm-gutter) 4px;
+}
+
+.wm-thread__subject {
+    margin: 0;
+    font: 700 18px/1.25 var(--wm-display);
+    letter-spacing: -0.015em;
+    color: var(--wm-emphasis);
+    overflow-wrap: anywhere;
+}
+
+.wm-thread__count {
+    margin: 0;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+}
+
+/* A thread is a timeline: a hairline runs behind the avatars, as in the dashboard's tickets. */
+.wm-thread__messages {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 12px 24px;
+}
+
+@media (min-width: 576px) {
+    .wm-thread__messages {
+        padding-inline: var(--wm-gutter);
+    }
+
+    .wm-thread__messages::before {
+        content: '';
+        position: absolute;
+        top: 16px;
+        bottom: 16px;
+        left: calc(var(--wm-gutter) + 13px);
+        width: 1px;
+        background: var(--wm-line);
+    }
+}
+
+.wm-msg {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+}
+
+@media (min-width: 576px) {
+    .wm-msg {
+        grid-template-columns: 28px minmax(0, 1fr);
+    }
+}
+
+.wm-msg__avatar {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: var(--wm-accent-tint);
+    box-shadow: 0 0 0 3px var(--wm-paper);
+    color: var(--wm-accent);
+    font: 700 12px var(--wm-body);
+    text-transform: uppercase;
+}
+
+@media (min-width: 576px) {
+    .wm-msg__avatar {
+        display: inline-flex;
+    }
+}
+
+.wm-msg__card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-lg);
+    background: var(--wm-paper);
+    overflow: hidden;
+}
+
+.wm-msg.is-collapsed .wm-msg__card {
+    background: var(--wm-paper-tint);
+}
+
+.wm-msg__collapsed,
+.wm-msg__toggle {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 0;
+    background: none;
+    color: var(--wm-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-msg__collapsed:hover {
+    background: var(--wm-paper-tint-2);
+}
+
+.wm-msg__collapsed .wm-msg__preview {
+    flex: 1 1 0;
+    min-width: 0;
+    font: var(--m-font-body-sm);
+    color: var(--wm-ink-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-msg__from {
+    flex: 1 1 auto;
+    min-width: 0;
+    font: 600 13px/1.4 var(--wm-body);
+    color: var(--wm-emphasis);
+    overflow-wrap: anywhere;
+}
+
+.wm-msg.is-collapsed .wm-msg__from {
+    flex: 0 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wm-msg__addr {
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+}
+
+.wm-msg__date {
+    flex: none;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.wm-msg__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--wm-line-faint);
+    background: var(--wm-paper-tint);
+}
+
+.wm-msg__head .wm-msg__toggle {
+    padding-bottom: 2px;
+}
+
+.wm-msg__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
+    padding: 0 14px;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-muted);
+    overflow-wrap: anywhere;
+}
+
+.wm-msg__details {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 3px 12px;
+    margin: 4px 0 0;
+    padding: 6px 14px 2px;
+    font: var(--m-font-meta);
+    border-top: 1px dashed var(--wm-rule);
+}
+
+.wm-msg__details dt {
+    color: var(--wm-ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
+}
+
+.wm-msg__details dd {
+    margin: 0;
+    color: var(--wm-ink);
+    overflow-wrap: anywhere;
+}
+
+.wm-msg__head tc-notice {
+    margin: 6px 14px 0;
+}
+
+/* Images off: one quiet line, not a warning strip. */
+.wm-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 5px 14px;
+    border-bottom: 1px dashed var(--wm-rule);
+    font: var(--m-font-body-sm);
+    color: var(--wm-ink-muted);
+}
+
+.wm-banner > tc-icon {
+    color: var(--wm-ink-faint);
+}
+
+.wm-banner__text {
+    margin-right: auto;
+}
+
+.wm-banner .wm-linkbtn {
+    min-height: 22px;
+}
+
+.wm-msg__body {
+    display: flex;
+    justify-content: center;
+    min-height: 120px;
+}
+
+/* No auto-height without same-origin: fixed height, scroll inside the frame. */
+.wm-msg__frame {
+    display: block;
+    width: 100%;
+    height: 68dvh;
+    min-height: 300px;
+    border: 0;
+    background: #ffffff;
+}
+
+.wm-attachments {
+    padding: 10px 14px;
+    border-top: 1px solid var(--wm-line-faint);
+}
+
+.wm-attachments__title {
+    margin: 0 0 8px;
+    font: var(--m-font-eyebrow);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wm-ink-muted);
+}
+
+.wm-attachments__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.wm-attachment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    max-width: 280px;
+    padding: 4px 10px 4px 6px;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-md);
+    background: var(--wm-paper);
+    color: var(--wm-ink);
+    text-decoration: none;
+    font: 500 12.5px var(--wm-body);
+}
+
+.wm-attachment:hover {
+    background: var(--wm-paper-tint);
+    border-color: var(--wm-line-strong);
+}
+
+.wm-attachment__thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--wm-r-sm);
+    object-fit: cover;
+}
+
+.wm-attachment > tc-icon {
+    color: var(--wm-ink-muted);
+}
+
+.wm-attachment__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wm-attachment__size {
+    flex: none;
+    font: var(--m-font-meta);
+    color: var(--wm-ink-faint);
+}
+
+.wm-msg__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    border-top: 1px solid var(--wm-line-faint);
+    background: var(--wm-paper-tint);
+}
+
+.wm-msg__actions .wm-toolbar__spacer {
+    flex: 1 1 auto;
+}
+
+.wm-toolbar__rule {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: var(--wm-line);
+}
+
+.wm-source {
+    margin: 0;
+    max-height: 70dvh;
+    overflow: auto;
+    font: 400 11.5px/1.5 var(--wm-mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* ── Pick list (move to folder), shortcuts ──────────────────────────────── */
+
+.wm-pick-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--wm-line);
+    border-radius: var(--wm-r-xl);
+    overflow: hidden;
+}
+
+.wm-pick-list li + li {
+    border-top: 1px solid var(--wm-line-faint);
+}
+
+.wm-pick-list__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    background: none;
+    color: var(--wm-ink);
+    font: 500 13.5px var(--wm-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wm-pick-list__item tc-icon {
+    color: var(--wm-ink-muted);
+}
+
+.wm-pick-list__item:hover {
+    background: var(--wm-paper-tint);
+}
+
+.wm-shortcuts {
+    margin: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.wm-shortcuts__row {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    align-items: center;
+    min-height: 30px;
+    font: var(--m-font-body-sm);
+}
+
+.wm-shortcuts__row dd {
+    margin: 0;
+}
+
+/* ── Touch ──────────────────────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+    .wm-folders__link,
+    .wm-row__star,
+    .wm-linkbtn,
+    .wm-check {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .wm-row__lead {
+        width: 48px;
+    }
+}

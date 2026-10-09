@@ -142,3 +142,29 @@ export function quoteText(text: string): string {
         .map((l) => (l.startsWith('>') ? '>' + l : '> ' + l))
         .join('\n')
 }
+
+/**
+ * Any HTML (typed in the source view, or a stored draft) → the restricted subset the editor and the wire accept,
+ * plus its text alternative. Parsed inert (no script runs, no image loads); everything outside the subset
+ * is reduced to its text, and scripts, styles, event handlers and unsafe links are gone.
+ */
+export function normaliseHtml(src: string): { html: string; text: string } {
+    const doc = new DOMParser().parseFromString(src, 'text/html')
+    doc.querySelectorAll('script, style, head, template, noscript').forEach((n) => n.remove())
+    const walk = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT)
+    const blank: Node[] = []
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (/^\s*\n\s*$/.test(n.textContent ?? '')) blank.push(n)
+    }
+    blank.forEach((n) => n.parentNode?.removeChild(n))
+    return serialiseEditor(doc.body)
+}
+
+/** Source view layout: one block per line. Whitespace between tags is dropped again by normaliseHtml. */
+export function prettyHtml(html: string): string {
+    return html
+        .replace(/>\n+</g, '><')
+        .replace(/<\/(div|li|ul|ol|blockquote)>/g, '</$1>\n')
+        .replace(/<(ul|ol)>/g, '<$1>\n')
+        .replace(/\n+$/, '')
+}

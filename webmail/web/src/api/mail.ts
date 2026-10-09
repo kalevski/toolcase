@@ -220,8 +220,9 @@ export async function getThread(jmap: JmapClient, threadId: string): Promise<Ema
 export async function getQuoteBody(jmap: JmapClient, emailId: string): Promise<Email | null> {
     const r = await jmap.call<{ list: Email[] }>('Email/get', {
         ids: [emailId],
-        properties: [...READ_PROPERTIES, 'textBody', 'bodyValues'],
+        properties: [...READ_PROPERTIES, 'textBody', 'htmlBody', 'bodyValues'],
         fetchTextBodyValues: true,
+        fetchHTMLBodyValues: true,
         maxBodyValueBytes: quirks.quoteBodyBytes,
     })
     return r.list[0] ?? null
