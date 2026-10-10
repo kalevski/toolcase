@@ -196,41 +196,120 @@ func TestResolveRefusesSchemeRelativeAndForeignHosts(t *testing.T) {
 	}
 }
 
-func TestChangePassword(t *testing.T) {
-	var gotUser, gotPass, gotBody string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotUser, gotPass, _ = r.BasicAuth()
-		b, _ := io.ReadAll(r.Body)
-		gotBody = string(b)
-		switch {
-		case gotPass == "wrong":
+type fakeStalwart struct {
+	password      string
+	jmap          bool // offers urn:stalwart:jmap and x:Account/set to the user
+	jmapIgnores   bool // acknowledges x:Account/set without changing anything
+	legacyIgnores bool // answers the 0.15 endpoint 200 with an HTML page and changes nothing
+	setCalls      int
+	legacyCalls   int
+}
+
+func (f *fakeStalwart) handler(t *testing.T) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, pass, _ := r.BasicAuth()
+		if pass != f.password {
 			w.WriteHeader(401)
-		case strings.Contains(gotBody, `"short"`):
-			w.WriteHeader(422)
-			w.Write([]byte(`{"message":"Too short."}`))
-		case strings.Contains(gotBody, `"boom"`):
-			w.WriteHeader(500)
-		default:
-			w.WriteHeader(204)
+			return
 		}
-	}))
-	defer srv.Close()
-	c := New(srv.URL, time.Second)
+		switch r.URL.Path {
+		case SessionPath:
+			caps := `{"urn:ietf:params:jmap:core":{},"urn:ietf:params:jmap:mail":{}`
+			primary := `{"urn:ietf:params:jmap:mail":"u1"`
+			if f.jmap {
+				caps += `,"urn:stalwart:jmap":{}`
+				primary += `,"urn:stalwart:jmap":"u1"`
+			}
+			w.Write([]byte(`{"capabilities":` + caps + `},"accounts":{"u1":{"name":"a@x.test","isPersonal":true}},"primaryAccounts":` + primary + `},"apiUrl":"/jmap/"}`))
+		case "/jmap/":
+			body, _ := io.ReadAll(r.Body)
+			name, args := call(t, body, 0)
+			if !f.jmap {
+				w.Write([]byte(`{"methodResponses":[["error",{"type":"forbidden"},"c0"]]}`))
+				return
+			}
+			switch name {
+			case "x:Domain/query":
+				w.Write([]byte(`{"methodResponses":[["x:Domain/query",{"ids":["d1"]},"c0"]]}`))
+			case "x:Account/query":
+				w.Write([]byte(`{"methodResponses":[["x:Account/query",{"ids":["acc1"]},"c0"]]}`))
+			case "x:Account/get":
+				w.Write([]byte(`{"methodResponses":[["x:Account/get",{"list":[{"id":"acc1","credentials":{"7":{"@type":"Password"}}}]},"c0"]]}`))
+			case "x:Account/set":
+				f.setCalls++
+				update := args["update"].(map[string]any)["acc1"].(map[string]any)
+				next, _ := update["credentials/7/secret"].(string)
+				if next == "short" {
+					w.Write([]byte(`{"methodResponses":[["x:Account/set",{"notUpdated":{"acc1":{"type":"invalidProperties","description":"Too short."}}},"c0"]]}`))
+					return
+				}
+				if !f.jmapIgnores {
+					f.password = next
+				}
+				w.Write([]byte(`{"methodResponses":[["x:Account/set",{"updated":{"acc1":null}},"c0"]]}`))
+			}
+		case AccountAuthPath:
+			f.legacyCalls++
+			if f.legacyIgnores {
+				w.Header().Set("Content-Type", "text/html")
+				w.Write([]byte("<!doctype html><title>Stalwart</title>"))
+				return
+			}
+			var body []map[string]string
+			json.NewDecoder(r.Body).Decode(&body)
+			if body[0]["password"] == "boom" {
+				w.WriteHeader(500)
+				return
+			}
+			f.password = body[0]["password"]
+			w.WriteHeader(204)
+		default:
+			w.WriteHeader(404)
+		}
+	}
+}
+
+func TestChangePassword(t *testing.T) {
 	ctx := context.Background()
-	if err := c.ChangePassword(ctx, "a@x.test", "old", "new-password", ""); err != nil {
-		t.Fatal(err)
+	run := func(f *fakeStalwart, current, next string) error {
+		srv := httptest.NewServer(f.handler(t))
+		defer srv.Close()
+		return New(srv.URL, time.Second).ChangePassword(ctx, "a@x.test", current, next, "")
 	}
-	if gotUser != "a@x.test" || gotPass != "old" || gotBody != `[{"password":"new-password","type":"changePassword"}]` {
-		t.Fatalf("%q %q %q", gotUser, gotPass, gotBody)
+
+	f := &fakeStalwart{password: "old", jmap: true}
+	if err := run(f, "old", "new-password"); err != nil || f.password != "new-password" || f.setCalls != 1 || f.legacyCalls != 0 {
+		t.Fatalf("jmap: err=%v password=%q set=%d legacy=%d", err, f.password, f.setCalls, f.legacyCalls)
 	}
-	if err := c.ChangePassword(ctx, "a@x.test", "wrong", "new-password", ""); !errors.Is(err, ErrUnauthorized) {
+
+	f = &fakeStalwart{password: "old"}
+	if err := run(f, "old", "new-password"); err != nil || f.password != "new-password" || f.legacyCalls != 1 {
+		t.Fatalf("legacy fallback: err=%v password=%q legacy=%d", err, f.password, f.legacyCalls)
+	}
+
+	f = &fakeStalwart{password: "old", jmap: true}
+	if err := run(f, "wrong", "new-password"); !errors.Is(err, ErrUnauthorized) || f.password != "old" {
 		t.Fatalf("wrong current: %v", err)
 	}
+
+	f = &fakeStalwart{password: "old", jmap: true}
 	var pe *PolicyError
-	if err := c.ChangePassword(ctx, "a@x.test", "old", "short", ""); !errors.As(err, &pe) || pe.Message != "Too short." {
+	if err := run(f, "old", "short"); !errors.As(err, &pe) || pe.Message != "Too short." || f.password != "old" {
 		t.Fatalf("policy: %v", err)
 	}
-	if err := c.ChangePassword(ctx, "a@x.test", "old", "boom", ""); !errors.Is(err, ErrUnavailable) {
+
+	f = &fakeStalwart{password: "old", legacyIgnores: true}
+	if err := run(f, "old", "new-password"); !errors.Is(err, ErrNotApplied) || !errors.Is(err, ErrUnavailable) || f.password != "old" {
+		t.Fatalf("acknowledged but ignored (legacy): %v", err)
+	}
+
+	f = &fakeStalwart{password: "old", jmap: true, jmapIgnores: true}
+	if err := run(f, "old", "new-password"); !errors.Is(err, ErrNotApplied) {
+		t.Fatalf("acknowledged but ignored (jmap): %v", err)
+	}
+
+	f = &fakeStalwart{password: "old"}
+	if err := run(f, "old", "boom"); !errors.Is(err, ErrUnavailable) || errors.Is(err, ErrNotApplied) {
 		t.Fatalf("5xx: %v", err)
 	}
 }

@@ -1,12 +1,7 @@
 package jmap
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 )
 
@@ -36,44 +31,19 @@ func rerootable(u *url.URL) bool { return u.Path != "" }
 // AuthResultsHeader is the header property read for the SPF/DKIM/DMARC badge.
 const AuthResultsHeader = "header:Authentication-Results:asText"
 
-// AccountAuthPath is where the mail server lets a signed-in user change their
-// own password, relative to the server's base URL. UNVERIFIED: this is
-// Stalwart's management API as documented for 0.10 to 0.15; 0.16 removed parts
-// of it (see the platform's Stalwart driver notes), so check it first.
+// AccountAuthPath is where Stalwart 0.10 to 0.15 let a signed-in user change
+// their own password, relative to the server's base URL. 0.16 dropped that
+// management API; ChangePassword only falls back to it.
 const AccountAuthPath = "/api/account/auth"
+
+// StalwartCapability is Stalwart's own JMAP capability. Since 0.16 its
+// management objects (x:Domain, x:Account) are JMAP methods under it.
+const StalwartCapability = "urn:stalwart:jmap"
 
 // PolicyError is a refusal of the new password with a presentable reason.
 type PolicyError struct{ Message string }
 
 func (e *PolicyError) Error() string { return "jmap: " + e.Message }
-
-// ChangePassword sets a new password for address, authenticating with the
-// current one: a wrong current password is ErrUnauthorized, a refused new one a
-// *PolicyError. The mail server does the work; nothing else holds the password.
-func (c *Client) ChangePassword(ctx context.Context, address, current, next, xff string) error {
-	ctx, cancel := context.WithTimeout(ctx, c.Timeout)
-	defer cancel()
-	body, _ := json.Marshal([]map[string]string{{"type": "changePassword", "password": next}})
-	req, err := c.Request(ctx, address, current, http.MethodPost, c.Base+AccountAuthPath, bytes.NewReader(body), xff)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	data, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
-	switch {
-	case resp.StatusCode >= 200 && resp.StatusCode < 300:
-		return nil
-	case resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnprocessableEntity:
-		return &PolicyError{Message: refusal(data)}
-	}
-	return fmt.Errorf("%w: password change answered %d", ErrUnavailable, resp.StatusCode)
-}
 
 // refusal pulls a human reason out of an error body, or a generic one.
 func refusal(data []byte) string {

@@ -308,6 +308,9 @@ func (s *Server) handlePassword(w http.ResponseWriter, r *http.Request, a *sessi
 		httpx.Error(w, r, http.StatusUnauthorized, "invalid_credentials", "Your current password is incorrect.")
 	case errors.As(err, &pe):
 		httpx.Error(w, r, http.StatusBadRequest, "password_policy", pe.Message)
+	case errors.Is(err, jmap.ErrNotApplied):
+		s.log.Warn("password change acknowledged but not applied", "address", a.Address)
+		httpx.Error(w, r, http.StatusBadGateway, "password_not_applied", "The mail server did not apply the new password. Your password is unchanged.")
 	case err != nil:
 		s.log.Warn("password change failed", "error", err)
 		httpx.Error(w, r, http.StatusServiceUnavailable, "mail_unavailable", "The password could not be changed right now. Try again in a moment.")

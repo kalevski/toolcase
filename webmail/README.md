@@ -161,7 +161,10 @@ web/                 React 19 + tc-* SPA, built into internal/web/dist
   `WEBMAIL_PUBLIC_URL` is https.
 - Back up `WEBMAIL_SESSION_KEY`; without it all users must sign in again.
 - Mail-server specifics (Stalwart) are unverified against a real server; they live in `internal/jmap/quirks.go` and
-  `web/src/jmap/quirks.ts`. Password change posts `[{"type":"changePassword","password":...}]` to
-  `/api/account/auth` on the JMAP base URL with the current password as Basic auth: unverified, and Stalwart 0.16
-  removed parts of that management API.
+  `web/src/jmap/quirks.ts`. Password change (`internal/jmap/password.go`) authenticates with the current password and
+  uses Stalwart 0.16's JMAP management methods (`x:Domain/query`, `x:Account/query`, `x:Account/set` on the account's
+  password credential) when the session offers `urn:stalwart:jmap`; otherwise it posts
+  `[{"type":"changePassword","password":...}]` to the 0.10–0.15 `/api/account/auth`. Either way it only reports success
+  once the new password signs in; an acknowledged change that did not take is `password_not_applied` and no session is
+  ended.
 - Mailbox invites are not handled here: the platform owns that state and webmail cannot call it.
