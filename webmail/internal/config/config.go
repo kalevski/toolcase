@@ -38,6 +38,7 @@ type Config struct {
 	PublicURL   string // scheme://host[:port], no trailing slash
 	JMAPURL     string // no trailing slash
 	APIToken    string // bearer token of the platform's calls to /admin/v1
+	PlatformURL string // optional; where webmail asks the platform to change a mailbox password, no trailing slash
 	SessionKey  []byte
 	DataDir     string
 
@@ -110,6 +111,7 @@ const (
 	VarPublicURL   = "WEBMAIL_PUBLIC_URL"
 	VarJMAPURL     = "WEBMAIL_JMAP_URL"
 	VarAPIToken    = "WEBMAIL_API_TOKEN"
+	VarPlatformURL = "WEBMAIL_PLATFORM_URL"
 	VarSessionKey  = "WEBMAIL_SESSION_KEY"
 	VarDataDir     = "WEBMAIL_DATA_DIR"
 	VarSessionIdle = "WEBMAIL_SESSION_IDLE"
@@ -123,7 +125,7 @@ const (
 	VarLogLevel    = "WEBMAIL_LOG_LEVEL"
 )
 
-var allNames = []string{VarListen, VarAdminListen, VarPublicURL, VarJMAPURL, VarAPIToken,
+var allNames = []string{VarListen, VarAdminListen, VarPublicURL, VarJMAPURL, VarAPIToken, VarPlatformURL,
 	VarSessionKey, VarDataDir, VarSessionIdle, VarSessionMax, VarMaxUploadMB, VarLoginFail, VarAddrFail,
 	VarProxies, VarUpstreamTO, VarLogFormat, VarLogLevel}
 
@@ -354,6 +356,13 @@ func (l *loader) parse() {
 			l.fail(VarJMAPURL, "%s", p)
 		} else {
 			c.JMAPURL = n
+		}
+	}
+	if v, ok := l.get(VarPlatformURL); ok {
+		if n, p := baseURL(v, false); p != "" {
+			l.fail(VarPlatformURL, "%s", p)
+		} else {
+			c.PlatformURL = n
 		}
 	}
 	if v, ok := l.secret(VarAPIToken); ok {

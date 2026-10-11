@@ -298,7 +298,12 @@ func (s *Server) handlePassword(w http.ResponseWriter, r *http.Request, a *sessi
 			return
 		}
 	}
-	err := s.hosts.For(ctx, a.Domain).ChangePassword(ctx, a.Address, req.Current, req.Next, ip)
+	var err error
+	if s.platform != nil {
+		err = s.platform.ChangePassword(ctx, a.Address, req.Current, req.Next, ip)
+	} else {
+		err = s.hosts.For(ctx, a.Domain).ChangePassword(ctx, a.Address, req.Current, req.Next, ip)
+	}
 	req.Current, req.Next = "", ""
 	var pe *jmap.PolicyError
 	switch {

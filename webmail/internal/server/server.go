@@ -21,6 +21,7 @@ import (
 	"github.com/kalevski/toolcase/webmail/internal/jmap"
 	"github.com/kalevski/toolcase/webmail/internal/mailhost"
 	"github.com/kalevski/toolcase/webmail/internal/obs"
+	"github.com/kalevski/toolcase/webmail/internal/platform"
 	"github.com/kalevski/toolcase/webmail/internal/ratelimit"
 	"github.com/kalevski/toolcase/webmail/internal/session"
 	"github.com/kalevski/toolcase/webmail/internal/store"
@@ -48,6 +49,7 @@ type Server struct {
 	store    *store.Store
 	jmap     *jmap.Client
 	hosts    *mailhost.Router
+	platform *platform.Client
 	sessions *session.Manager
 	gw       *gateway.Gateway
 
@@ -87,6 +89,9 @@ func New(ctx context.Context, cfg *config.Config, log *slog.Logger, build Build,
 	s.store = st
 	s.jmap = jmap.New(cfg.JMAPURL, cfg.UpstreamTimeout)
 	s.hosts = &mailhost.Router{Default: s.jmap, Store: st, Timeout: cfg.UpstreamTimeout, Now: s.now}
+	if cfg.PlatformURL != "" {
+		s.platform = platform.New(cfg.PlatformURL, cfg.APIToken, cfg.UpstreamTimeout)
+	}
 	s.sessions = &session.Manager{
 		Store: st, Key: cfg.SessionKey, PublicURL: cfg.PublicURL, Now: s.now, Log: log,
 		KnownHost: func(ctx context.Context, host string) bool {
