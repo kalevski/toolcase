@@ -351,11 +351,16 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	// source_ref: git sources accept ref (pin one commit).
 	// disk: /status carries disk.
 	// error_codes: sites carry last_error_code / last_error_limit(_max).
+	// proxy_streaming: proxies accept buffering, request_buffering, keepalive.
+	// proxy_upstream_resolve: the managed nginx can pool a resolving location
+	// (keepalive with resolve); without it such a location is not pooled.
 	payload["features"] = map[string]any{
-		"proxy_resolve": true,
-		"source_ref":    true,
-		"disk":          true,
-		"error_codes":   true,
+		"proxy_resolve":          true,
+		"source_ref":             true,
+		"disk":                   true,
+		"error_codes":            true,
+		"proxy_streaming":        true,
+		"proxy_upstream_resolve": s.mgr.UpstreamResolve(),
 	}
 
 	writeJSON(w, r, payload, s)

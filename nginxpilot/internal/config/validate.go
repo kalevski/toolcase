@@ -458,10 +458,40 @@ func validateProxyTargets(p *Proxy, upstreams map[string]bool, pol targetcheck.P
 	if len(p.Locations) == 0 && p.Upstream == "" && p.Pass == "" {
 		return fmt.Errorf("a proxy needs upstream/pass (or at least one location that sets one)")
 	}
+	if p.Keepalive < 0 || p.Keepalive > MaxProxyKeepalive {
+		return fmt.Errorf("keepalive %d must be between 0 and %d", p.Keepalive, MaxProxyKeepalive)
+	}
 	for _, loc := range p.EffectiveLocations() {
 		if err := checkResolve(p, loc); err != nil {
 			return err
 		}
+		if err := checkKeepalive(p, loc); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// MaxProxyKeepalive bounds a proxy's idle-connection pool per worker.
+const MaxProxyKeepalive = 1024
+
+// checkKeepalive enforces keepalive_pass_path: a pooled location proxies to a
+// generated upstream by name, and `proxy_pass http://<upstream>` carries no
+// URI, so a pass with a path would silently stop rewriting the location prefix.
+func checkKeepalive(p *Proxy, loc ProxyLocation) error {
+	if p.Keepalive == 0 {
+		return nil
+	}
+	up, pass := p.LocationTarget(loc)
+	if up != "" || pass == "" {
+		return nil
+	}
+	t, err := targetcheck.ParsePass(pass)
+	if err != nil {
+		return nil
+	}
+	if t.Path != "" {
+		return fmt.Errorf("location %q: keepalive needs a pass without a URI path — %q must be scheme://host[:port] only (keepalive_pass_path)", loc.Path, pass)
 	}
 	return nil
 }

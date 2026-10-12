@@ -49,6 +49,11 @@ type Options struct {
 	// IncludeDir is nginx.managed_include_dir — where the shared block-exploits
 	// snippet lives, referenced by `include` in managed mode.
 	IncludeDir string
+	// UpstreamResolve reports that the running nginx accepts `resolve` on an
+	// upstream server (1.27.3+). Only then does a keepalive proxy route a
+	// resolving location through its pooled upstream; without it that location
+	// keeps the per-request variable form.
+	UpstreamResolve bool
 }
 
 // Vhost renders the self-contained snippet for one domain (print-vhost / the

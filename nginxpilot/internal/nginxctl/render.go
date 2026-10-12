@@ -52,8 +52,8 @@ type rendered struct {
 // resources disabled at render time (currently only tls: required with no
 // cert). baseHTTP holds shared http-context includes (cache zones) that are
 // always kept — they are generator output, not quarantinable resources.
-func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDir string) (resources []rendered, baseHTTP []rendered, disabled []ResourceResult) {
-	opts := nginxconf.Options{Certs: certs, Managed: true, IncludeDir: includeDir}
+func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDir string, upstreamResolve bool) (resources []rendered, baseHTTP []rendered, disabled []ResourceResult) {
+	opts := nginxconf.Options{Certs: certs, Managed: true, IncludeDir: includeDir, UpstreamResolve: upstreamResolve}
 
 	// Shared JSON access-log format (logs.access.enabled). The 00- filename
 	// sorts before every vhost file, so the log_format declaration precedes
@@ -69,6 +69,15 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 	if inc := nginxconf.CachePathInclude(cfg); inc != "" {
 		baseHTTP = append(baseHTTP, rendered{
 			kind: "cache", key: "cache", filename: nginxconf.CacheIncludeFilename,
+			content: inc, context: ctxHTTP,
+		})
+	}
+
+	// Shared websocket Connection map (only when a keepalive proxy pools a
+	// websocket location).
+	if inc := nginxconf.ConnectionUpgradeInclude(cfg, opts); inc != "" {
+		baseHTTP = append(baseHTTP, rendered{
+			kind: "upgrade", key: "upgrade", filename: nginxconf.ConnectionUpgradeFilename,
 			content: inc, context: ctxHTTP,
 		})
 	}

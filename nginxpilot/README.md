@@ -256,6 +256,13 @@ proxies:
       - path: /legacy
         pass: http://legacy:8080
         resolve: false             # per-location override (unset = inherit the proxy's)
+
+  - domain: php.example.com
+    pass: http://wmk-php1:8080     # a backend that buffers itself (nginx in front of php-fpm)
+    resolve: true
+    buffering: false               # proxy_buffering off — stream responses, no proxy_temp spill
+    request_buffering: false       # proxy_request_buffering off — stream uploads through
+    keepalive: 8                   # pool up to 8 idle backend connections per worker
 ```
 
 Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint unless you opt into [managed mode](#managed-mode).
@@ -272,6 +279,10 @@ nginx:
 ```
 
 `GET /status` reports `"features": {"proxy_resolve": true}` so a control plane can tell a daemon that accepts `resolve` from an older one that would reject it as an unknown key.
+
+`buffering` / `request_buffering` render `proxy_buffering` / `proxy_request_buffering` in every location (unset = nginx's default, `on`). Turn both off when the backend already absorbs slow clients — an nginx in front of php-fpm — so a response is not collected twice and an upload is not spooled to disk twice; it also lets a backend stream (server-sent events, progress output) without needing `X-Accel-Buffering`, which an inner nginx strips anyway.
+
+`keepalive: N` routes every location with an inline `pass` through a generated `upstream np_ka_<domain>_<hash>_<n> { zone …; server <pass host:port>; keepalive N; }` and sends `Connection ""`, so requests reuse warm backend connections instead of opening one each. A resolving location keeps following address changes through `server … resolve` with the resolver inside the upstream — which open-source nginx supports from **1.27.3**; nginxpilot reads `nginx -v` once and, on an older nginx, leaves resolving locations on the per-request variable form without a pool. A websocket location that is pooled sends `Connection $nginxpilot_connection_upgrade` from a managed `00-nginxpilot-upgrade.conf` map (`upgrade` when the client asked for one, empty otherwise), so plain requests still return their connection to the pool. Keepalive needs a pass without a URI path (`keepalive_pass_path`); named-upstream locations use their upstream's own `keepalive`. `features.proxy_streaming` says the daemon accepts these three keys, and `features.proxy_upstream_resolve` whether its nginx can pool a resolving location.
 
 Every location also accepts an `advanced: |` raw passthrough (the location-level twin of the server-level `advanced`), and backend targets are strictly validated — a `pass`/`address` may only be a well-formed `scheme://host[:port][/path]`, `host[:port]` or `unix:/path`; nginx metacharacters (`;`, `{`, `}`, `$`, whitespace) are rejected at validation time.
 
@@ -661,7 +672,7 @@ admin:
 Routes:
 
 - `GET /healthz` — liveness
-- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one. A `disk` object reports the filesystem holding `data_dir` (`total_bytes`, `used_bytes`, `available_bytes`; `used + available` excludes root-reserved blocks, or `error` if it could not be read). A site refused by a source limit carries `last_error_code` / `last_error_limit` / `last_error_limit_max`. A `features` object lists capabilities of this build a control plane can gate on (`proxy_resolve`, `source_ref`, `disk`, `error_codes`).
+- `GET /status` — the daemon `version` plus per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one. A `disk` object reports the filesystem holding `data_dir` (`total_bytes`, `used_bytes`, `available_bytes`; `used + available` excludes root-reserved blocks, or `error` if it could not be read). A site refused by a source limit carries `last_error_code` / `last_error_limit` / `last_error_limit_max`. A `features` object lists capabilities of this build a control plane can gate on (`proxy_resolve`, `source_ref`, `disk`, `error_codes`, `proxy_streaming`, `proxy_upstream_resolve`).
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`. In managed mode a reload also re-renders + reloads nginx.

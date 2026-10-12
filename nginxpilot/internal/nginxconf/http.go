@@ -2,6 +2,7 @@ package nginxconf
 
 import (
 	"fmt"
+	"hash/fnv"
 	"net/netip"
 	"path/filepath"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
+	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
 )
 
 // StaticVhost renders the content-serving server block(s) for a static site,
@@ -107,6 +109,17 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 		}
 	}
 
+	if !opts.Managed && pooledWebsocket(p, opts) {
+		b.WriteString("# Add this map to your http{} context (outside server{}):\n")
+		b.WriteString("# " + strings.ReplaceAll(strings.TrimRight(ConnectionUpgradeMap, "\n"), "\n", "\n# ") + "\n\n")
+	}
+	for i, loc := range effectiveLocations(p) {
+		if pooled(p, loc, opts) {
+			b.WriteString(keepaliveUpstreamBlock(cfg, p, i, loc))
+			b.WriteByte('\n')
+		}
+	}
+
 	acmeRoot := acmeWebroot(cfg)
 	writeRedirectIfForceSSL(&b, p.Domain, p.ListenPort(), tls, p.WebOptions, acmeRoot)
 
@@ -130,7 +143,7 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 
 	consumeAuth := consumesAuthHeader(cfg, p.AccessList)
 	for i, loc := range effectiveLocations(p) {
-		writeLocation(&b, p, i, loc, consumeAuth)
+		writeLocation(&b, p, i, loc, consumeAuth, opts)
 	}
 
 	b.WriteString("}\n")
@@ -371,10 +384,15 @@ func hstsValue(h config.HSTS) string {
 // stages its pass in a variable, $np_pass_<index>: nginx resolves a proxy_pass
 // hostname once at load, but a proxy_pass holding a variable is resolved at
 // request time through the server's resolver, cached for resolver valid=.
-func writeLocation(b *strings.Builder, p *config.Proxy, index int, loc config.ProxyLocation, consumeAuth bool) {
+func writeLocation(b *strings.Builder, p *config.Proxy, index int, loc config.ProxyLocation, consumeAuth bool, opts Options) {
 	target := proxyPassTarget(p, loc)
+	isPooled := pooled(p, loc, opts)
 	fmt.Fprintf(b, "\n    location %s {\n", loc.Path)
-	if p.ResolvesPerRequest(loc) {
+	if isPooled {
+		_, pass := p.LocationTarget(loc)
+		t, _ := targetcheck.ParsePass(pass)
+		fmt.Fprintf(b, "        proxy_pass %s://%s;\n", t.Scheme, keepaliveUpstreamName(p, index))
+	} else if p.ResolvesPerRequest(loc) {
 		fmt.Fprintf(b, "        set $np_pass_%d %s;\n", index, target)
 		fmt.Fprintf(b, "        proxy_pass $np_pass_%d;\n", index)
 	} else {
@@ -388,9 +406,22 @@ func writeLocation(b *strings.Builder, p *config.Proxy, index int, loc config.Pr
 	if consumeAuth {
 		b.WriteString("        proxy_set_header Authorization \"\";\n")
 	}
-	if loc.Websocket || p.Websocket {
+	websocket := loc.Websocket || p.Websocket
+	switch {
+	case websocket && isPooled:
+		b.WriteString("        proxy_set_header Upgrade $http_upgrade;\n")
+		b.WriteString("        proxy_set_header Connection $" + ConnectionUpgradeVar + ";\n")
+	case websocket:
 		b.WriteString("        proxy_set_header Upgrade $http_upgrade;\n")
 		b.WriteString("        proxy_set_header Connection \"upgrade\";\n")
+	case isPooled:
+		b.WriteString("        proxy_set_header Connection \"\";\n")
+	}
+	if p.Buffering != nil {
+		fmt.Fprintf(b, "        proxy_buffering %s;\n", onOff(*p.Buffering))
+	}
+	if p.RequestBuffering != nil {
+		fmt.Fprintf(b, "        proxy_request_buffering %s;\n", onOff(*p.RequestBuffering))
 	}
 	if p.ConnectTimeout > 0 {
 		fmt.Fprintf(b, "        proxy_connect_timeout %s;\n", p.ConnectTimeout)
@@ -421,6 +452,100 @@ func proxyPassTarget(p *config.Proxy, loc config.ProxyLocation) string {
 		return "http://" + up
 	}
 	return pass
+}
+
+// ConnectionUpgradeVar is the variable the managed ConnectionUpgradeMap sets:
+// "upgrade" when the client asked for one, empty otherwise — so a pooled
+// websocket location still returns plain requests' connections to the pool.
+const ConnectionUpgradeVar = "nginxpilot_connection_upgrade"
+
+// ConnectionUpgradeFilename is the managed http-context include holding
+// ConnectionUpgradeMap, written while any proxy has a pooled websocket location.
+const ConnectionUpgradeFilename = "00-nginxpilot-upgrade.conf"
+
+// ConnectionUpgradeMap is the http-context map behind ConnectionUpgradeVar.
+const ConnectionUpgradeMap = "map $http_upgrade $" + ConnectionUpgradeVar + " {\n    default upgrade;\n    '' '';\n}\n"
+
+// ConnectionUpgradeInclude renders the managed include, or "" when no proxy
+// has a pooled websocket location (the engine then omits the file).
+func ConnectionUpgradeInclude(cfg *config.Config, opts Options) string {
+	for i := range cfg.Proxies {
+		p := &cfg.Proxies[i]
+		if p.IsEnabled() && pooledWebsocket(p, opts) {
+			return "# nginxpilot managed websocket Connection map — do not edit.\n" + ConnectionUpgradeMap
+		}
+	}
+	return ""
+}
+
+// pooledWebsocket reports whether any of the proxy's locations is both pooled
+// and websocket — the condition for needing ConnectionUpgradeMap.
+func pooledWebsocket(p *config.Proxy, opts Options) bool {
+	for _, loc := range effectiveLocations(p) {
+		if (loc.Websocket || p.Websocket) && pooled(p, loc, opts) {
+			return true
+		}
+	}
+	return false
+}
+
+// pooled reports whether a location proxies through a generated keepalive
+// upstream: the proxy asks for keepalive, the location has an inline pass,
+// and — for a resolving hostname — the running nginx can resolve inside an
+// upstream (Options.UpstreamResolve).
+func pooled(p *config.Proxy, loc config.ProxyLocation, opts Options) bool {
+	if p.Keepalive <= 0 {
+		return false
+	}
+	up, pass := p.LocationTarget(loc)
+	if up != "" || pass == "" {
+		return false
+	}
+	t, err := targetcheck.ParsePass(pass)
+	if err != nil || t.Path != "" || t.IsUnix {
+		return false
+	}
+	if p.ResolvesPerRequest(loc) && !opts.UpstreamResolve {
+		return false
+	}
+	return true
+}
+
+// keepaliveUpstreamName names a location's generated upstream. The fnv suffix
+// keeps two domains that sanitize alike (a-b.example, a_b.example) apart.
+func keepaliveUpstreamName(p *config.Proxy, index int) string {
+	h := fnv.New32a()
+	h.Write([]byte(p.Domain))
+	return fmt.Sprintf("np_ka_%s_%08x_%d", cacheZoneName(p.Domain), h.Sum32(), index)
+}
+
+// keepaliveUpstreamBlock renders a pooled location's upstream: one server for
+// the inline pass, a shared-memory zone (required by `resolve`), the resolver
+// when the location follows address changes, and the keepalive pool.
+func keepaliveUpstreamBlock(cfg *config.Config, p *config.Proxy, index int, loc config.ProxyLocation) string {
+	_, pass := p.LocationTarget(loc)
+	t, _ := targetcheck.ParsePass(pass)
+	name := keepaliveUpstreamName(p, index)
+	var b strings.Builder
+	fmt.Fprintf(&b, "upstream %s {\n", name)
+	fmt.Fprintf(&b, "    zone %s 64k;\n", name)
+	addr := t.Addr()
+	if p.ResolvesPerRequest(loc) {
+		writeResolver(&b, cfg.Nginx.Resolver)
+		fmt.Fprintf(&b, "    server %s resolve;\n", addr)
+	} else {
+		fmt.Fprintf(&b, "    server %s;\n", addr)
+	}
+	fmt.Fprintf(&b, "    keepalive %d;\n", p.Keepalive)
+	b.WriteString("}\n")
+	return b.String()
+}
+
+func onOff(v bool) string {
+	if v {
+		return "on"
+	}
+	return "off"
 }
 
 // effectiveLocations returns the proxy's locations, defaulting to a single "/"

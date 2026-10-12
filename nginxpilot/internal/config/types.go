@@ -196,6 +196,30 @@ type Proxy struct {
 	// unless they set their own.
 	Resolve bool `yaml:"resolve" json:"resolve,omitempty"`
 
+	// Buffering sets proxy_buffering (nil = nginx's default, on). false streams
+	// the backend's response to the client as it arrives instead of collecting
+	// it in proxy_buffers and spilling the rest to proxy_temp on disk — for a
+	// backend that already buffers itself (an nginx in front of php-fpm) or
+	// streams on purpose (server-sent events, progress output).
+	Buffering *bool `yaml:"buffering" json:"buffering,omitempty"`
+
+	// RequestBuffering sets proxy_request_buffering (nil = nginx's default,
+	// on). false passes a request body to the backend as it arrives instead of
+	// spooling the whole upload to client_body_temp first.
+	RequestBuffering *bool `yaml:"request_buffering" json:"request_buffering,omitempty"`
+
+	// Keepalive > 0 keeps up to that many idle connections per worker open to
+	// each inline pass target, so a request reuses a warm connection instead
+	// of opening a new one. Every location with an inline pass is routed
+	// through a generated upstream{} block holding the pool; a resolving
+	// location keeps following address changes through the upstream's
+	// `server ... resolve` form when the running nginx supports it (1.27.3+,
+	// features.proxy_keepalive), and otherwise keeps the per-request variable
+	// form without a pool. Needs a pass without a URI path
+	// (keepalive_pass_path). Named-upstream locations are unaffected — their
+	// upstream's own keepalive applies.
+	Keepalive int `yaml:"keepalive" json:"keepalive,omitempty"`
+
 	// File records which config file declared this proxy (provenance). Never
 	// serialized over the admin API.
 	File string `yaml:"-" json:"-"`

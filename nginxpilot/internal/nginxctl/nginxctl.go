@@ -17,7 +17,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
@@ -43,6 +46,9 @@ type Engine struct {
 	// quarantined resource gets a self-explanatory reason ("host does not
 	// resolve") instead of raw nginx -t stderr. Nil-safe.
 	annotator TargetAnnotator
+
+	versionOnce sync.Once
+	version     [3]int
 }
 
 // TargetAnnotator pre-checks resource backends (DNS) ahead of nginx -t.
@@ -121,6 +127,31 @@ func nginxBinary(testCmd []string) string {
 		return testCmd[0]
 	}
 	return "nginx"
+}
+
+var nginxVersionRe = regexp.MustCompile(`nginx/(\d+)\.(\d+)\.(\d+)`)
+
+// NginxVersion returns the running nginx's version from `nginx -v`, read once
+// per engine; zeros when the binary cannot be run or its answer not parsed.
+func (e *Engine) NginxVersion(ctx context.Context) [3]int {
+	e.versionOnce.Do(func() {
+		out, _ := e.run(ctx, e.nginxBin, "-v")
+		m := nginxVersionRe.FindStringSubmatch(out)
+		if m == nil {
+			return
+		}
+		for i := range e.version {
+			e.version[i], _ = strconv.Atoi(m[i+1])
+		}
+	})
+	return e.version
+}
+
+// UpstreamResolve reports whether the running nginx accepts `resolve` on an
+// upstream server, which open-source nginx gained in 1.27.3.
+func (e *Engine) UpstreamResolve(ctx context.Context) bool {
+	v := e.NginxVersion(ctx)
+	return v[0] > 1 || (v[0] == 1 && (v[1] > 27 || (v[1] == 27 && v[2] >= 3)))
 }
 
 func defaultRun(ctx context.Context, name string, args ...string) (string, error) {
@@ -220,7 +251,7 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 		annotations = e.annotator.Annotate(ctx, cfg)
 	}
 
-	resources, baseHTTP, disabled := renderResources(cfg, certs, e.includeDir)
+	resources, baseHTTP, disabled := renderResources(cfg, certs, e.includeDir, e.UpstreamResolve(ctx))
 	httpStaging, streamStaging, err = e.newStagingDirs()
 	if err != nil {
 		return nil, "", "", err

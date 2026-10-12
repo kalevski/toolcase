@@ -77,3 +77,15 @@ func (m *Manager) PHPApps() []config.App {
 	}
 	return out
 }
+
+// UpstreamResolve reports whether the managed nginx accepts `resolve` on an
+// upstream server — whether a keepalive proxy can pool a resolving location.
+// False outside managed mode, where nginxpilot does not run nginx itself.
+func (m *Manager) UpstreamResolve() bool {
+	if m.engine == nil {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return m.engine.UpstreamResolve(ctx)
+}
